@@ -10,8 +10,10 @@ import Conditions from './Conditions';
 import CostTable from './CostTable';
 import IncotermTab from './IncotermBar';
 import Overview from './Overview';
+import NetworkTab from './NetworkTab';
 
 const TABS: { id: ResultTab; label: string }[] = [
+  { id: 'network', label: '🗺️ Mạng tuyến' },
   { id: 'overview', label: 'Tổng quan' },
   { id: 'cost', label: 'Chi phí' },
   { id: 'rules', label: 'Điều kiện' },
@@ -55,6 +57,8 @@ export default function ResultPanel() {
   const saveQuote = useAppStore((s) => s.saveQuote);
   const showToast = useAppStore((s) => s.showToast);
   const computed = useAppStore((s) => s.computed);
+  const viewMode = useAppStore((s) => s.viewMode);
+  const netCount = useAppStore((s) => s.network.length);
   const [height, setHeight] = useState(() => Math.round(window.innerHeight * 0.36));
   const drag = useRef<{ y: number; h: number } | null>(null);
 
@@ -115,13 +119,14 @@ export default function ResultPanel() {
       >
         <div className="absolute top-1 left-1/2 h-1 w-10 -translate-x-1/2 rounded bg-slate-300" />
         <div className="scroll-thin flex min-w-0 flex-1 gap-1 overflow-x-auto" onPointerDown={(e) => e.stopPropagation()}>
-          {TABS.map((t) => (
+          {TABS.filter((t) => t.id !== 'network' || viewMode === 'network').map((t) => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
               className={`rounded-md px-3 py-1.5 text-sm whitespace-nowrap ${tab === t.id && open ? 'bg-brand-600 font-semibold text-white' : 'text-slate-600 hover:bg-slate-100'}`}
             >
               {t.label}
+              {t.id === 'network' && netCount > 0 && <span className="ml-1 text-xs opacity-80">({netCount})</span>}
             </button>
           ))}
         </div>
@@ -133,6 +138,7 @@ export default function ResultPanel() {
       </div>
       {open && (
         <div className="scroll-thin flex-1 overflow-y-auto p-3 md:p-4">
+          {tab === 'network' && viewMode === 'network' && <NetworkTab />}
           {tab === 'overview' && <Overview plan={plan} incoterm={incoterm} />}
           {tab === 'cost' && <CostTable plan={plan} incoterm={incoterm} />}
           {tab === 'rules' && <Conditions plan={plan} />}

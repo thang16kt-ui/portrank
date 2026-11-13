@@ -1,19 +1,7 @@
-import { useMemo } from 'react';
 import { CRITERIA_LABEL, PRIORITY_LABEL, type Weights } from '../config/weights';
-import { rankAlternatives } from '../lib/ranking';
-import { routeOptionsOf, shipmentOf, usd } from '../lib/results';
-import { useAppStore, usePlayback, type FormState } from '../store/useAppStore';
+import { usd } from '../lib/results';
+import { useAppStore, usePlayback } from '../store/useAppStore';
 import { getPort } from '../data/ports';
-
-export function useAlternatives(form: FormState | null) {
-  const weights = useAppStore((s) => s.weights);
-  return useMemo(() => {
-    if (!form) return [];
-    const pol = getPort(form.pol), pod = getPort(form.pod);
-    if (!pol || !pod) return [];
-    return rankAlternatives({ pol, pod, radiusKm: form.radiusKm, shipment: shipmentOf(form), options: routeOptionsOf(form), weights });
-  }, [form, weights]);
-}
 
 const TAG_CLS: Record<string, string> = {
   'Rẻ nhất': 'bg-emerald-100 text-emerald-800',
@@ -29,7 +17,7 @@ export default function AltRanking() {
   const setPriority = useAppStore((s) => s.setPriority);
   const sim = useAppStore((s) => s.sim);
   const showRoute = useAppStore((s) => s.showRoute);
-  const list = useAlternatives(form);
+  const list = useAppStore((s) => s.alts);
   if (!form) return null;
   const top = list.slice(0, 5);
   const totalW = Object.values(weights).reduce((a, b) => a + b, 0);

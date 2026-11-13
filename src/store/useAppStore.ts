@@ -1,10 +1,14 @@
 import { create } from 'zustand';
 import { WEIGHT_PRESETS, type Weights } from '../config/weights';
+import type { AltCandidate } from '../lib/ranking';
+import type { NetworkRoute } from '../lib/network';
 import type { Booker, CargoType, ContainerType, Incoterm, Priority, Role, RouteResult, ShipMode } from '../types';
 
 export type Page = 'plan' | 'prices' | 'saved';
 export type PickTarget = 'pol' | 'pod';
-export type ResultTab = 'overview' | 'cost' | 'rules' | 'incoterm' | 'alts';
+export type ResultTab = 'network' | 'overview' | 'cost' | 'rules' | 'incoterm' | 'alts';
+export type ViewMode = 'network' | 'single';
+export type BaseMap = 'clean' | 'detail' | 'dark';
 
 export interface FormState {
   cargo: CargoType;
@@ -83,6 +87,21 @@ interface AppState {
   saved: SavedQuote[];
   toast: string | null;
   sidebarOpen: boolean;
+  /** V2: hiển thị mạng tuyến đa cảng hay chỉ một tuyến */
+  viewMode: ViewMode;
+  alts: AltCandidate[];
+  network: NetworkRoute[];
+  hoverKey: string | null;
+  labelMode: 'all' | 'top5' | 'none';
+  baseMap: BaseMap;
+
+  setViewMode: (m: ViewMode) => void;
+  setNetwork: (alts: AltCandidate[], network: NetworkRoute[]) => void;
+  setHoverKey: (k: string | null) => void;
+  setLabelMode: (m: 'all' | 'top5' | 'none') => void;
+  setBaseMap: (b: BaseMap) => void;
+  /** Chọn một cặp trong mạng tuyến (không phát lại hoạt ảnh) */
+  selectPair: (pol: string, pod: string, route: RouteResult) => void;
 
   setPage: (p: Page) => void;
   setForm: (patch: Partial<FormState>) => void;
@@ -121,7 +140,7 @@ export const DEFAULT_FORM: FormState = {
   priority: 'balanced',
   avoidRedSea: false,
   avoidPanama: false,
-  radiusKm: 300,
+  radiusKm: 500,
   engine: 'searoute',
 };
 
@@ -136,13 +155,26 @@ export const useAppStore = create<AppState>((set, get) => ({
   computed: null,
   sim: null,
   incoterm: null,
-  tab: 'overview',
+  tab: 'network',
   panelOpen: true,
-  mapMode: 'globe',
+  mapMode: 'mercator',
   follow: false,
   saved: loadSaved(),
   toast: null,
   sidebarOpen: true,
+  viewMode: 'network',
+  alts: [],
+  network: [],
+  hoverKey: null,
+  labelMode: 'top5',
+  baseMap: 'clean',
+
+  setViewMode: (viewMode) => set((s) => ({ viewMode, tab: viewMode === 'network' ? 'network' : s.tab === 'network' ? 'overview' : s.tab, sim: s.sim ? { ...s.sim, runId: s.sim.runId + 1 } : null })),
+  setNetwork: (alts, network) => set({ alts, network }),
+  setHoverKey: (hoverKey) => set({ hoverKey }),
+  setLabelMode: (labelMode) => set({ labelMode }),
+  setBaseMap: (baseMap) => set({ baseMap }),
+  selectPair: (pol, pod, route) => set((s) => ({ sim: s.sim ? { ...s.sim, pol, pod, route } : { pol, pod, route, runId: 1 } })),
 
   setPage: (page) => set({ page }),
   setForm: (patch) =>
@@ -171,6 +203,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       sim: { pol: f.pol!, pod: f.pod!, route, runId: (s.sim?.runId ?? 0) + 1 },
       incoterm: null,
       panelOpen: true,
+      tab: s.viewMode === 'network' ? 'network' : s.tab === 'network' ? 'overview' : s.tab,
     }));
   },
   showRoute: (pol, pod, route) => set((s) => ({ sim: { pol, pod, route, runId: (s.sim?.runId ?? 0) + 1 } })),
@@ -201,14 +234,16 @@ export const useAppStore = create<AppState>((set, get) => ({
 
 /* ───────────── Playback (tách riêng để chỉ PlaybackBar/MapView re-render mỗi khung hình) ───────────── */
 
+export type Speed = 0.5 | 1 | 2 | 5;
+
 interface PlaybackState {
   /** 0..1 */
   progress: number;
   playing: boolean;
-  speed: 1 | 2 | 5;
+  speed: Speed;
   setProgress: (p: number) => void;
   setPlaying: (p: boolean) => void;
-  setSpeed: (s: 1 | 2 | 5) => void;
+  setSpeed: (s: Speed) => void;
 }
 
 export const usePlayback = create<PlaybackState>((set) => ({

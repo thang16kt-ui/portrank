@@ -8,6 +8,7 @@ import { ANIMATION_CONFIG } from '../config/routing';
 import { PORTS } from '../data/ports';
 import { bearing, positionAt } from '../lib/geo';
 import type { LngLat, Port, RouteResult } from '../types';
+import { positionAtDay, type NetworkRoute } from '../lib/network';
 
 const svg = (s: string) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(s)}`;
 
@@ -19,6 +20,22 @@ export const SHIP_ICON = svg(`<svg xmlns="http://www.w3.org/2000/svg" width="40"
   <rect x="11" y="62" width="8" height="12" fill="#3b82f6"/><rect x="21" y="62" width="8" height="12" fill="#ef4444"/>
   <rect x="11" y="76" width="8" height="12" fill="#22c55e"/><rect x="21" y="76" width="8" height="12" fill="#f59e0b"/>
   <rect x="9" y="94" width="22" height="14" rx="2" fill="#f8fafc"/></svg>`);
+
+/* Dữ liệu ổn định giữa các khung hình: nếu tạo mảng mới mỗi frame, deck.gl sẽ tính lại toàn bộ thuộc tính (rất chậm) */
+const routeDataCache = new WeakMap<RouteResult, { path: LngLat[]; timestamps: number[] }[]>();
+const routeData = (r: RouteResult) => {
+  let d = routeDataCache.get(r);
+  if (!d) routeDataCache.set(r, (d = [{ path: r.coords, timestamps: r.cumNm }]));
+  return d;
+};
+const reversedCache = new WeakMap<NetworkRoute[], NetworkRoute[]>();
+const reversed = (net: NetworkRoute[]) => {
+  let d = reversedCache.get(net);
+  if (!d) reversedCache.set(net, (d = [...net].reverse()));
+  return d;
+};
+const DASH_EXT = [new PathStyleExtension({ dash: true })];
+const OFFSET_EXT = [new PathStyleExtension({ offset: true })];
 
 export interface LayerContext {
   polCode: string | null;
@@ -34,6 +51,14 @@ export interface LayerContext {
   hoverPort: string | null;
   onPortClick: (code: string) => void;
   onPortHover: (code: string | null) => void;
+  /** V2 – mạng tuyến đa cảng */
+  network?: NetworkRoute[];
+  curDay?: number;
+  maxDays?: number;
+  hoverKey?: string | null;
+  selectedKey?: string | null;
+  onRouteHover?: (key: string | null) => void;
+  onRouteClick?: (r: NetworkRoute) => void;
 }
 
 export function buildLayers(ctx: LayerContext): Layer[] {
@@ -61,9 +86,19 @@ export function buildLayers(ctx: LayerContext): Layer[] {
       parameters: { depthCompare: 'always' },
     }),
   );
+  // V2: mạng tuyến đa cảng
+  if (ctx.network && ctx.network.length) {
+    layers.push(...networkLayers(ctx));
+    if (ctx.zoom > 12) {
+      const codes = new Set(ctx.network.flatMap((r) => [r.candidate.pol.code, r.candidate.pod.code]));
+      layers.push(...portScene(PORTS.filter((p) => codes.has(p.code))));
+    }
+    return layers;
+  }
+
   // 2) Tuyến
   if (route) {
-    const data = [{ path: route.coords, timestamps: route.cumNm }];
+    const data = routeData(route);
     layers.push(
       new PathLayer({
         id: `route-full-${ctx.routeKey}`,
@@ -74,7 +109,7 @@ export function buildLayers(ctx: LayerContext): Layer[] {
         widthUnits: 'pixels',
         getDashArray: [6, 5],
         dashJustified: true,
-        extensions: [new PathStyleExtension({ dash: true })],
+        extensions: DASH_EXT,
         parameters: { depthCompare: 'always' },
       } as any),
       new PathLayer({
@@ -256,5 +291,101 @@ function portScene(ports: Port[]): Layer[] {
       getColor: (b) => b.color,
       material: { ambient: 0.45, diffuse: 0.6, shininess: 20 },
     }),
+  ];
+}
+
+/* ───────────── V2: các lớp vẽ mạng tuyến ───────────── */
+
+const lighten = (c: [number, number, number], k = 0.45): [number, number, number] => [c[0] + (255 - c[0]) * k, c[1] + (255 - c[1]) * k, c[2] + (255 - c[2]) * k] as [number, number, number];
+
+function networkLayers(ctx: LayerContext): Layer[] {
+  const net = ctx.network!;
+  const focus = ctx.hoverKey ?? null;
+  const sel = ctx.selectedKey ?? null;
+  const day = ctx.curDay ?? 0;
+  const draw = reversed(net); // tuyến hạng 1 vẽ sau cùng (nằm trên)
+  const isOn = (r: NetworkRoute) => !focus || r.key === focus;
+  const w = (r: NetworkRoute) => r.width + (r.key === focus || r.key === sel ? 2 : 0);
+  const trig = [focus, sel];
+  const ships = net.map((r: NetworkRoute) => ({ r, ...positionAtDay(r, day) }));
+  const common = { widthUnits: 'pixels' as const, capRounded: true, jointRounded: true, extensions: OFFSET_EXT, parameters: { depthCompare: 'always' as const } };
+
+  return [
+    // viền trắng giúp đường màu nổi trên nền bản đồ
+    new PathLayer<NetworkRoute>({
+      ...common,
+      id: 'net-casing',
+      data: draw,
+      getPath: (r: NetworkRoute) => r.route.coords,
+      getColor: (r: NetworkRoute) => [255, 255, 255, isOn(r) ? 230 : 70],
+      getWidth: (r: NetworkRoute) => w(r) + 3,
+      getOffset: (r: NetworkRoute) => r.offsetPx / (w(r) + 3),
+      updateTriggers: { getColor: trig, getWidth: trig, getOffset: trig },
+    } as any),
+    new PathLayer<NetworkRoute>({
+      ...common,
+      id: 'net-lines',
+      data: draw,
+      getPath: (r: NetworkRoute) => r.route.coords,
+      getColor: (r: NetworkRoute) => [...r.color, isOn(r) ? 255 : 55] as [number, number, number, number],
+      getWidth: w,
+      getOffset: (r: NetworkRoute) => r.offsetPx / w(r),
+      pickable: true,
+      onHover: (info: { object?: unknown }) => ctx.onRouteHover?.((info.object as NetworkRoute | undefined)?.key ?? null),
+      onClick: (info: { object?: unknown }) => info.object && ctx.onRouteClick?.(info.object as NetworkRoute),
+      updateTriggers: { getColor: trig, getWidth: trig, getOffset: trig },
+    } as any),
+    // vệt sáng tàu chạy – thời gian tính theo NGÀY nên tuyến nhanh về trước
+    new TripsLayer<NetworkRoute>({
+      ...common,
+      id: 'net-trips',
+      data: draw,
+      getPath: (r: NetworkRoute) => r.route.coords,
+      getTimestamps: (r: NetworkRoute) => r.times,
+      getColor: (r: NetworkRoute) => [...lighten(r.color, 0.35), isOn(r) ? 255 : 60] as [number, number, number, number],
+      getWidth: (r: NetworkRoute) => w(r) + 2,
+      getOffset: (r: NetworkRoute) => r.offsetPx / (w(r) + 2),
+      trailLength: Math.max(1.5, (ctx.maxDays ?? 30) * ANIMATION_CONFIG.trailRatio),
+      currentTime: day,
+      fadeTrail: true,
+      updateTriggers: { getColor: trig, getWidth: trig, getOffset: trig },
+    } as any),
+    new ScatterplotLayer({
+      id: 'net-ship-halo',
+      data: ships,
+      getPosition: (d: (typeof ships)[0]) => d.pos,
+      getRadius: (d: (typeof ships)[0]) => (d.r.key === focus || d.r.key === sel ? 15 : 11),
+      radiusUnits: 'pixels',
+      getFillColor: (d: (typeof ships)[0]) => [...d.r.color, isOn(d.r) ? 70 : 20] as [number, number, number, number],
+      getLineColor: (d: (typeof ships)[0]) => [...d.r.color, isOn(d.r) ? 255 : 60] as [number, number, number, number],
+      stroked: true,
+      lineWidthMinPixels: 2,
+      updateTriggers: { getPosition: [day], getFillColor: trig, getLineColor: trig, getRadius: trig },
+      parameters: { depthCompare: 'always' },
+    }),
+    ctx.shipModelOk
+      ? new ScenegraphLayer({
+          id: 'net-ships',
+          data: ships.filter((d) => isOn(d.r) && (d.r.rank <= 8 || d.r.key === sel || d.r.key === focus)),
+          scenegraph: '/models/ship.glb',
+          getPosition: (d: (typeof ships)[0]) => [d.pos[0], d.pos[1], 0],
+          getOrientation: (d: (typeof ships)[0]) => [0, 90 - d.bearing, 0],
+          sizeScale: 380,
+          sizeMinPixels: 46,
+          sizeMaxPixels: 300,
+          _lighting: 'pbr',
+          updateTriggers: { getPosition: [day], getOrientation: [day] },
+          parameters: { depthCompare: 'always' },
+        } as any)
+      : new IconLayer({
+          id: 'net-ships-2d',
+          data: ships.filter((d) => isOn(d.r)),
+          getPosition: (d: (typeof ships)[0]) => d.pos,
+          getIcon: () => ({ url: SHIP_ICON, width: 40, height: 120, anchorY: 60 }),
+          getAngle: (d: (typeof ships)[0]) => -d.bearing,
+          getSize: 34,
+          billboard: false,
+          updateTriggers: { getPosition: [day], getAngle: [day] },
+        }),
   ];
 }

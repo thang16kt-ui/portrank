@@ -48,6 +48,8 @@ export default function Sidebar() {
   const compute = useAppStore((s) => s.compute);
   const showToast = useAppStore((s) => s.showToast);
   const setSidebarOpen = useAppStore((s) => s.setSidebarOpen);
+  const viewMode = useAppStore((s) => s.viewMode);
+  const setViewMode = useAppStore((s) => s.setViewMode);
   const [error, setError] = useState<string | null>(null);
 
   const run = () => {
@@ -156,7 +158,11 @@ export default function Sidebar() {
           </div>
         </Field>
 
-        <Field label={`Bán kính tìm cảng thay thế: ${form.radiusKm} km`}>
+        <Field label="Chế độ hiển thị" hint={viewMode === 'network' ? 'Vẽ mọi tuyến từ các cảng quanh A tới các cảng quanh B, kèm thời gian & chi phí trên đường.' : 'Chỉ vẽ một tuyến A → B (như V1).'}>
+          <Segmented value={viewMode} onChange={setViewMode} options={[{ v: 'network', label: '🗺️ Mạng tuyến đa cảng' }, { v: 'single', label: '➖ Một tuyến A → B' }]} />
+        </Field>
+
+        <Field label={`Bán kính tìm cảng quanh A và B: ${form.radiusKm} km`}>
           <input type="range" min={0} max={800} step={50} className="w-full" value={form.radiusKm} onChange={(e) => setForm({ radiusKm: +e.target.value })} />
         </Field>
 

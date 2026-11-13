@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import Header from './components/Header';
 import MapOverlays from './components/MapOverlays';
 import MapView from './components/MapView';
+import NetworkSync from './components/NetworkSync';
 import ResultPanel from './components/ResultPanel';
 import Sidebar from './components/Sidebar';
 import { useAppStore } from './store/useAppStore';
@@ -16,6 +17,7 @@ export default function App() {
 
   return (
     <div className="flex h-full flex-col">
+      <NetworkSync />
       <Header />
       <div className="relative flex min-h-0 flex-1">
         {/* Sidebar: cột trái ≥900px, bottom sheet <900px */}

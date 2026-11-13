@@ -10,6 +10,23 @@ Web app chạy local (giao diện tiếng Việt) để lập kế hoạch vận
 
 > ⚠️ **Mọi con số giá là MÔ HÌNH ƯỚC TÍNH / DỮ LIỆU MÔ PHỎNG**, không phải giá thị trường.
 
+## Phiên bản
+
+| | Nhánh | Nội dung |
+| --- | --- | --- |
+| **V1** | `release/v1` | Một tuyến A → B, hoạt ảnh tàu, cước, điều kiện, Incoterm, xếp hạng cảng thay thế |
+| **V2** | `v2` | **Mạng tuyến đa cảng**: vẽ đồng thời mọi tuyến từ các cảng quanh A tới các cảng quanh B, nhãn thời gian / chi phí / quãng đường ngay trên đường, các tàu "đua" theo số ngày thực, nền bản đồ tối giản, hoạt ảnh chậm hơn |
+
+### V2 – Mạng tuyến đa cảng
+- Lấy mọi cảng trong bán kính R quanh **A** và quanh **B** (mặc định 500 km), ghép tất cả cặp → mỗi cặp một tuyến.
+- Mỗi tuyến một màu theo thứ hạng (8 tuyến đầu; còn lại màu xám), các tuyến chạy chung được **tách làn song song** kiểu bản đồ metro, có viền trắng để nổi trên nền.
+- **Nhãn trên đường**: số ngày · cước ước tính · hải lý. Nhãn chồng nhau được tự lật phía hoặc ẩn (ưu tiên hạng cao); rê chuột/click để xem tên tuyến. Chọn hiển thị nhãn Tất cả / Top 5 / Ẩn.
+- **Hoạt ảnh "đua"**: tất cả tàu xuất phát cùng lúc, thời gian tính theo NGÀY nên tuyến nhanh cập bến trước (🏁 thứ tự về đích). Mặc định ~1 giây thực / 1 ngày hành trình (15–60 giây), tốc độ x0.5 / x1 / x2 / x5 – chỉnh trong `src/config/routing.ts`.
+- Rê chuột lên đường / nhãn / dòng trong bảng **"Mạng tuyến"** → làm nổi tuyến đó, các tuyến khác mờ đi; click → các tab Tổng quan / Chi phí / Điều kiện / Incoterm chuyển sang tuyến đó.
+- Nền bản đồ: *Sáng tối giản* (OpenFreeMap Positron, mặc định), *Chi tiết* (Liberty), *Tối*. Mặc định bản đồ phẳng 2D; vẫn chuyển được sang 3D Globe.
+- Chuyển về chế độ một tuyến (như V1) ở thanh bên: *Chế độ hiển thị → Một tuyến A → B*.
+- Logic thuần trong `src/lib/network.ts` (có test `tests/network.test.ts`).
+
 ## Chạy
 
 ```bash
@@ -23,7 +40,7 @@ Các lệnh khác:
 
 | Lệnh | Mô tả |
 | --- | --- |
-| `npm test` | Unit test (Vitest) cho `routing`, `pricing`, `incoterm`, `ranking`, `rules` |
+| `npm test` | Unit test (Vitest) cho `routing`, `pricing`, `incoterm`, `ranking`, `rules`, `network` |
 | `npm run build` | Kiểm tra type + build production vào `dist/` |
 | `npm run gen:ship` | Sinh lại model tàu `public/models/ship.glb` |
 | `npx tsx scripts/check-land.ts [searoute\|graph] [ALL\|POL-POD]` | Kiểm tra tuyến không cắt qua đất liền (Natural Earth 1:50m) |

@@ -21,11 +21,13 @@ export const VESSEL_CONFIG = {
   cutoffDays: 3,
 };
 
-/** Thời lượng hoạt ảnh (giây) theo quãng đường */
+/**
+ * Thời lượng hoạt ảnh ở tốc độ x1. V2: chậm hơn để dễ theo dõi –
+ * mặc định ~1 giây thực cho mỗi ngày hành trình (tuyến 30 ngày ≈ 30 giây), giới hạn 15–60 giây.
+ */
 export const ANIMATION_CONFIG = {
-  minSec: 6,
-  maxSec: 12,
-  /** Quãng đường (hải lý) ứng với maxSec */
-  nmForMax: 15000,
+  secPerDay: 1,
+  minSec: 15,
+  maxSec: 60,
   trailRatio: 0.08,
 };

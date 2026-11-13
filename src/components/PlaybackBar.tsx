@@ -4,6 +4,7 @@ import { PORTS } from '../data/ports';
 import { haversineKm, normalizeLon, positionAt } from '../lib/geo';
 import { dayAt, transitDays } from '../lib/transit';
 import { useAppStore, usePlayback } from '../store/useAppStore';
+import { maxArrival } from '../lib/network';
 
 function fmtCoord([lon, lat]: [number, number]) {
   const L = normalizeLon(lon);
@@ -33,11 +34,15 @@ export default function PlaybackBar() {
   const speed = usePlayback((s) => s.speed);
   const { setProgress, setPlaying, setSpeed } = usePlayback.getState();
 
-  const total = useMemo(() => (sim ? transitDays(sim.route, cargo) : 0), [sim, cargo]);
+  const viewMode = useAppStore((s) => s.viewMode);
+  const network = useAppStore((s) => s.network);
+  const net = viewMode === 'network' && network.length ? network : null;
+  const total = useMemo(() => (net ? maxArrival(net) : sim ? transitDays(sim.route, cargo) : 0), [net, sim, cargo]);
   if (!sim) return null;
   const nm = progress * sim.route.distanceNm;
   const at = positionAt(sim.route.coords, sim.route.cumNm, nm);
-  const day = progress >= 1 ? total : dayAt(sim.route, nm, cargo);
+  const day = net ? progress * total : progress >= 1 ? total : dayAt(sim.route, nm, cargo);
+  const arrived = net ? net.filter((r) => r.arrivalDays <= day + 1e-6).sort((a, b) => a.arrivalDays - b.arrivalDays) : [];
 
   return (
     <div className="pointer-events-auto rounded-xl bg-slate-900/85 px-3 py-2 text-white shadow-xl backdrop-blur">
@@ -65,7 +70,7 @@ export default function PlaybackBar() {
           aria-label="Tiến trình hành trình"
         />
         <div className="flex shrink-0 overflow-hidden rounded-md border border-white/20 text-[11px]">
-          {([1, 2, 5] as const).map((s) => (
+          {([0.5, 1, 2, 5] as const).map((s) => (
             <button key={s} onClick={() => setSpeed(s)} className={`px-2 py-1 ${speed === s ? 'bg-white/25 font-bold' : 'hover:bg-white/10'}`}>
               x{s}
             </button>
@@ -76,10 +81,25 @@ export default function PlaybackBar() {
         <span>
           Ngày thứ <b className="text-amber-300">{day.toFixed(1)}</b> / {total.toFixed(1)} ngày
         </span>
-        <span>
-          Đã đi <b>{Math.round(nm).toLocaleString('vi-VN')}</b> / {Math.round(sim.route.distanceNm).toLocaleString('vi-VN')} hải lý
-        </span>
-        <span className="truncate">📍 {fmtCoord(at.pos)} · {describe(at.pos)}</span>
+        {net ? (
+          <>
+            <span>
+              Đã cập bến <b>{arrived.length}</b>/{net.length} tuyến
+            </span>
+            {arrived[0] && (
+              <span className="truncate">
+                🏁 Về đầu tiên: <b style={{ color: arrived[0].hex }}>#{arrived[0].rank}</b> {arrived[0].candidate.pol.name} → {arrived[0].candidate.pod.name} ({arrived[0].arrivalDays.toFixed(1)} ngày)
+              </span>
+            )}
+          </>
+        ) : (
+          <>
+            <span>
+              Đã đi <b>{Math.round(nm).toLocaleString('vi-VN')}</b> / {Math.round(sim.route.distanceNm).toLocaleString('vi-VN')} hải lý
+            </span>
+            <span className="truncate">📍 {fmtCoord(at.pos)} · {describe(at.pos)}</span>
+          </>
+        )}
       </div>
     </div>
   );
