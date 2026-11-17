@@ -36,8 +36,10 @@ dữ liệu cảng 3D (vector tiles OpenStreetMap qua OpenFreeMap). Bản đồ 
 
 | Lệnh | Mô tả |
 | --- | --- |
-| `npm test` | 121 unit test (Vitest): routing, pricing + bảng giá, incoterm (đủ 11 điều kiện), duty, ranking, plan (tiêu chí hoàn thành), track + cảnh cảng, rules, nguồn thuế UK/US, DCSA + máy chủ trung gian |
+| `npm test` | 133 unit test (Vitest): routing, pricing + bảng giá, incoterm (đủ 11 điều kiện), duty, ranking, plan (tiêu chí hoàn thành), track + cảnh cảng, rules, nguồn thuế UK/US + Chương 99 + bản chụp, DCSA + máy chủ trung gian |
 | `npm start` | Máy chủ Node phục vụ `dist/` + API trung gian (`/api/hts`, `/api/schedules`) |
+| `npm run tariffs:update` | Tải lại bản chụp biểu thuế (Mỹ, Anh, HS 2022) cho `src/data/tariffProducts.csv` |
+| `npm run tariffs:check` | Kiểm tra mã trong danh mục hàng, gợi ý mã còn thiếu (không ghi file) |
 | `npm run build` | Kiểm tra type + build production vào `dist/` |
 | `npm run gen:ship` / `gen:crane` | Sinh lại mô hình tàu / cẩu bờ `.glb` (tự vẽ bằng code, CC0) |
 | `npx tsx scripts/check-land.ts [searoute\|graph] [ALL\|POL-POD]` | Kiểm tra tuyến biển không cắt qua đất liền |
@@ -99,12 +101,29 @@ thời gian quay về ước tính. Khi chọn một lộ trình: dòng thời g
 | Nước nhập | Nguồn | Cách gọi | Lấy gì |
 | --- | --- | --- | --- |
 | Anh | UK Trade Tariff API v2 (`/api/v2/headings`, `/api/v2/commodities`) | Trình duyệt gọi thẳng (API cho phép CORS) | Thuế MFN (Third country duty), ưu đãi theo xuất xứ (Tariff preference, có xét nhóm nước như CPTPP), VAT |
-| Mỹ | USITC HTS REST (`/reststop/search`) | Qua trung gian `/api/hts/search` (USITC chặn gọi từ trình duyệt) | Cột General (MFN), cột Special (FTA của Mỹ). **Chưa gồm thuế bổ sung Chương 99** (Section 301/232, thuế đối ứng) – app hiện cảnh báo |
+| Mỹ | USITC HTS REST (`/reststop/exportList`, dự phòng `/reststop/search`) | Qua trung gian `/api/hts/exportList` và `/api/hts/search` (USITC chặn gọi từ trình duyệt) | Cột General (MFN), cột Special (FTA của Mỹ), phí MPF 0,3464% + HMF 0,125% (cộng vào tổng). Thuế bổ sung **Chương 99** theo xuất xứ (thuế đối ứng, Section 301 – vd. Việt Nam +20%) hiện mục **“Cần xác minh”**, KHÔNG cộng vào tổng vì phụ thuộc ngày xếp hàng và danh mục loại trừ |
 | EU, Việt Nam, WTO | – | Không làm | TARIC không có API công khai (trang HTML tải bằng JavaScript, yêu cầu lớn bị chuyển sang gửi email); biểu thuế VN không có API; WTO cần key và cập nhật chậm → tra tay ở trang **Biểu thuế** |
 
 - Mã HS 6 số ứng với nhiều dòng thuế 10 số → hiện danh sách để chọn (không tự đoán). Thuế phức hợp (vd “6,5% + 33 GBP/100 kg”) → báo cần tính tay.
 - Mỗi mức thuế lấy tự động ghi **nguồn (link trang chính thức)** và **ngày lấy**; có nút “Lưu vào biểu thuế của tôi”. Tắt/bật ở trang Biểu thuế.
-- Trung gian HTS: dev server (`npm run dev`) và `npm start` có sẵn; trên Render (trang tĩnh) dùng quy tắc **Rewrite** `/api/hts/search` → `https://hts.usitc.gov/reststop/search`.
+- Trung gian HTS: dev server (`npm run dev`) và `npm start` có sẵn; trên Render (trang tĩnh) dùng quy tắc **Rewrite** `/api/hts/search` → `https://hts.usitc.gov/reststop/search`
+  và thêm `/api/hts/exportList` → `https://hts.usitc.gov/reststop/exportList` (thiếu quy tắc này app vẫn chạy: quay về `/search`, Chương 99 lấy từ bản chụp).
+- Hai ưu đãi cùng thuế suất (vd. UKVFTA và CPTPP cùng 0%) → chọn hiệp định song phương.
+
+### Bản chụp biểu thuế & cập nhật định kỳ
+`npm run tariffs:update` (`scripts/update-tariffs.ts`) tải thuế cho danh mục hàng `src/data/tariffProducts.csv` từ nguồn chính thức,
+dùng chính các hàm phân tích của app, rồi ghi `src/data/tariffSnapshot.json` (MFN, FTA theo từng xuất xứ, phí MPF/HMF, các dòng Chương 99).
+`npm run tariffs:check` chỉ kiểm tra: mã HS6 còn trong HS 2022 (GitHub `datasets/harmonized-system`), mã Mỹ/Anh trong danh mục còn hiệu lực, gợi ý mã còn thiếu.
+
+| Dùng ở đâu | Cách dùng |
+| --- | --- |
+| API trực tuyến không phản hồi | Tự lấy mức thuế từ bản chụp, ghi rõ “Bản chụp ngày …” |
+| Trang **Biểu thuế** | Nút “Nạp … mức thuế” → thêm MFN + FTA cho xuất xứ đang chọn vào bảng của bạn (đánh dấu chưa xác minh) |
+| EU / Việt Nam | `src/data/tariffManual.csv` (cùng mẫu CSV của trang Biểu thuế) → đưa vào bản chụp, luôn **chưa xác minh** – đối chiếu TARIC/biểu thuế VN trước khi dùng |
+
+Workflow `.github/workflows/update-tariffs.yml` chạy khi sửa danh mục hàng trên nhánh `v2`, và ngày 1 & 15 hằng tháng (lịch chỉ chạy khi file có trên nhánh mặc định),
+mở pull request khi dữ liệu thay đổi – cần bật *Settings → Actions → General → Allow GitHub Actions to create and approve pull requests*.
+Mạng cần proxy: `NODE_USE_ENV_PROXY=1 npm run tariffs:update`.
 
 ### Lịch tàu từ API hãng (DCSA Commercial Schedules 1.0)
 - Theo đặc tả công khai của DCSA: `GET {gốc API của hãng}/v1/point-to-point-routes?placeOfReceipt=…&placeOfDelivery=…&departureStartDate=…&limit=50`,

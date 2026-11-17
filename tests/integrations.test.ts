@@ -6,7 +6,7 @@ import { aggregateCredits } from '../src/components/map/mapLayers';
 import { dcsaToSchedule, type DcsaPointToPoint } from '../src/lib/dcsa';
 import { scheduleTrack } from '../src/lib/track';
 import {
-  htsLeaves, parsePercent, parseUkCommodity, parseUkHeadingLeaves, UkTariffSource, UsHtsSource, usEntry, usSpecialRate, type HtsRow,
+  clearTariffCache, htsLeaves, parsePercent, parseUkCommodity, parseUkHeadingLeaves, UkTariffSource, UsHtsSource, usEntry, usSpecialRate, type HtsRow,
 } from '../src/lib/tariffSources';
 import ukCommodity from './fixtures/uk-commodity-9403609000.json';
 import ukHeading from './fixtures/uk-heading-9403.json';
@@ -92,13 +92,36 @@ describe('US HTS', () => {
     expect(notes.join(' ')).toContain('Chương 99');
     expect(notes.join(' ')).toContain('không có VAT');
   });
-  it('lookup gọi qua trung gian /api/hts, không gọi thẳng hts.usitc.gov', async () => {
+  it('lookup gọi qua trung gian /api/hts (exportList cho mã HS và Chương 99), không gọi thẳng hts.usitc.gov', async () => {
     const f = vi.fn(async (_url: string) => ({ ok: true, status: 200, json: async () => usHts }) as Response);
     vi.stubGlobal('fetch', f);
-    const r = await UsHtsSource.lookup({ importCountry: 'US', hs: '94036040', origin: 'VN', preferFta: false });
-    expect(String(f.mock.calls[0][0])).toMatch(/^\/api\/hts\/search\?keyword=9403\.60$/);
-    expect(r.entry?.hs).toBe('9403604000');
-    vi.unstubAllGlobals();
+    try {
+      const r = await UsHtsSource.lookup({ importCountry: 'US', hs: '94036040', origin: 'VN', preferFta: false });
+      const urls = f.mock.calls.map((c) => String(c[0]));
+      expect(urls).toContain('/api/hts/exportList?from=9403.60&to=9403.60.99.99');
+      expect(urls.some((u) => u.startsWith('/api/hts/exportList?from=9903.'))).toBe(true);
+      expect(urls.every((u) => u.startsWith('/api/hts/'))).toBe(true);
+      expect(r.entry?.hs).toBe('9403604000');
+      expect(r.entry?.feePct).toBeCloseTo(0.4714);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+  it('trang tĩnh chưa có rewrite exportList (trả HTML) → quay về /api/hts/search', async () => {
+    const f = vi.fn(async (url: string) =>
+      url.includes('exportList')
+        ? ({ ok: true, status: 200, json: async () => { throw new SyntaxError('Unexpected token <'); } } as unknown as Response)
+        : ({ ok: true, status: 200, json: async () => usHts } as Response),
+    );
+    vi.stubGlobal('fetch', f);
+    clearTariffCache();
+    try {
+      const r = await UsHtsSource.lookup({ importCountry: 'US', hs: '94036080', origin: 'VN', preferFta: false });
+      expect(f.mock.calls.map((c) => String(c[0]))).toContain('/api/hts/search?keyword=9403.60');
+      expect(r.entry).not.toBeNull();
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });
 

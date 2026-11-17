@@ -1,0 +1,43 @@
+name: Cập nhật biểu thuế (v2)
+
+# Tạo lại bản chụp biểu thuế src/data/tariffSnapshot.json từ nguồn chính thức (USITC HTS, UK Trade Tariff, HS 2022)
+# cho danh mục hàng src/data/tariffProducts.csv, rồi mở pull request vào chính nhánh đang chạy.
+# - push: chạy khi sửa danh mục hàng / thuế nhập tay trên nhánh v2 (hoạt động ngay).
+# - schedule / workflow_dispatch: GitHub chỉ kích hoạt khi file này có trên nhánh mặc định.
+# Cần bật Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests".
+on:
+  push:
+    branches: [v2]
+    paths: [src/data/tariffProducts.csv, src/data/tariffManual.csv]
+  schedule:
+    - cron: '37 3 1,15 * *' # 03:37 UTC ngày 1 và 15 hằng tháng
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Tải biểu thuế
+        # Một nguồn lỗi → script giữ dữ liệu cũ của nguồn đó, vẫn mở PR cho phần còn lại
+        continue-on-error: true
+        run: npm run --silent tariffs:update | tee tariff-report.txt
+      - run: npm test
+      - name: Mở pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: auto/tariff-update-v2
+          delete-branch: true
+          add-paths: src/data/tariffSnapshot.json
+          commit-message: 'Cập nhật bản chụp biểu thuế tự động'
+          title: 'Cập nhật biểu thuế v2 (tự động)'
+          body-path: tariff-report.txt

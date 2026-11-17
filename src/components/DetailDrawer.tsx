@@ -129,6 +129,7 @@ function DutyPanel({ plan, r }: { plan: Plan; r: RankedOption }) {
               <tr><td>Trị giá tính thuế ({d.basis.basis})</td><td className="text-right">{usd(d.customsValue)}</td></tr>
               <tr><td>Thuế nhập khẩu {e.dutyPct}% <span className="chip chip-sky">{e.rateType === 'FTA' ? `Ưu đãi ${e.fta || 'FTA'}` : 'MFN'}</span></td><td className="text-right">{usd(d.duty)}</td></tr>
               {d.other > 0 && <tr><td>Thuế khác {e.otherPct}%</td><td className="text-right">{usd(d.other)}</td></tr>}
+              {d.fees > 0 && <tr><td>{e.feeLabel || 'Phí theo trị giá'} {e.feePct}% <span className="text-[10.5px] text-mute">(không chịu VAT)</span></td><td className="text-right">{usd(d.fees)}</td></tr>}
               <tr><td>VAT/GST {d.vatMissing ? <span className="chip chip-warn">chưa nhập</span> : `${e.vatPct}%`}</td><td className="text-right">{d.vatMissing ? '—' : usd(d.vat)}</td></tr>
               <tr><td className="font-semibold text-fg">Tổng thuế</td><td className="text-right font-bold text-amber-200">{usd(d.total)}</td></tr>
             </tbody>
@@ -198,7 +199,24 @@ function OfficialTariffBox({ plan }: { plan: Plan }) {
           </div>
         </div>
       )}
+      {off.snapshot && <div className="mt-1"><span className="chip chip-warn">Bản chụp ngày {fmtDateVi(off.snapshot)}</span> <span className="text-mute">API trực tuyến không phản hồi</span></div>}
       {off.notes.length > 0 && <ul className="mt-1 list-disc space-y-0.5 pl-4 text-mute">{off.notes.map((n, i) => <li key={i}>{n}</li>)}</ul>}
+      {off.additional && off.additional.length > 0 && (
+        <div className="mt-2 rounded-md border border-gold/40 bg-gold/5 p-2">
+          <div className="font-semibold text-amber-200">Cần xác minh – thuế bổ sung Chương 99 cho xuất xứ {countryName((plan.input.origin || plan.seller.country).toUpperCase())} ({off.additional.length})</div>
+          <div className="mb-1 text-[11px] text-mute">Phụ thuộc ngày xếp hàng, danh mục loại trừ và điều kiện riêng – KHÔNG cộng vào tổng thuế.</div>
+          <ul className="space-y-1">
+            {off.additional.map((a) => (
+              <li key={a.code}>
+                <details>
+                  <summary className="cursor-pointer"><span className="font-mono text-fg">HTS {a.code}</span> <span className="text-amber-200">{a.pct != null ? `${/^\d/.test(a.rate) ? '' : '+'}${a.pct}%` : a.rate}</span></summary>
+                  <div className="mt-0.5 text-mute">{a.rate} · {a.note}</div>
+                </details>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
