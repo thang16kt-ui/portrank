@@ -7,12 +7,14 @@
  *   npm run tariffs:check             # chỉ kiểm tra danh mục, không ghi file
  *
  * Nguồn: HS 2022 – GitHub datasets/harmonized-system · Mỹ – USITC HTS REST (exportList) · Anh – UK Trade Tariff API v2.
+ * Ngoài ra ghi: public/data/hs6.json (danh mục HS 2022 chuẩn 2/4/6 số cho ô nhập mã HS) và
+ * src/data/vatRates.json (VAT/GST tiêu chuẩn ~130 nước – gói npm sales-tax, MIT, valeriansaliou/node-sales-tax).
  * EU / Việt Nam: không có API công khai → `src/data/tariffManual.csv` (cùng mẫu CSV của trang Biểu thuế, chưa xác minh).
  * Dùng chính các hàm phân tích của app (src/lib/tariffSources.ts) để bản chụp khớp với kết quả tra trực tuyến.
  * Mạng cần proxy: NODE_USE_ENV_PROXY=1 npm run tariffs:update
  * Một nguồn lỗi → giữ dữ liệu cũ của nguồn đó trong bản chụp và thoát với mã 1.
  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { COUNTRIES } from '../src/data/countries';
@@ -60,12 +62,36 @@ async function get<T>(url: string, accept = 'application/json', tries = 4): Prom
 }
 
 /* ───────────── HS 2022 (GitHub) ───────────── */
+const HS_URL = 'https://raw.githubusercontent.com/datasets/harmonized-system/main/data/harmonized-system.csv';
 async function checkHs6() {
-  const csv = await get<string>('https://raw.githubusercontent.com/datasets/harmonized-system/main/data/harmonized-system.csv', 'text/csv');
-  const hs6 = new Set(parseCsv(csv).filter((r) => r[4] === '6').map((r) => r[1]));
+  const csv = await get<string>(HS_URL, 'text/csv');
+  // cột: section, hscode, description, parent, level
+  const rows = parseCsv(csv).slice(1).filter((r) => ['2', '4', '6'].includes(r[4]) && /^\d+$/.test(r[1]));
+  const hs6 = new Set(rows.filter((r) => r[4] === '6').map((r) => r[1]));
   const bad = products.filter((p) => !hs6.has(p.hs6));
   for (const p of bad) report.push(`✗ ${p.sku}: HS6 ${fmt(p.hs6)} không có trong HS 2022 (datasets/harmonized-system).`);
-  report.push(`✓ HS 2022: ${products.length - bad.length}/${products.length} mã HS6 hợp lệ`);
+  report.push(`✓ HS 2022: ${products.length - bad.length}/${products.length} mã HS6 trong danh mục hàng hợp lệ; ${hs6.size} mã HS6 trong danh mục chuẩn`);
+  if (hs6.size < 5000) throw new Error(`Danh mục HS chỉ có ${hs6.size} mã HS6 – nghi dữ liệu lỗi, không ghi`);
+  if (!CHECK_ONLY) {
+    mkdirSync(join(ROOT, 'public/data'), { recursive: true });
+    const catalog = { version: 'HS 2022', source: 'GitHub datasets/harmonized-system (UN Comtrade, ODC-PDDL)', sourceUrl: 'https://github.com/datasets/harmonized-system', fetchedAt: today, items: rows.map((r) => [r[1], r[2]]) };
+    writeFileSync(join(ROOT, 'public/data/hs6.json'), JSON.stringify(catalog) + '\n');
+  }
+}
+
+/* ───────────── VAT/GST tiêu chuẩn (npm sales-tax) ───────────── */
+const VAT_URL = 'https://raw.githubusercontent.com/valeriansaliou/node-sales-tax/master/res/sales_tax_rates.json';
+async function updateVat() {
+  const raw = await get<Record<string, { type: string; rate: number; states?: Record<string, unknown> }>>(VAT_URL);
+  const rates: Record<string, { pct: number; type: string; regional?: boolean }> = {};
+  for (const [cc, r] of Object.entries(raw)) {
+    if (!/^[A-Z]{2}$/.test(cc) || typeof r?.rate !== 'number') continue;
+    rates[cc] = { pct: Math.round(r.rate * 10000) / 100, type: r.type, ...(r.states && { regional: true }) };
+  }
+  if (Object.keys(rates).length < 100) throw new Error(`Chỉ có ${Object.keys(rates).length} nước – nghi dữ liệu lỗi, không ghi`);
+  if (!CHECK_ONLY)
+    writeFileSync(join(DATA, 'vatRates.json'), JSON.stringify({ source: 'npm sales-tax (MIT) – valeriansaliou/node-sales-tax', sourceUrl: 'https://github.com/valeriansaliou/node-sales-tax', fetchedAt: today, rates }, null, 0) + '\n');
+  report.push(`✓ VAT/GST: ${Object.keys(rates).length} nước`);
 }
 
 /* ───────────── Mỹ – USITC HTS ───────────── */
@@ -153,6 +179,7 @@ const run = async <T>(name: string, job: () => Promise<T>, fallback: T): Promise
 };
 
 await run('HS 2022', checkHs6, undefined);
+await run('VAT/GST', updateVat, undefined);
 const us = await run('US', updateUS, { entries: keep('us-'), chapter99: prev.chapter99, release: prev.sources.find((s) => s.id === 'us-hts')?.release ?? '' });
 const gb = await run('GB', updateGB, keep('uk-'));
 const manual = parseTariffRows(readCsv('tariffManual.csv'));

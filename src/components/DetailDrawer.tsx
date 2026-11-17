@@ -5,6 +5,10 @@ import type { RuleCategory } from '../config/rules';
 import { CARRIERS, findCarrier } from '../data/carriers';
 import { countryName, ftasBetween } from '../data/countries';
 import { tariffLookupLink } from '../data/customsBasis';
+import { otherTaxesFor } from '../data/otherTaxes';
+import { VAT_DATA, standardVat, vatLabel } from '../data/vatRates';
+import { fmtHsCode, hs6Of } from '../lib/hs';
+import { autoSourceOf } from '../lib/tariffSources';
 import { PORT_BY_CODE } from '../data/ports';
 import { loadApiSchedules, runPlan, useCurrent } from '../lib/actions';
 import { fetchApiConfig, type ApiConfig } from '../lib/dcsa';
@@ -136,7 +140,7 @@ function DutyPanel({ plan, r }: { plan: Plan; r: RankedOption }) {
           </table>
           <div className="mt-2 space-y-0.5 text-[11px] text-mute">
             <div>Nguồn: {/^https?:/.test(e.source) ? <a href={e.source} target="_blank" rel="noreferrer">{e.source}</a> : <b className="text-fg">{e.source}</b>}</div>
-            <div>Hiệu lực từ: {fmtDateVi(e.effectiveDate)} · {isAuto(e) ? 'lấy ngày' : 'cập nhật'}: <b className="text-fg">{fmtDateVi(e.updatedAt)}</b> {isAuto(e) ? <span className="chip chip-real">Nguồn chính thức · lấy tự động</span> : <span className={`chip ${e.verified ? 'chip-real' : 'chip-warn'}`}>{e.verified ? 'Đã xác minh' : 'Chưa xác minh'}</span>}</div>
+            <div>Hiệu lực từ: {fmtDateVi(e.effectiveDate)} · {isAuto(e) ? 'lấy ngày' : 'cập nhật'}: <b className="text-fg">{fmtDateVi(e.updatedAt)}</b> {isAuto(e) ? (e.id.startsWith('wits-') ? <span className="chip chip-warn">WITS/TRAINS · số liệu năm {e.effectiveDate.slice(0, 4)} · trung bình HS6</span> : <span className="chip chip-real">Nguồn chính thức · lấy tự động</span>) : <span className={`chip ${e.verified ? 'chip-real' : 'chip-warn'}`}>{e.verified ? 'Đã xác minh' : 'Chưa xác minh'}</span>}</div>
             {isAuto(e) && (
               <button className="btn mt-1" onClick={() => { useDataStore.getState().upsertTariff({ ...e, id: Math.random().toString(36).slice(2, 10), verified: false }); useAppStore.getState().showToast('Đã lưu vào Biểu thuế của bạn (đánh dấu chưa xác minh để bạn kiểm tra)'); }}>
                 💾 Lưu vào biểu thuế của tôi
@@ -162,6 +166,7 @@ function DutyPanel({ plan, r }: { plan: Plan; r: RankedOption }) {
           </div>
         </div>
       )}
+      <OtherTaxesBox country={imp} hs={plan.input.hs} />
       {ftas.length > 0 && (
         <p className="rounded bg-sky/10 px-2 py-1.5 text-[11.5px] text-cyan-100">
           💡 {countryName(exp)} – {countryName(imp)} có thể áp dụng: <b>{ftas.join(', ')}</b>. Hãy kiểm tra thuế ưu đãi và điều kiện C/O (quy tắc xuất xứ) cho mã HS của bạn.
@@ -172,7 +177,33 @@ function DutyPanel({ plan, r }: { plan: Plan; r: RankedOption }) {
   );
 }
 
-const isAuto = (e: { id: string }) => e.id.startsWith('uk-') || e.id.startsWith('us-');
+const isAuto = (e: { id: string }) => !!autoSourceOf(e);
+
+/** VAT/GST tiêu chuẩn + các thuế/phí khác có thể áp dụng theo nước nhập & chương HS (tham khảo, không cộng vào tổng) */
+function OtherTaxesBox({ country, hs }: { country: string; hs: string }) {
+  const vat = standardVat(country);
+  const list = otherTaxesFor(country, hs);
+  const hs6 = hs6Of(hs);
+  return (
+    <div className="rounded-lg border border-line bg-well p-2.5 text-[11.5px]">
+      <div className="mb-1 font-semibold text-fg">Các thuế / phí khác có thể áp dụng khi nhập vào {countryName(country)}{hs6 ? ` – HS ${fmtHsCode(hs6)}` : ''}</div>
+      <ul className="space-y-1">
+        <li>
+          <b className="text-fg">{vat ? vatLabel(vat) : 'VAT / GST'}</b>{' '}
+          {vat ? (vat.type === 'none' ? <span className="text-mute">– không có VAT/GST cấp quốc gia{vat.regional ? ' (thuế theo bang/tỉnh khi bán lẻ)' : ''}</span> : <><span className="font-mono text-amber-200">{vat.pct}%</span> <span className="text-mute">thuế suất tiêu chuẩn{vat.regional ? ' + thuế theo bang/tỉnh' : ''} – mặt hàng có thể chịu mức giảm/miễn</span></>) : <span className="text-mute">– chưa có dữ liệu</span>}
+        </li>
+        {list.map((t) => (
+          <li key={t.name}>
+            <b className="text-fg">{t.name}</b>{t.rate && <span className="ml-1 font-mono text-amber-200">{t.rate}</span>} <span className="text-mute">– {t.detail}</span>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-1.5 text-[10.5px] text-mute italic">
+        Danh mục tham khảo, chưa xác minh, không cộng vào tổng thuế. VAT tiêu chuẩn: <a href={VAT_DATA.sourceUrl} target="_blank" rel="noreferrer">{VAT_DATA.source}</a> ({fmtDateVi(VAT_DATA.fetchedAt)}).
+      </div>
+    </div>
+  );
+}
 
 /** Kết quả tra cứu từ nguồn chính thức: mã đã dùng, lựa chọn mã chi tiết, ghi chú, lỗi */
 function OfficialTariffBox({ plan }: { plan: Plan }) {

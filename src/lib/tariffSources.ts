@@ -1,6 +1,10 @@
 import { todayIso } from './csv';
 import { matchTariff, type TariffEntry, type TariffQuery } from '../providers/TariffProvider';
 import snapshotJson from '../data/tariffSnapshot.json';
+import countries from 'i18n-iso-countries';
+import { EU_SET } from '../data/countries';
+import { VAT_DATA, standardVat } from '../data/vatRates';
+import { tariffLookupLink } from '../data/customsBasis';
 
 /**
  * Adapter lấy thuế suất tự động từ NGUỒN CHÍNH THỨC (đã kiểm tra tài liệu API trước khi viết):
@@ -17,7 +21,7 @@ export interface TariffChoice {
 
 /** Kết quả từ nguồn chính thức */
 export interface OfficialTariffResult {
-  provider: 'uk' | 'us';
+  provider: 'uk' | 'us' | 'wits';
   providerLabel: string;
   /** Mã đã dùng để tra (10 số UK / HTS 8–10 số Mỹ) */
   code?: string;
@@ -65,7 +69,7 @@ export interface TariffSnapshot {
 export const TARIFF_SNAPSHOT = snapshotJson as unknown as TariffSnapshot;
 
 export interface OfficialTariffSource {
-  readonly id: 'uk' | 'us';
+  readonly id: 'uk' | 'us' | 'wits';
   readonly label: string;
   supports(importCountry: string): boolean;
   lookup(q: TariffQuery): Promise<OfficialTariffResult>;
@@ -421,5 +425,136 @@ export const UsHtsSource: OfficialTariffSource = {
   },
 };
 
-export const OFFICIAL_SOURCES: OfficialTariffSource[] = [UkTariffSource, UsHtsSource];
+/* ───────────────── WITS / UNCTAD TRAINS (mọi nước, theo HS6) ───────────────── */
+
+/** Trung gian: WITS không cho gọi từ trình duyệt (không có CORS). Trên Render: rewrite /api/wits/* */
+export const WITS_PROXY = '/api/wits';
+/** Mã WITS của EU (biểu thuế chung cho 27 nước) */
+const WITS_EU = '918';
+
+export interface WitsTariff {
+  /** Thuế trung bình đơn giản các dòng quốc gia trong HS6 (%) */
+  pct: number;
+  min: number | null;
+  max: number | null;
+  lines: number | null;
+  /** MFN / PRF / AHS… */
+  tariffType: string;
+  /** Danh mục HS của biểu thuế năm đó: H6 = HS 2022, H5 = HS 2017… */
+  nomen: string;
+}
+
+/** Đọc phản hồi SDMX-JSON của WITS TRAINS. Hàm thuần. */
+export function parseWits(doc: any): WitsTariff | null {
+  const series = doc?.dataSets?.[0]?.series;
+  const attrs: { id: string; values: { id?: string; name?: string }[] }[] = doc?.structure?.attributes?.observation ?? [];
+  if (!series) return null;
+  const obs: (number | null)[] | undefined = (Object.values(series)[0] as { observations?: Record<string, (number | null)[]> })?.observations?.['0'];
+  if (!obs || obs[0] == null) return null;
+  const attr = (id: string) => {
+    const i = attrs.findIndex((a) => a.id === id);
+    if (i < 0) return undefined;
+    const v = obs[i + 1];
+    return v == null ? undefined : (attrs[i].values[v]?.id ?? attrs[i].values[v]?.name);
+  };
+  const num = (id: string) => {
+    const v = attr(id);
+    return v == null || !isFinite(+v) ? null : Math.round(+v * 100) / 100;
+  };
+  return { pct: Math.round(obs[0] * 100) / 100, min: num('MIN_RATE'), max: num('MAX_RATE'), lines: num('TOTALNOOFLINES'), tariffType: attr('TARIFFTYPE') ?? 'MFN', nomen: attr('NOMENCODE') ?? '' };
+}
+
+const NOMEN: Record<string, string> = { H6: 'HS 2022', H5: 'HS 2017', H4: 'HS 2012', H3: 'HS 2007' };
+
+/** Mã số WITS (ISO 3166 numeric) của nước nhập; nước EU → biểu thuế chung EU */
+export function witsReporter(iso2: string): string | null {
+  if (EU_SET.has(iso2)) return WITS_EU;
+  const n = countries.alpha2ToNumeric(iso2);
+  return n ? String(n).padStart(3, '0') : null;
+}
+
+const witsUrl = (reporter: string, partner: string, hs6: string, year: number) =>
+  `${WITS_PROXY}/reporter/${reporter}/partner/${partner}/product/${hs6}/year/${year}/datatype/reported?format=JSON`;
+
+/** Năm gần nhất có dữ liệu (TRAINS thường trễ 1–3 năm) */
+async function witsLatest(reporter: string, partner: string, hs6: string, years: number[]): Promise<{ year: number; t: WitsTariff } | null> {
+  for (const year of years) {
+    try {
+      const t = parseWits(await getJson(witsUrl(reporter, partner, hs6, year)));
+      if (t) return { year, t };
+    } catch (e) {
+      if ((e as { status?: number }).status !== 404) throw e;
+    }
+  }
+  return null;
+}
+
+export const WitsTariffSource: OfficialTariffSource = {
+  id: 'wits',
+  label: 'WITS – UNCTAD TRAINS (World Bank)',
+  supports: (c) => c !== 'GB' && c !== 'US' && witsReporter(c) != null,
+  async lookup(q) {
+    const hs6 = digits(q.hs).slice(0, 6);
+    const reporter = witsReporter(q.importCountry)!;
+    // link tra cứu chính thức của nước nhập (EU → TARIC, VN → Hải quan VN, khác → WTO)
+    const url = tariffLookupLink(q.importCountry).url;
+    const base = { provider: 'wits' as const, providerLabel: this.label, notes: [] as string[], entry: null, url: 'https://wits.worldbank.org/' };
+    if (hs6.length < 6) return { ...base, error: 'Cần mã HS ít nhất 6 số (chuẩn HS6)' };
+    const now = new Date().getFullYear();
+    const years = [now - 1, now - 2, now - 3, now - 4, now - 5, now - 6];
+    try {
+      const mfn = await witsLatest(reporter, '000', hs6, years);
+      if (!mfn) return { ...base, error: `WITS chưa có thuế MFN của ${q.importCountry} cho HS ${hs6} (6 năm gần nhất)` };
+      const notes: string[] = [];
+      const { t, year } = mfn;
+      const isEu = reporter === WITS_EU;
+      notes.push(`Thuế MFN theo biểu thuế ${isEu ? 'chung EU' : q.importCountry} năm ${year} (UNCTAD TRAINS qua WITS) – có thể đã thay đổi; xác nhận ở biểu thuế hiện hành.`);
+      if (t.min != null && t.max != null && t.min !== t.max)
+        notes.push(`HS6 ${hs6} gồm ${t.lines ?? 'nhiều'} dòng quốc gia, thuế từ ${t.min}% đến ${t.max}% – đang dùng trung bình ${t.pct}%. Mã quốc gia cụ thể có thể cao/thấp hơn.`);
+      if (t.nomen && t.nomen !== 'H6') notes.push(`Biểu thuế năm ${year} dùng danh mục ${NOMEN[t.nomen] ?? t.nomen} – mã HS có thể khác HS 2022.`);
+      // thuế ưu đãi theo đúng xuất xứ (TRAINS có dữ liệu cho một số cặp nước)
+      let pref: WitsTariff | null = null;
+      const partner = q.origin && q.origin !== '*' ? witsReporter(q.origin) : null;
+      if (partner && partner !== reporter && !(isEu && EU_SET.has(q.origin))) {
+        try {
+          const p = parseWits(await getJson(witsUrl(reporter, partner, hs6, year)));
+          if (p && p.tariffType !== 'MFN' && p.pct < t.pct) pref = p;
+        } catch {
+          /* không có dữ liệu ưu đãi */
+        }
+      }
+      const usePref = !!pref && q.preferFta;
+      if (pref && !usePref) notes.push(`TRAINS ghi thuế ưu đãi ${pref.pct}% cho hàng xuất xứ ${q.origin} – tích “Có C/O” để áp dụng.`);
+      if (!pref) notes.push(`TRAINS năm ${year} không có thuế ưu đãi riêng cho xuất xứ ${q.origin}. Nếu có FTA, tra thuế ưu đãi ở nguồn chính thức rồi nhập vào trang Biểu thuế.`);
+      const vat = standardVat(q.importCountry);
+      if (vat) notes.push(`VAT/GST: dùng thuế suất tiêu chuẩn ${vat.pct}% (${VAT_DATA.source}) – một số mặt hàng có mức giảm/miễn.`);
+      return {
+        ...base,
+        url,
+        code: hs6,
+        notes,
+        entry: {
+          id: `wits-${q.importCountry}-${hs6}-${usePref ? q.origin : '*'}`,
+          importCountry: q.importCountry, hs: hs6, origin: usePref ? q.origin : '*',
+          rateType: usePref ? 'FTA' : 'MFN', fta: usePref ? `TRAINS – ưu đãi cho ${q.origin}` : '',
+          dutyPct: usePref ? pref!.pct : t.pct, vatPct: vat && vat.type !== 'none' ? vat.pct : vat ? 0 : null, otherPct: 0,
+          source: `https://wits.worldbank.org/API/V1/SDMX/V21/datasource/TRN/reporter/${reporter}/partner/${usePref ? partner : '000'}/product/${hs6}/year/${year}/datatype/reported?format=JSON`,
+          effectiveDate: `${year}-01-01`, updatedAt: todayIso(), verified: false,
+        },
+      };
+    } catch (e) {
+      return { ...base, error: `Không gọi được WITS qua máy chủ trung gian (/api/wits): ${(e as Error).message}` };
+    }
+  },
+};
+
+export const OFFICIAL_SOURCES: OfficialTariffSource[] = [UkTariffSource, UsHtsSource, WitsTariffSource];
+
+/** Nhãn nguồn của mức thuế lấy tự động (theo tiền tố id) */
+export function autoSourceOf(e: { id: string }): string | null {
+  if (e.id.startsWith('uk-')) return 'UK Trade Tariff';
+  if (e.id.startsWith('us-')) return 'US HTS';
+  if (e.id.startsWith('wits-')) return 'WITS / UNCTAD TRAINS';
+  return null;
+}
 export const officialSourceFor = (importCountry: string) => OFFICIAL_SOURCES.find((s) => s.supports(importCountry));

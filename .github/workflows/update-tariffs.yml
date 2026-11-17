@@ -37,7 +37,10 @@ jobs:
         with:
           branch: auto/tariff-update-v2
           delete-branch: true
-          add-paths: src/data/tariffSnapshot.json
+          add-paths: |
+            src/data/tariffSnapshot.json
+            src/data/vatRates.json
+            public/data/hs6.json
           commit-message: 'Cập nhật bản chụp biểu thuế tự động'
           title: 'Cập nhật biểu thuế v2 (tự động)'
           body-path: tariff-report.txt

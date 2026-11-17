@@ -6,7 +6,7 @@ import { regionOf } from '../data/countries';
 import { roadAvailability } from '../data/landBlocks';
 import type { RateHit, RateProvider } from '../providers/RateProvider';
 import type { TariffEntry, TariffProvider } from '../providers/TariffProvider';
-import type { OfficialTariffResult, OfficialTariffSource } from './tariffSources';
+import { autoSourceOf, type OfficialTariffResult, type OfficialTariffSource } from './tariffSources';
 import type { Incoterm, LngLat, Place, Port, Role, RouteResult, ShipmentInput, TransportMode } from '../types';
 import { candidatePorts } from './candidates';
 import { computeDuty, type DutyResult } from './duty';
@@ -171,8 +171,8 @@ export function finalize(items: CostItem[], input: PlanInput, importCountry: str
     if (duty.fees) i8.lines.push({ label: `${duty.entry!.feeLabel || 'Phí theo trị giá'} ${duty.entry!.feePct}%`, amount: r0(duty.fees) });
     if (!duty.vatMissing) i8.lines.push({ label: `VAT/GST ${duty.entry!.vatPct}%`, amount: r0(duty.vat) });
     i8.estimated = false;
-    i8.note = duty.entry!.id.startsWith('uk-') || duty.entry!.id.startsWith('us-')
-      ? `Thuế suất lấy tự động từ nguồn chính thức (${duty.entry!.id.startsWith('uk-') ? 'UK Trade Tariff' : 'US HTS'}) ngày ${duty.entry!.updatedAt}`
+    i8.note = autoSourceOf(duty.entry!)
+      ? `Thuế suất lấy tự động (${autoSourceOf(duty.entry!)}) ngày ${duty.entry!.updatedAt}`
       : `Thuế suất theo biểu thuế bạn nhập · ${duty.entry!.verified ? 'đã xác minh' : 'chưa xác minh'}`;
   } else {
     i8.note = duty.status === 'domestic' ? 'Nội địa – không thông quan' : duty.status === 'no-value' ? 'Chưa gồm thuế · nhập mã HS và giá trị hàng' : 'Chưa gồm thuế · chưa có dữ liệu thuế suất';

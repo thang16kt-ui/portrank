@@ -6,6 +6,8 @@
  *   GET /api/hts/search?keyword=…   → chuyển tiếp tới USITC HTS REST (https://hts.usitc.gov/reststop/search)
  *   GET /api/hts/exportList?from=…&to=…
  *                                   → https://hts.usitc.gov/reststop/exportList (đủ dòng tiêu đề trung gian, dùng cho Chương 99)
+ *   GET /api/wits/reporter/{nnn}/partner/{nnn}/product/{hs6}/year/{yyyy}/datatype/reported
+ *                                   → WITS (World Bank) – UNCTAD TRAINS, thuế MFN/ưu đãi theo HS6 cho mọi nước
  *   GET /api/schedules?pol=&pod=&from=&to=&carrier=
  *                                   → gọi DCSA Commercial Schedules 1.0 `GET {base}/v1/point-to-point-routes`
  *                                     của từng hãng đã cấu hình, trả về JSON gốc theo chuẩn DCSA
@@ -20,6 +22,8 @@
 const HTS_BASE = 'https://hts.usitc.gov/reststop/search';
 const HTS_EXPORT = 'https://hts.usitc.gov/reststop/exportList';
 const HTS_CODE = /^[0-9.]{4,13}$/;
+const WITS_BASE = 'https://wits.worldbank.org/API/V1/SDMX/V21/datasource/TRN';
+const WITS_PATH = /^\/api\/wits(\/reporter\/\d{3}\/partner\/(?:\d{3}|all)\/product\/\d{6}\/year\/\d{4}\/datatype\/reported)$/;
 const LOCODE = /^[A-Z]{2}[A-Z2-9]{3}$/;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const TIMEOUT_MS = 15000;
@@ -85,6 +89,21 @@ async function handleHtsExport(url) {
   return cachedJson(`export:${from}:${to}`, `${HTS_EXPORT}?${q}`);
 }
 
+const witsCache = new Map();
+
+async function handleWits(url) {
+  const m = url.pathname.match(WITS_PATH);
+  if (!m) return json(400, { error: 'Đường dẫn phải dạng /api/wits/reporter/392/partner/000/product/610910/year/2023/datatype/reported' });
+  const key = m[1];
+  const hit = witsCache.get(key);
+  if (hit && Date.now() - hit.at < 24 * 3600e3) return hit.out;
+  const res = await fetchWithTimeout(`${WITS_BASE}${key}?format=JSON`, { headers: { Accept: 'application/json' } });
+  // WITS trả 404 khi năm / nước chưa có số liệu → chuyển nguyên 404 để app thử năm khác
+  const out = res.status === 404 ? json(404, { error: 'NoRecordsFound' }) : res.ok ? json(200, await res.json(), { 'Cache-Control': 'public, max-age=86400' }) : json(502, { error: `WITS trả về HTTP ${res.status}` });
+  if (out.status !== 502) witsCache.set(key, { at: Date.now(), out });
+  return out;
+}
+
 /** Gọi một hãng: theo chuẩn DCSA, trang sau chỉ gửi ?cursor=… (không kèm tham số khác) */
 export async function fetchDcsaRoutes(carrier, q) {
   const params = new URLSearchParams({ placeOfReceipt: q.pol, placeOfDelivery: q.pod, limit: '50' });
@@ -146,6 +165,7 @@ export async function handleApi(method, rawUrl, env = process.env) {
     }
     if (url.pathname === '/api/hts/search') return await handleHts(url);
     if (url.pathname === '/api/hts/exportList') return await handleHtsExport(url);
+    if (url.pathname.startsWith('/api/wits/')) return await handleWits(url);
     if (url.pathname === '/api/schedules') return await handleSchedules(url, env);
     return json(404, { error: 'Không có API này' });
   } catch (e) {
