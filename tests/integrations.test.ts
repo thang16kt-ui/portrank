@@ -98,7 +98,7 @@ describe('US HTS', () => {
     try {
       const r = await UsHtsSource.lookup({ importCountry: 'US', hs: '94036040', origin: 'VN', preferFta: false });
       const urls = f.mock.calls.map((c) => String(c[0]));
-      expect(urls).toContain('/api/hts/exportList?from=9403.60&to=9403.60.99.99');
+      expect(urls).toContain('/api/hts/exportList?from=9403.60&to=9403.60.99.99&format=JSON&styles=false');
       expect(urls.some((u) => u.startsWith('/api/hts/exportList?from=9903.'))).toBe(true);
       expect(urls.every((u) => u.startsWith('/api/hts/'))).toBe(true);
       expect(r.entry?.hs).toBe('9403604000');

@@ -322,12 +322,14 @@ export function usEntry(row: HtsRow, origin: string, preferFta: boolean): { entr
 export const HTS_PROXY = '/api/hts/search';
 /** exportList trả đủ các dòng tiêu đề trung gian ("Other:") → mô tả cấp cha đúng. Không có thì quay về /search */
 export const HTS_EXPORT_PROXY = '/api/hts/exportList';
+/** Rewrite trên Render chuyển nguyên query string → phải tự gửi format (USITC trả 400 nếu thiếu) */
+const HTS_EXPORT_FORMAT = '&format=JSON&styles=false';
 
 /** Các dòng HTS dưới một mã HS6: thử exportList, lỗi (hoặc trang tĩnh chưa có rewrite) → /search */
 async function htsRows(hs6: string): Promise<HtsRow[]> {
   const d = fmtHts(hs6);
   try {
-    const rows = await getJson<HtsRow[]>(`${HTS_EXPORT_PROXY}?from=${d}&to=${d}.99.99`);
+    const rows = await getJson<HtsRow[]>(`${HTS_EXPORT_PROXY}?from=${d}&to=${d}.99.99${HTS_EXPORT_FORMAT}`);
     if (Array.isArray(rows) && rows.length) return rows;
   } catch {
     /* quay về /search */
@@ -370,7 +372,7 @@ export const chapter99For = (items: Chapter99Item[], origin: string) => items.fi
 export const CH99_RANGES: [string, string][] = [['9903.01.00', '9903.02.99'], ['9903.88.00', '9903.88.99']];
 
 async function liveChapter99(): Promise<Chapter99Item[]> {
-  const parts = await Promise.all(CH99_RANGES.map(([from, to]) => getJson<HtsRow[]>(`${HTS_EXPORT_PROXY}?from=${from}&to=${to}`)));
+  const parts = await Promise.all(CH99_RANGES.map(([from, to]) => getJson<HtsRow[]>(`${HTS_EXPORT_PROXY}?from=${from}&to=${to}${HTS_EXPORT_FORMAT}`)));
   if (!parts.every(Array.isArray)) throw new Error('Phản hồi không hợp lệ');
   return parseChapter99(parts.flat());
 }
