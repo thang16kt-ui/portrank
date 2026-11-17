@@ -36,7 +36,8 @@ dữ liệu cảng 3D (vector tiles OpenStreetMap qua OpenFreeMap). Bản đồ 
 
 | Lệnh | Mô tả |
 | --- | --- |
-| `npm test` | 93 unit test (Vitest): routing, pricing + bảng giá, incoterm (đủ 11 điều kiện), duty, ranking, plan (tiêu chí hoàn thành), track + cảnh cảng, rules |
+| `npm test` | 112 unit test (Vitest): routing, pricing + bảng giá, incoterm (đủ 11 điều kiện), duty, ranking, plan (tiêu chí hoàn thành), track + cảnh cảng, rules, nguồn thuế UK/US, DCSA + máy chủ trung gian |
+| `npm start` | Máy chủ Node phục vụ `dist/` + API trung gian (`/api/hts`, `/api/schedules`) |
 | `npm run build` | Kiểm tra type + build production vào `dist/` |
 | `npm run gen:ship` / `gen:crane` | Sinh lại mô hình tàu / cẩu bờ `.glb` (tự vẽ bằng code, CC0) |
 | `npx tsx scripts/check-land.ts [searoute\|graph] [ALL\|POL-POD]` | Kiểm tra tuyến biển không cắt qua đất liền |
@@ -70,22 +71,62 @@ dữ liệu cảng 3D (vector tiles OpenStreetMap qua OpenFreeMap). Bản đồ 
 - **Xếp hạng** (`ranking.ts`): `35% chi phí + 25% ổn định giá + 20% thời gian + 10% tần suất + 10% rủi ro` (đổi theo Ưu tiên, có slider).
   Chi phí = **phần bạn trả theo Incoterm đang chọn** (nút chuyển sang “Tổng”). Ổn định giá dùng chuỗi giá 12 tháng **mô phỏng** (seed cố định).
 - **Thuế** (`duty.ts`): trị giá tính thuế CIF hoặc FOB theo nước (`data/customsBasis.ts`, có cờ `verified` + link nguồn);
-  thuế NK = trị giá × %; VAT = (trị giá + thuế NK + thuế khác) × %. **Không có thuế suất nào hard-code** – thiếu dữ liệu thì hiện
+  thuế NK = trị giá × %; VAT = (trị giá + thuế NK + thuế khác) × %. **Không có thuế suất nào hard-code** – lấy từ biểu thuế bạn nhập
+  hoặc nguồn chính thức (Anh, Mỹ); thiếu dữ liệu thì hiện
   “Chưa có dữ liệu thuế” + nút “Nhập thuế suất” + link tra cứu chính thức. Mức thuế cập nhật quá 90 ngày có cảnh báo vàng. Gợi ý FTA.
 
-## Nguồn dữ liệu có thể thay thế (`src/providers`)
+## Nguồn dữ liệu có thể thay thế (`src/providers`, `src/lib`)
 
-| Interface | Đang dùng | Để nối sau |
+| Interface | Đang dùng | Ghi chú |
 | --- | --- | --- |
 | `GeocodingProvider` | Photon (OSM, debounce 400 ms) + ~300 thành phố offline (`data/cities.ts`) | – |
-| `RateProvider` | Bảng giá của tôi (CSV / Excel / nhập tay) – giá thật còn hiệu lực ghi đè ước tính | Freightos, Xeneta, API hãng tàu |
-| `TariffProvider` | Biểu thuế bạn nhập (CSV / nhập tay, bắt buộc nguồn + ngày) | EU TARIC, UK Trade Tariff, US HTS, biểu thuế VN, WTO (chưa bật) |
-| `ScheduleProvider` | Lịch tàu bạn nhập (CSV / nhập tay) | API chuẩn DCSA Commercial Schedules qua proxy `/api/schedules` (chưa bật) |
+| `RateProvider` | Bảng giá của tôi (CSV / Excel / nhập tay) – giá thật còn hiệu lực ghi đè ước tính | Để nối sau: Freightos, Xeneta, API hãng tàu |
+| `TariffProvider` | 1) Biểu thuế bạn nhập → 2) **nguồn chính thức tự động** (`lib/tariffSources.ts`) | Xem mục *Thuế tự động* |
+| `ScheduleProvider` | 1) Lịch tàu bạn nhập → 2) **API hãng tàu chuẩn DCSA** qua máy chủ PortRank | Xem mục *Lịch tàu từ API hãng* |
 
 **Lịch tàu không bao giờ được tự sinh.** Hãng chưa có lịch → “Chưa có lịch tàu của [hãng] cho tuyến này” + nút Nhập lịch + link trang hãng;
 thời gian quay về ước tính. Khi chọn một lộ trình: dòng thời gian (rời kho → cut-off → ETD → chuyển tải → ETA → về kho), bản đồ vẽ
 đúng các chặng qua cảng chuyển tải, tàu dừng tại cảng chuyển tải, thanh “Ngày X / Y” dùng ngày thật. Liên minh hãng tàu trong
 `data/carriers.ts` là thông tin tham khảo, **chưa xác minh**.
+
+## Kết nối nguồn ngoài
+
+### Thuế tự động từ nguồn chính thức
+Đã đọc tài liệu API hiện hành của từng nguồn trước khi viết adapter (`src/lib/tariffSources.ts`, test với phản hồi thật trong `tests/fixtures/`):
+
+| Nước nhập | Nguồn | Cách gọi | Lấy gì |
+| --- | --- | --- | --- |
+| Anh | UK Trade Tariff API v2 (`/api/v2/headings`, `/api/v2/commodities`) | Trình duyệt gọi thẳng (API cho phép CORS) | Thuế MFN (Third country duty), ưu đãi theo xuất xứ (Tariff preference, có xét nhóm nước như CPTPP), VAT |
+| Mỹ | USITC HTS REST (`/reststop/search`) | Qua trung gian `/api/hts/search` (USITC chặn gọi từ trình duyệt) | Cột General (MFN), cột Special (FTA của Mỹ). **Chưa gồm thuế bổ sung Chương 99** (Section 301/232, thuế đối ứng) – app hiện cảnh báo |
+| EU, Việt Nam, WTO | – | Không làm | TARIC không có API công khai (trang HTML tải bằng JavaScript, yêu cầu lớn bị chuyển sang gửi email); biểu thuế VN không có API; WTO cần key và cập nhật chậm → tra tay ở trang **Biểu thuế** |
+
+- Mã HS 6 số ứng với nhiều dòng thuế 10 số → hiện danh sách để chọn (không tự đoán). Thuế phức hợp (vd “6,5% + 33 GBP/100 kg”) → báo cần tính tay.
+- Mỗi mức thuế lấy tự động ghi **nguồn (link trang chính thức)** và **ngày lấy**; có nút “Lưu vào biểu thuế của tôi”. Tắt/bật ở trang Biểu thuế.
+- Trung gian HTS: dev server (`npm run dev`) và `npm start` có sẵn; trên Render (trang tĩnh) dùng quy tắc **Rewrite** `/api/hts/search` → `https://hts.usitc.gov/reststop/search`.
+
+### Lịch tàu từ API hãng (DCSA Commercial Schedules 1.0)
+- Theo đặc tả công khai của DCSA: `GET {gốc API của hãng}/v1/point-to-point-routes?placeOfReceipt=…&placeOfDelivery=…&departureStartDate=…&limit=50`,
+  header `API-Version: 1`, phân trang bằng header `Next-Page-Cursor` (trang sau chỉ gửi `?cursor=`). Chuyển đổi dữ liệu: `src/lib/dcsa.ts`
+  (chặng `VESSEL` theo `sequenceNumber`, cảng chuyển tải, cut-off `DCO`/`VCO`/`FCO`).
+- **Key hãng tàu chỉ nằm ở máy chủ** (`server/api.mjs`), trình duyệt gọi `/api/schedules`. Mỗi hãng cấp key riêng trên cổng developer của hãng.
+- Chạy máy chủ: `npm run build && npm start` (cổng `PORT`, mặc định 8080) với biến môi trường (mẫu trong `.env.example`):
+  ```
+  DCSA_CARRIERS=MAERSK,CMACGM
+  DCSA_MAERSK_URL=<gốc API do hãng cấp>        DCSA_MAERSK_HEADERS={"Consumer-Key":"<key>"}
+  DCSA_CMACGM_URL=<gốc API>                    DCSA_CMACGM_KEY=<key>   DCSA_CMACGM_KEY_HEADER=KeyId
+  ```
+  `<ID>` dùng mã hãng trong `src/data/carriers.ts` (MSC, MAERSK, CMACGM, COSCO, HAPAG, ONE, EVERGREEN, HMM, YANGMING, ZIM, OOCL, WANHAI, PIL).
+  Hãng dùng OAuth (đổi client id/secret lấy token) chưa được hỗ trợ – chỉ hỗ trợ key gửi bằng header.
+- Trên Render: cần một **Web Service** Node (build `npm ci && npm run build`, start `npm start`) để giữ key; trang tĩnh không có máy chủ nên
+  mục Hãng tàu sẽ ghi “Trang đang chạy dạng tĩnh…”.
+
+### Ảnh thực Google Photorealistic 3D Tiles (Mức 2)
+- Đặt `VITE_GOOGLE_MAPS_KEY` khi build (Render: Environment của trang V2 → Save, rebuild and deploy). Không có key → không hiện nút.
+- Key nằm trong mã chạy trên trình duyệt (giống Google Maps JS) → giới hạn key theo **HTTP referrer** (tên miền của bạn) và chỉ cho phép **Map Tiles API**.
+  Dịch vụ cần billing và tính phí theo lượt dùng – xem bảng giá và điều khoản của Google trước khi bật.
+- Chỉ nạp khi bấm **📷 Ảnh thực** trong chế độ cảng 3D: gọi `https://tile.googleapis.com/v1/3dtiles/root.json` một lần để kiểm tra
+  (key sai / chưa bật API → báo lỗi, giữ bố cục OpenStreetMap), rồi hiển thị bằng `Tile3DLayer` của deck.gl.
+  Ghi công: logo Google + bản quyền của các tile đang hiển thị (gộp, sắp theo tần suất) trên một dòng cuối khung nhìn, theo chính sách Map Tiles API.
 
 ## Chế độ 3D
 
@@ -95,7 +136,7 @@ thời gian quay về ước tính. Khi chọn một lộ trình: dòng thời g
   quanh cảng để tìm mép bến, rồi đặt **cẩu bờ** (`public/models/crane.glb`) dọc mép bến – dùng vị trí `man_made=crane` từ Overpass
   nếu truy cập được, không thì rải đều theo số cẩu trong thông tin cảng – cùng **chồng container** và **tàu đậu** minh họa.
   Góc màn hình ghi rõ: “Bố cục cảng theo dữ liệu bản đồ; container, cẩu và tàu là hình minh họa”.
-- **Mức 2 – ảnh thực Google 3D Tiles: chưa làm** (cần `VITE_GOOGLE_MAPS_KEY`, tính phí theo lượt).
+- **Mức 2 – ảnh thực Google 3D Tiles**: xem mục *Kết nối nguồn ngoài*.
 - **Thẻ thông tin cảng** 6 nhóm; mỗi trường `{ value, source, updatedAt, verified }`, trường thiếu ghi “Chưa có dữ liệu”.
   Bộ dữ liệu đi kèm chỉ có nhận diện cơ bản – năng lực, terminal, hãng tàu, THC, free time… nhập ở trang **Danh mục cảng**
   (từ World Port Index của NGA, UN/LOCODE, trang cảng vụ / đơn vị khai thác).

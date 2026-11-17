@@ -9,6 +9,8 @@ import { resolveCountryCoord } from './geocoding';
 import { buildPlan, type PlanInput, type PlanOption } from './plan';
 import { rankOptions, type RankedOption } from './ranking';
 import { trackOf, type Track } from './track';
+import { OFFICIAL_SOURCES } from './tariffSources';
+import { fetchDcsaSchedules } from './dcsa';
 
 export function planInputOf(f: FormState): PlanInput | null {
   if (!f.mine || !f.partner) return null;
@@ -45,6 +47,7 @@ export async function runPlan(opts: { keepSelection?: boolean } = {}) {
     const plan = await buildPlan(planInputOf(form)!, {
       rates: createTableRateProvider(data.rates),
       tariffs: createUserTariffProvider(data.tariffs),
+      official: data.officialTariffs ? OFFICIAL_SOURCES : [],
       onProgress: (done, total) => seq === runSeq && useAppStore.getState().set({ planning: { done, total } }),
     });
     if (seq !== runSeq) return;
@@ -88,7 +91,30 @@ export function useCurrent(): RankedOption | null {
 export function useSchedule(): ScheduleEntry | null {
   const id = useAppStore((s) => s.scheduleId);
   const schedules = useDataStore((s) => s.schedules);
-  return useMemo(() => schedules.find((x) => x.id === id) ?? null, [id, schedules]);
+  const api = useAppStore((s) => s.apiSchedules);
+  return useMemo(() => {
+    if (!id) return null;
+    const own = schedules.find((x) => x.id === id);
+    if (own) return own;
+    for (const v of Object.values(api)) if (v.status === 'ok') {
+      const hit = v.entries.find((x) => x.id === id);
+      if (hit) return hit;
+    }
+    return null;
+  }, [id, schedules, api]);
+}
+
+/** Lấy lịch từ API hãng tàu (qua máy chủ PortRank) cho một cặp cảng */
+export async function loadApiSchedules(pol: string, pod: string, from: string, carriers: string[]) {
+  const key = `${pol}>${pod}`;
+  const st = useAppStore.getState();
+  st.set({ apiSchedules: { ...st.apiSchedules, [key]: { status: 'loading' } } });
+  try {
+    const r = await fetchDcsaSchedules({ pol, pod, from, carriers });
+    useAppStore.setState((s) => ({ apiSchedules: { ...s.apiSchedules, [key]: { ...r, status: 'ok' } } }));
+  } catch (e) {
+    useAppStore.setState((s) => ({ apiSchedules: { ...s.apiSchedules, [key]: { status: 'error', error: (e as Error).message } } }));
+  }
 }
 
 const trackCache = new WeakMap<PlanOption, Map<string, Track | null>>();

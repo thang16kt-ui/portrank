@@ -6,6 +6,7 @@ import { regionOf } from '../data/countries';
 import { roadAvailability } from '../data/landBlocks';
 import type { RateHit, RateProvider } from '../providers/RateProvider';
 import type { TariffEntry, TariffProvider } from '../providers/TariffProvider';
+import type { OfficialTariffResult, OfficialTariffSource } from './tariffSources';
 import type { Incoterm, LngLat, Place, Port, Role, RouteResult, ShipmentInput, TransportMode } from '../types';
 import { candidatePorts } from './candidates';
 import { computeDuty, type DutyResult } from './duty';
@@ -106,11 +107,15 @@ export interface Plan {
   scopeTitle: string;
   scopeShort: string;
   domestic: boolean;
+  /** Thuế suất lấy từ đâu: biểu thuế của bạn, nguồn chính thức (kèm lựa chọn mã / ghi chú), hoặc chưa có */
+  tariffSource: { kind: 'user' | 'official' | 'none'; official?: OfficialTariffResult };
 }
 
 export interface PlanDeps {
   rates: RateProvider;
   tariffs: TariffProvider;
+  /** Nguồn thuế chính thức (UK Trade Tariff, US HTS) – dùng khi biểu thuế của bạn chưa có mức thuế phù hợp */
+  official?: OfficialTariffSource[];
   onProgress?: (done: number, total: number) => void;
 }
 
@@ -165,7 +170,9 @@ export function finalize(items: CostItem[], input: PlanInput, importCountry: str
     if (duty.other) i8.lines.push({ label: `Thuế khác ${duty.entry!.otherPct}%`, amount: r0(duty.other) });
     if (!duty.vatMissing) i8.lines.push({ label: `VAT/GST ${duty.entry!.vatPct}%`, amount: r0(duty.vat) });
     i8.estimated = false;
-    i8.note = `Thuế suất theo biểu thuế bạn nhập · ${duty.entry!.verified ? 'đã xác minh' : 'chưa xác minh'}`;
+    i8.note = duty.entry!.id.startsWith('uk-') || duty.entry!.id.startsWith('us-')
+      ? `Thuế suất lấy tự động từ nguồn chính thức (${duty.entry!.id.startsWith('uk-') ? 'UK Trade Tariff' : 'US HTS'}) ngày ${duty.entry!.updatedAt}`
+      : `Thuế suất theo biểu thuế bạn nhập · ${duty.entry!.verified ? 'đã xác minh' : 'chưa xác minh'}`;
   } else {
     i8.note = duty.status === 'domestic' ? 'Nội địa – không thông quan' : duty.status === 'no-value' ? 'Chưa gồm thuế · nhập mã HS và giá trị hàng' : 'Chưa gồm thuế · chưa có dữ liệu thuế suất';
   }
@@ -193,9 +200,15 @@ function originOf(input: PlanInput, seller: Place) {
   return (input.origin || seller.country).toUpperCase();
 }
 
-async function lookupTariff(input: PlanInput, seller: Place, buyer: Place, deps: PlanDeps) {
-  if (input.hs.replace(/\D/g, '').length < 4) return null;
-  return deps.tariffs.lookup({ importCountry: buyer.country, hs: input.hs, origin: originOf(input, seller), preferFta: input.hasCo });
+async function lookupTariff(input: PlanInput, seller: Place, buyer: Place, deps: PlanDeps): Promise<{ entry: TariffEntry | null; source: Plan['tariffSource'] }> {
+  if (input.hs.replace(/\D/g, '').length < 4 || seller.country === buyer.country) return { entry: null, source: { kind: 'none' } };
+  const q = { importCountry: buyer.country, hs: input.hs, origin: originOf(input, seller), preferFta: input.hasCo };
+  const user = await deps.tariffs.lookup(q);
+  if (user) return { entry: user, source: { kind: 'user' } };
+  const src = deps.official?.find((s) => s.supports(buyer.country));
+  if (!src) return { entry: null, source: { kind: 'none' } };
+  const official = await src.lookup(q);
+  return { entry: official.entry, source: { kind: official.entry ? 'official' : 'none', official } };
 }
 
 /** Phương án đường biển: mọi cặp cảng đi × cảng đến */
@@ -308,8 +321,8 @@ export async function buildPlan(input: PlanInput, deps: PlanDeps): Promise<Plan>
   const notes: string[] = [];
   let mode = input.mode;
   if (mode === 'road' && !roadAvailability(seller.country, buyer.country).ok) mode = 'sea';
-  const tariff = await lookupTariff(input, seller, buyer, deps);
+  const { entry: tariff, source: tariffSource } = await lookupTariff(input, seller, buyer, deps);
   const res = mode === 'sea' ? await seaOptions({ ...input, mode }, seller, buyer, deps, tariff, notes) : roadOptions({ ...input, mode }, seller, buyer, tariff, notes);
   const scope = scopeTitle(seller, buyer, mode);
-  return { input: { ...input, mode }, seller, buyer, notes, scopeTitle: scope.title, scopeShort: scope.short, ...res };
+  return { input: { ...input, mode }, seller, buyer, notes, scopeTitle: scope.title, scopeShort: scope.short, tariffSource, ...res };
 }

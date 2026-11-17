@@ -73,11 +73,11 @@ export function createUserTariffProvider(entries: TariffEntry[]): TariffProvider
  * Thứ tự ưu tiên: bảng người dùng nhập → nguồn chính thức theo nước → WTO → API landed cost trả phí.
  */
 export const OFFICIAL_TARIFF_SOURCES: { id: string; label: string; url: string; enabled: boolean; note: string }[] = [
-  { id: 'taric', label: 'EU TARIC', url: 'https://ec.europa.eu/taxation_customs/dds2/taric/taric_consultation.jsp', enabled: false, note: 'Chưa có adapter – tra tay rồi nhập vào bảng' },
-  { id: 'uk-tariff', label: 'UK Trade Tariff API', url: 'https://www.trade-tariff.service.gov.uk/', enabled: false, note: 'Chưa có adapter' },
-  { id: 'us-hts', label: 'US HTS (USITC)', url: 'https://hts.usitc.gov/', enabled: false, note: 'Chưa có adapter' },
-  { id: 'vn', label: 'Biểu thuế Việt Nam', url: 'https://www.customs.gov.vn/', enabled: false, note: 'Chưa có adapter' },
-  { id: 'wto', label: 'WTO Tariff & Trade Data', url: 'https://ttd.wto.org/', enabled: false, note: 'Chưa có adapter – dữ liệu cập nhật chậm, phải ghi rõ năm' },
+  { id: 'uk-tariff', label: 'UK Trade Tariff API', url: 'https://www.trade-tariff.service.gov.uk/', enabled: true, note: 'Tự động cho nước nhập = Anh: thuế MFN, ưu đãi theo xuất xứ, VAT (src/lib/tariffSources.ts)' },
+  { id: 'us-hts', label: 'US HTS (USITC)', url: 'https://hts.usitc.gov/', enabled: true, note: 'Tự động cho nước nhập = Mỹ qua trung gian /api/hts: cột General / Special. Chưa gồm thuế bổ sung Chương 99' },
+  { id: 'taric', label: 'EU TARIC', url: 'https://ec.europa.eu/taxation_customs/dds2/taric/taric_consultation.jsp', enabled: false, note: 'Không có API công khai (trang HTML tải bằng JavaScript) – tra tay rồi nhập vào bảng' },
+  { id: 'vn', label: 'Biểu thuế Việt Nam', url: 'https://www.customs.gov.vn/', enabled: false, note: 'Không có API công khai – tra tay' },
+  { id: 'wto', label: 'WTO Tariff & Trade Data', url: 'https://ttd.wto.org/', enabled: false, note: 'API cần đăng ký key, dữ liệu cập nhật chậm – chưa làm' },
 ];
 
 export const TARIFF_CSV_HEADER = ['import_country', 'hs', 'origin', 'rate_type', 'fta', 'duty_pct', 'vat_pct', 'other_pct', 'source', 'effective_date', 'updated_at', 'verified'];

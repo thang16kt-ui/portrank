@@ -13,6 +13,8 @@ interface DataState {
   /** Thông tin cảng do người dùng nhập: mã cảng → trường → giá trị có nguồn */
   portInfo: Record<string, Record<string, Sourced<string>>>;
   explainerAutoplay: boolean;
+  /** Tự lấy thuế từ nguồn chính thức (UK Trade Tariff, US HTS) khi biểu thuế của bạn chưa có */
+  officialTariffs: boolean;
 
   addRates: (e: RateEntry[]) => void;
   removeRate: (id: string) => void;
@@ -26,6 +28,7 @@ interface DataState {
   setPortField: (code: string, field: string, v: Sourced<string> | null) => void;
   setPortInfoBulk: (rows: { code: string; field: string; v: Sourced<string> }[]) => void;
   setExplainerAutoplay: (b: boolean) => void;
+  setOfficialTariffs: (b: boolean) => void;
 }
 
 export const useDataStore = create<DataState>()(
@@ -36,6 +39,7 @@ export const useDataStore = create<DataState>()(
       schedules: [],
       portInfo: {},
       explainerAutoplay: true,
+      officialTariffs: true,
 
       addRates: (e) => set((s) => ({ rates: [...e, ...s.rates] })),
       removeRate: (id) => set((s) => ({ rates: s.rates.filter((r) => r.id !== id) })),
@@ -60,6 +64,7 @@ export const useDataStore = create<DataState>()(
           return { portInfo: next };
         }),
       setExplainerAutoplay: (explainerAutoplay) => set({ explainerAutoplay }),
+      setOfficialTariffs: (officialTariffs) => set({ officialTariffs }),
     }),
     { name: 'portrank.data.v2' },
   ),

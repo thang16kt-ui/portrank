@@ -15,6 +15,8 @@ export default function TariffTablePage() {
   const { upsertTariff, addTariffs, removeTariff } = useDataStore.getState();
   const showToast = useAppStore((s) => s.showToast);
   const plan = useAppStore((s) => s.plan);
+  const official = useDataStore((s) => s.officialTariffs);
+  const setOfficial = useDataStore((s) => s.setOfficialTariffs);
   const form = useAppStore((s) => s.form);
   const buyer = form.role === 'seller' ? form.partner : form.mine;
   const seller = form.role === 'seller' ? form.mine : form.partner;
@@ -119,12 +121,16 @@ export default function TariffTablePage() {
         </table>
       </section>
       <section className="card p-3">
-        <h2 className="mb-1.5 text-[13px] font-semibold text-fg">Nguồn chính thức (adapter tự động – chưa bật)</h2>
+        <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-[13px] font-semibold text-fg">Nguồn chính thức (lấy tự động)</h2>
+          <label className="flex items-center gap-2 text-xs text-fg"><input type="checkbox" checked={official} onChange={(e) => { setOfficial(e.target.checked); refresh(); }} /> Tự lấy thuế từ nguồn chính thức khi bảng của tôi chưa có</label>
+        </div>
+        <p className="mb-1.5 text-[11px] text-mute">Thứ tự ưu tiên: biểu thuế bạn nhập → nguồn chính thức của nước nhập. Mức thuế lấy tự động ghi rõ nguồn và ngày lấy; bạn có thể lưu vào bảng để chỉnh.</p>
         <ul className="grid gap-1.5 text-[11.5px] text-mute md:grid-cols-2">
           {OFFICIAL_TARIFF_SOURCES.map((s) => (
             <li key={s.id} className="flex items-center justify-between gap-2 rounded-md border border-line/60 px-2 py-1">
               <span><a href={s.url} target="_blank" rel="noreferrer">{s.label} ↗</a> · {s.note}</span>
-              <span className="chip chip-est">Chưa bật</span>
+              <span className={`chip ${s.enabled ? 'chip-real' : 'chip-est'}`}>{s.enabled ? 'Đang dùng' : 'Không có API'}</span>
             </li>
           ))}
         </ul>

@@ -1,6 +1,7 @@
 import type { Layer } from '@deck.gl/core';
 import { PathStyleExtension } from '@deck.gl/extensions';
-import { TripsLayer } from '@deck.gl/geo-layers';
+import { Tile3DLayer, TripsLayer } from '@deck.gl/geo-layers';
+import { Tiles3DLoader } from '@loaders.gl/3d-tiles';
 import { IconLayer, PathLayer, ScatterplotLayer } from '@deck.gl/layers';
 import { ScenegraphLayer, SimpleMeshLayer } from '@deck.gl/mesh-layers';
 import { CubeGeometry } from '@luma.gl/engine';
@@ -81,6 +82,8 @@ export interface LayerCtx {
   portView: boolean;
   shipModelOk: boolean;
   scene: PortScene | null;
+  /** Ảnh thực Google Photorealistic 3D Tiles (Mức 2) – chỉ khi người dùng bật và có key */
+  google?: GoogleTilesCtx | null;
   onHover: (key: string | null) => void;
   onClick: (key: string) => void;
 }
@@ -90,7 +93,8 @@ const cube = new CubeGeometry();
 export function buildLayers(c: LayerCtx): Layer[] {
   const layers: Layer[] = [];
   if (c.portView) {
-    if (c.scene) layers.push(...sceneLayers(c.scene));
+    if (c.google) layers.push(googleLayer(c.google));
+    else if (c.scene) layers.push(...sceneLayers(c.scene));
     return layers;
   }
   const sel = c.selectedKey;
@@ -269,6 +273,69 @@ export function buildLayers(c: LayerCtx): Layer[] {
     }
   }
   return layers;
+}
+
+export interface GoogleTilesCtx {
+  key: string;
+  /** Nội dung root.json đã tải khi kiểm tra – dùng lại để không gọi root (tính phí) hai lần */
+  rootJson: string;
+  onTileLoad: (id: string, copyright: string) => void;
+  onTileUnload: (id: string) => void;
+  onError: (msg: string) => void;
+}
+
+/** URL gốc theo tài liệu Map Tiles API; key gửi qua header X-GOOG-API-KEY (cách deck.gl hướng dẫn) */
+export const GOOGLE_3D_ROOT = 'https://tile.googleapis.com/v1/3dtiles/root.json';
+
+/** Gọi root tileset một lần để kiểm tra key / Map Tiles API / billing trước khi bật lớp ảnh thực */
+export async function preflightGoogleTiles(key: string): Promise<{ ok: true; rootJson: string } | { ok: false; error: string }> {
+  try {
+    const res = await fetch(GOOGLE_3D_ROOT, { headers: { 'X-GOOG-API-KEY': key } });
+    const text = await res.text();
+    if (res.ok) return { ok: true, rootJson: text };
+    let msg = `HTTP ${res.status}`;
+    try {
+      msg += ` – ${JSON.parse(text).error?.message ?? ''}`;
+    } catch {
+      /* không phải JSON */
+    }
+    return { ok: false, error: msg };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+}
+
+let googleLayerCache: { key: string; layer: Layer } | null = null;
+/** Giữ nguyên một instance layer (không tạo lại mỗi khung hình → không yêu cầu lại root tileset) */
+function googleLayer(g: GoogleTilesCtx): Layer {
+  if (googleLayerCache?.key === g.key) return googleLayerCache.layer;
+  const fetchTile = (url: string, init?: RequestInit) => {
+    if (url.split('?')[0] === GOOGLE_3D_ROOT) return Promise.resolve(new Response(g.rootJson, { status: 200, headers: { 'Content-Type': 'application/json' } }));
+    return fetch(url, { ...init, headers: { ...(init?.headers ?? {}), 'X-GOOG-API-KEY': g.key } });
+  };
+  const layer = new Tile3DLayer({
+    id: 'google-3d-tiles',
+    data: GOOGLE_3D_ROOT,
+    loader: Tiles3DLoader,
+    loadOptions: { fetch: fetchTile },
+    onTileLoad: (tile: any) => g.onTileLoad(String(tile.id), String(tile.content?.gltf?.asset?.copyright ?? '')),
+    onTileUnload: (tile: any) => g.onTileUnload(String(tile.id)),
+    onTileError: (_tile: any, _url: string, msg: string) => g.onError(msg || 'tile error'),
+    onError: (err: Error) => {
+      g.onError(err?.message ?? String(err));
+      return true;
+    },
+  } as any);
+  googleLayerCache = { key: g.key, layer };
+  return layer;
+}
+export const resetGoogleLayer = () => (googleLayerCache = null);
+
+/** Gộp ghi công của các tile đang hiển thị: tách theo ";", sắp xếp theo số lần xuất hiện (theo chính sách Map Tiles API) */
+export function aggregateCredits(perTile: Iterable<string>): string {
+  const count = new Map<string, number>();
+  for (const c of perTile) for (const part of c.split(';').map((x) => x.trim()).filter(Boolean)) count.set(part, (count.get(part) ?? 0) + 1);
+  return [...count.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([k]) => k).join('; ');
 }
 
 /** Cảnh cảng 3D: chồng container (khối hộp), cẩu bờ và tàu đậu (mô hình .glb) – hình minh họa */

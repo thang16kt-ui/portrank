@@ -6,7 +6,8 @@ import { CARRIERS, findCarrier } from '../data/carriers';
 import { countryName, ftasBetween } from '../data/countries';
 import { tariffLookupLink } from '../data/customsBasis';
 import { PORT_BY_CODE } from '../data/ports';
-import { useCurrent } from '../lib/actions';
+import { loadApiSchedules, runPlan, useCurrent } from '../lib/actions';
+import { fetchApiConfig, type ApiConfig } from '../lib/dcsa';
 import { daysSince, fmtDateVi } from '../lib/csv';
 import { fmtDays, usd } from '../lib/format';
 import { sellerShare } from '../lib/incoterm';
@@ -120,6 +121,7 @@ function DutyPanel({ plan, r }: { plan: Plan; r: RankedOption }) {
           {d.basis.note && <div className="text-[11px] opacity-80">{d.basis.note}</div>}
         </div>
       </div>
+      <OfficialTariffBox plan={plan} />
       {d.status === 'ok' && e ? (
         <div className="rounded-lg border border-line bg-[#0a1120] p-2.5">
           <table className="tbl">
@@ -133,7 +135,12 @@ function DutyPanel({ plan, r }: { plan: Plan; r: RankedOption }) {
           </table>
           <div className="mt-2 space-y-0.5 text-[11px] text-mute">
             <div>Nguồn: {/^https?:/.test(e.source) ? <a href={e.source} target="_blank" rel="noreferrer">{e.source}</a> : <b className="text-fg">{e.source}</b>}</div>
-            <div>Hiệu lực từ: {fmtDateVi(e.effectiveDate)} · cập nhật: <b className="text-fg">{fmtDateVi(e.updatedAt)}</b> <span className={`chip ${e.verified ? 'chip-real' : 'chip-warn'}`}>{e.verified ? 'Đã xác minh' : 'Chưa xác minh'}</span></div>
+            <div>Hiệu lực từ: {fmtDateVi(e.effectiveDate)} · {isAuto(e) ? 'lấy ngày' : 'cập nhật'}: <b className="text-fg">{fmtDateVi(e.updatedAt)}</b> {isAuto(e) ? <span className="chip chip-real">Nguồn chính thức · lấy tự động</span> : <span className={`chip ${e.verified ? 'chip-real' : 'chip-warn'}`}>{e.verified ? 'Đã xác minh' : 'Chưa xác minh'}</span>}</div>
+            {isAuto(e) && (
+              <button className="btn mt-1" onClick={() => { useDataStore.getState().upsertTariff({ ...e, id: Math.random().toString(36).slice(2, 10), verified: false }); useAppStore.getState().showToast('Đã lưu vào Biểu thuế của bạn (đánh dấu chưa xác minh để bạn kiểm tra)'); }}>
+                💾 Lưu vào biểu thuế của tôi
+              </button>
+            )}
             {d.stale && <div className="rounded bg-gold/10 px-2 py-1 text-amber-200">⚠️ Mức thuế này cập nhật cách đây {daysSince(e.updatedAt)} ngày (quá 90 ngày) – hãy kiểm tra lại.</div>}
             {e.rateType === 'FTA' && <div>Thuế ưu đãi chỉ áp dụng khi có C/O hợp lệ.</div>}
           </div>
@@ -160,6 +167,38 @@ function DutyPanel({ plan, r }: { plan: Plan; r: RankedOption }) {
         </p>
       )}
       <p className="text-[11px] text-mute italic">Số thuế là ước tính để lập kế hoạch; số chính thức do cơ quan hải quan xác định.</p>
+    </div>
+  );
+}
+
+const isAuto = (e: { id: string }) => e.id.startsWith('uk-') || e.id.startsWith('us-');
+
+/** Kết quả tra cứu từ nguồn chính thức: mã đã dùng, lựa chọn mã chi tiết, ghi chú, lỗi */
+function OfficialTariffBox({ plan }: { plan: Plan }) {
+  const off = plan.tariffSource.official;
+  const setForm = useAppStore((s) => s.setForm);
+  if (!off) return null;
+  return (
+    <div className="rounded-lg border border-sky/30 bg-sky/5 p-2.5 text-[11.5px]">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <b className="text-cyan-100">🏛 {off.providerLabel}</b>
+        <a href={off.url} target="_blank" rel="noreferrer">Mở trang chính thức ↗</a>
+      </div>
+      {off.code && <div className="mt-0.5 text-mute">Mã <b className="font-mono text-fg">{off.code}</b>{off.description ? ` – ${off.description}` : ''}</div>}
+      {off.error && <div className="mt-1 text-amber-200">⚠️ {off.error}</div>}
+      {off.choices && (
+        <div className="mt-1.5">
+          <div className="mb-1 text-mute">Chọn mã chi tiết (mã HS sẽ được cập nhật và tính lại):</div>
+          <div className="max-h-48 space-y-1 overflow-y-auto pr-1">
+            {off.choices.map((c) => (
+              <button key={c.code} className="btn w-full !justify-start !whitespace-normal !text-left !text-[11px]" onClick={() => { setForm({ hs: c.code }); runPlan({ keepSelection: true }); }}>
+                <span className="font-mono text-amber-200">{c.code}</span> <span className="text-mute">{c.description}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      {off.notes.length > 0 && <ul className="mt-1 list-disc space-y-0.5 pl-4 text-mute">{off.notes.map((n, i) => <li key={i}>{n}</li>)}</ul>}
     </div>
   );
 }
@@ -264,8 +303,51 @@ function Timeline({ plan, r, e }: { plan: Plan; r: RankedOption; e: ScheduleEntr
   );
 }
 
+function ApiScheduleBox({ plan, r }: { plan: Plan; r: RankedOption }) {
+  const [cfg, setCfg] = useState<ApiConfig | null | undefined>(undefined);
+  const o = r.option;
+  const key = `${o.pol?.code}>${o.pod?.code}`;
+  const state = useAppStore((s) => s.apiSchedules[key]);
+  const configured = cfg?.dcsa.filter((c) => c.configured) ?? [];
+  const wanted = plan.input.carriers.length ? configured.filter((c) => plan.input.carriers.includes(c.id)) : configured;
+  const load = () => o.pol && o.pod && loadApiSchedules(o.pol.code, o.pod.code, plan.input.readyDate, wanted.map((c) => c.id));
+  useEffect(() => {
+    fetchApiConfig().then(setCfg);
+  }, []);
+  // tự lấy một lần cho mỗi cặp cảng khi máy chủ có cấu hình hãng
+  useEffect(() => {
+    if (cfg && wanted.length && !state) load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cfg, key]);
+  if (cfg === undefined) return null;
+  return (
+    <div className="rounded-lg border border-sky/30 bg-sky/5 p-2.5 text-[11.5px]">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <b className="text-cyan-100">🔌 API hãng tàu (chuẩn DCSA)</b>
+        {wanted.length > 0 && <button className="btn !py-0.5" disabled={state?.status === 'loading'} onClick={load}>{state?.status === 'loading' ? 'Đang lấy…' : '↻ Lấy lịch'}</button>}
+      </div>
+      {!cfg ? (
+        <p className="mt-1 text-mute">Trang đang chạy dạng tĩnh, không có máy chủ PortRank nên chưa gọi được API hãng tàu. Chạy <code>npm start</code> với key hãng tàu (xem README) để bật.</p>
+      ) : !configured.length ? (
+        <p className="mt-1 text-mute">Máy chủ chưa cấu hình key hãng nào (biến <code>DCSA_CARRIERS</code>, <code>DCSA_&lt;HÃNG&gt;_URL</code>, <code>DCSA_&lt;HÃNG&gt;_HEADERS</code>).</p>
+      ) : !wanted.length ? (
+        <p className="mt-1 text-mute">Các hãng bạn lọc chưa được cấu hình API. Đang có: {configured.map((c) => findCarrier(c.id)?.name ?? c.id).join(', ')}.</p>
+      ) : (
+        <div className="mt-1 text-mute">
+          Hãng có API: {wanted.map((c) => findCarrier(c.id)?.name ?? c.id).join(', ')}
+          {state?.status === 'ok' && <> · lấy lúc {fmtDateVi(state.fetchedAt)} · {state.entries.length} lộ trình</>}
+          {state?.status === 'error' && <div className="text-amber-200">⚠️ {state.error}</div>}
+          {state?.status === 'ok' && state.errors.map((e) => <div key={e.carrier} className="text-amber-200">⚠️ {findCarrier(e.carrier)?.name ?? e.carrier}: {e.error}</div>)}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function SchedulePanel({ plan, r }: { plan: Plan; r: RankedOption }) {
-  const schedules = useDataStore((s) => s.schedules);
+  const own = useDataStore((s) => s.schedules);
+  const apiState = useAppStore((s) => s.apiSchedules[`${r.option.pol?.code}>${r.option.pod?.code}`]);
+  const schedules = useMemo(() => [...own, ...(apiState?.status === 'ok' ? apiState.entries : [])], [own, apiState]);
   const rates = useDataStore((s) => s.rates);
   const scheduleId = useAppStore((s) => s.scheduleId);
   const set = useAppStore((s) => s.set);
@@ -299,6 +381,7 @@ function SchedulePanel({ plan, r }: { plan: Plan; r: RankedOption }) {
   if (o.mode !== 'sea' || !o.pol || !o.pod) return <p className="text-[12px] text-mute">Lộ trình hãng tàu chỉ áp dụng cho đường biển.</p>;
   return (
     <div className="space-y-3 text-[12px]">
+      <ApiScheduleBox plan={plan} r={r} />
       <p className="text-mute">Cặp cảng <b className="text-fg">{o.pol.name} → {o.pod.name}</b> · hàng sẵn sàng {fmtDateVi(plan.input.readyDate)}{filter.length ? ` · lọc: ${filter.map((id) => findCarrier(id)?.name).join(', ')}` : ''}</p>
       {rows.length > 0 && (
         <table className="tbl">

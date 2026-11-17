@@ -15,7 +15,7 @@ import { loadWorld } from '../../lib/world';
 import { useAppStore, usePlayback } from '../../store/useAppStore';
 import { useDataStore } from '../../store/useDataStore';
 import type { LngLat, Place } from '../../types';
-import { buildLayers } from './mapLayers';
+import { aggregateCredits, buildLayers, preflightGoogleTiles, resetGoogleLayer, type GoogleTilesCtx } from './mapLayers';
 import { buildScene, fetchOsmCranes, scanPort, type PortGrid, type PortScene } from './portScene';
 import PlaybackBar from '../PlaybackBar';
 
@@ -131,7 +131,11 @@ interface Latest {
   portView: string | null;
   follow: boolean;
   scene: PortScene | null;
+  google: GoogleTilesCtx | null;
 }
+
+/** Key Map Tiles API (build-time). Không có key → ẩn nút "Ảnh thực". */
+const GOOGLE_KEY = (import.meta.env.VITE_GOOGLE_MAPS_KEY as string | undefined)?.trim() || '';
 
 export default function MapView() {
   const container = useRef<HTMLDivElement>(null);
@@ -140,7 +144,42 @@ export default function MapView() {
   const [mapError, setMapError] = useState<string | null>(null);
   const [scene, setScene] = useState<PortScene | null>(null);
   const [sceneBusy, setSceneBusy] = useState(false);
-
+  const [photoreal, setPhotoreal] = useState(false);
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const rootJson = useRef('');
+  const [credits, setCredits] = useState('');
+  const [photoMsg, setPhotoMsg] = useState<string | null>(null);
+  const tileCredits = useRef(new Map<string, string>());
+  const google = useMemo<GoogleTilesCtx | null>(() => {
+    if (!photoreal || !GOOGLE_KEY) return null;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let loaded = 0;
+    const flush = () => {
+      timer = null;
+      setCredits(aggregateCredits(tileCredits.current.values()));
+    };
+    const schedule = () => (timer ??= setTimeout(flush, 400));
+    return {
+      key: GOOGLE_KEY,
+      rootJson: rootJson.current,
+      onTileLoad: (id, c) => {
+        loaded++;
+        tileCredits.current.set(id, c);
+        schedule();
+      },
+      onTileUnload: (id) => {
+        tileCredits.current.delete(id);
+        schedule();
+      },
+      onError: (msg) => {
+        // lỗi ngay từ đầu (key sai, chưa bật Map Tiles API / billing…) → quay về Mức 1
+        if (loaded === 0) {
+          setPhotoreal(false);
+          setPhotoMsg(`Không tải được ảnh thực Google 3D (${msg.slice(0, 120)}). Kiểm tra key, Map Tiles API và billing – đã quay về bố cục OpenStreetMap.`);
+        }
+      },
+    };
+  }, [photoreal]);
   const plan = useAppStore((s) => s.plan);
   const planRun = useAppStore((s) => s.planRun);
   const planning = useAppStore((s) => s.planning);
@@ -172,8 +211,8 @@ export default function MapView() {
     grid: null as PortGrid | null,
     lastT: 0,
   });
-  const latest = useRef<Latest>({ plan, ranked, current, selectedKey, hoverKey, track, showSeaRoute, view3d, portView, follow, scene });
-  latest.current = { plan, ranked, current, selectedKey, hoverKey, track, showSeaRoute, view3d, portView, follow, scene };
+  const latest = useRef<Latest>({ plan, ranked, current, selectedKey, hoverKey, track, showSeaRoute, view3d, portView, follow, scene, google });
+  latest.current = { plan, ranked, current, selectedKey, hoverKey, track, showSeaRoute, view3d, portView, follow, scene, google };
 
   /* ───────── Khởi tạo bản đồ: style rỗng (chỉ nền màu), không dùng tile server cho bản đồ chính ───────── */
   useEffect(() => {
@@ -259,7 +298,7 @@ export default function MapView() {
         layers: buildLayers({
           plan: L.plan, ranked: L.ranked, current: L.current, selectedKey: L.selectedKey, hoverKey: L.hoverKey,
           now: ts / 1000, track: L.track, day, showSeaRoute: L.showSeaRoute, view3d: L.view3d, portView: !!L.portView,
-          shipModelOk: s.shipModelOk, scene: L.scene,
+          shipModelOk: s.shipModelOk, scene: L.scene, google: L.portView ? L.google : null,
           onHover: (k) => useAppStore.getState().hoverKey !== k && useAppStore.getState().set({ hoverKey: k }),
           onClick: (k) => useAppStore.getState().select(k),
         }),
@@ -477,6 +516,25 @@ export default function MapView() {
     };
   }, [ready, portView]);
 
+  /* ───────── Mức 2: ảnh thực Google – ẩn lớp OSM khi bật; tắt khi rời chế độ cảng ───────── */
+  useEffect(() => {
+    const map = mapHandle.map;
+    if (!map || !ready) return;
+    const on = !!portView && photoreal;
+    PORT_VIEW_LAYERS.forEach((id) => map.getLayer(id) && map.setLayoutProperty(id, 'visibility', portView && !on ? 'visible' : 'none'));
+    if (!on) {
+      tileCredits.current.clear();
+      setCredits('');
+      resetGoogleLayer();
+    }
+  }, [ready, portView, photoreal]);
+  useEffect(() => {
+    if (!portView) {
+      setPhotoreal(false);
+      setPhotoMsg(null);
+    }
+  }, [portView]);
+
   const sel = selectedKey && current ? current : null;
   const portName = portView ? PORT_BY_CODE[portView]?.name : null;
 
@@ -490,6 +548,26 @@ export default function MapView() {
             <>
               <button className="btn btn-on" onClick={() => set({ portView: null })}>← Thoát cảng 3D</button>
               <span className="btn cursor-default">⚓ {portName}{sceneBusy ? ' · đang dựng…' : ''}</span>
+              {GOOGLE_KEY && (
+                <button
+                  className={`btn ${photoreal ? 'btn-on' : ''}`}
+                  disabled={photoBusy}
+                  title="Google Photorealistic 3D Tiles – tính phí theo lượt dùng, chỉ nạp khi bấm"
+                  onClick={async () => {
+                    setPhotoMsg(null);
+                    if (photoreal) return setPhotoreal(false);
+                    setPhotoBusy(true);
+                    const r = await preflightGoogleTiles(GOOGLE_KEY);
+                    setPhotoBusy(false);
+                    if (!r.ok) return setPhotoMsg(`Không tải được ảnh thực Google 3D (${r.error}). Kiểm tra key, Map Tiles API và billing – vẫn dùng bố cục OpenStreetMap.`);
+                    rootJson.current = r.rootJson;
+                    resetGoogleLayer();
+                    setPhotoreal(true);
+                  }}
+                >
+                  📷 {photoBusy ? 'Đang kiểm tra…' : photoreal ? 'Tắt ảnh thực' : 'Ảnh thực'}
+                </button>
+              )}
             </>
           ) : (
             <>
@@ -516,7 +594,22 @@ export default function MapView() {
           </div>
         )}
 
-        {portView && (
+        {portView && photoreal && (
+          <>
+            {/* Ghi công bắt buộc của Google: logo + bản quyền của các tile đang hiển thị, một dòng ở cuối khung, không bị che */}
+            <div className="absolute inset-x-0 bottom-0 z-10 flex items-end justify-between gap-3 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-1.5 text-[10.5px] text-white">
+              <span className="shrink-0 text-[15px] leading-none font-medium tracking-tight" style={{ fontFamily: 'Arial, sans-serif' }}>
+                <span style={{ color: '#4285F4' }}>G</span><span style={{ color: '#EA4335' }}>o</span><span style={{ color: '#FBBC05' }}>o</span><span style={{ color: '#4285F4' }}>g</span><span style={{ color: '#34A853' }}>l</span><span style={{ color: '#EA4335' }}>e</span>
+              </span>
+              <span className="min-w-0 truncate text-right" title={credits}>{credits || 'Đang tải ảnh thực…'}</span>
+            </div>
+            <div className="absolute top-14 left-3 max-w-[360px] rounded-lg border border-line bg-panel/90 px-3 py-2 text-[11px] leading-snug text-mute">
+              Ảnh thực: Google Photorealistic 3D Tiles. Nếu chỉ thấy hình mờ, khu vực này chưa có ảnh 3D chi tiết – bấm <b className="text-fg">Tắt ảnh thực</b> để quay về bố cục OpenStreetMap.
+            </div>
+          </>
+        )}
+        {portView && photoMsg && <div className="absolute top-14 left-3 max-w-[380px] rounded-lg border border-amber-400/40 bg-panel/95 px-3 py-2 text-[11px] text-amber-200">{photoMsg}</div>}
+        {portView && !photoreal && (
           <div className="absolute right-3 bottom-3 max-w-[340px] rounded-lg border border-line bg-panel/90 px-3 py-2 text-[11px] leading-snug text-mute">
             Bố cục cảng theo dữ liệu bản đồ (OpenStreetMap); <b className="text-fg">container, cẩu và tàu là hình minh họa</b>.
             {scene && (

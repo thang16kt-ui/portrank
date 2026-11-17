@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { SEA_ONLY_EQUIVALENT, termsForMode } from '../config/incoterms';
 import { WEIGHT_PRESETS, type Weights } from '../config/weights';
 import type { Plan } from '../lib/plan';
+import type { DcsaFetchResult } from '../lib/dcsa';
 import type { CostBasis } from '../lib/ranking';
 import { useDataStore } from './useDataStore';
 import type { CargoType, ContainerType, Incoterm, Place, Priority, Role, ShipMode, TransportMode } from '../types';
@@ -123,6 +124,8 @@ interface AppState {
   detailOpen: boolean;
   /** id lộ trình hãng tàu đang chọn */
   scheduleId: string | null;
+  /** Lịch lấy từ API hãng tàu (DCSA) theo cặp cảng "POL>POD" – không lưu lâu dài */
+  apiSchedules: Record<string, (DcsaFetchResult & { status: 'ok' }) | { status: 'loading' } | { status: 'error'; error: string }>;
   notice: string | null;
   toast: string | null;
   saved: SavedPlan[];
@@ -166,6 +169,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   detailTab: 'cost',
   detailOpen: false,
   scheduleId: null,
+  apiSchedules: {},
   notice: null,
   toast: null,
   saved: loadSaved(),

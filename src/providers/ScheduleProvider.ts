@@ -61,15 +61,18 @@ export function createUserScheduleProvider(entries: ScheduleEntry[]): SchedulePr
 }
 
 /**
- * Adapter theo chuẩn DCSA Commercial Schedules (point-to-point routings) – CHƯA triển khai.
- * Trình duyệt không gọi thẳng được API hãng tàu (CORS, lộ key) nên cần proxy phía server (/api/schedules).
+ * Adapter theo chuẩn DCSA Commercial Schedules 1.0 (GET /v1/point-to-point-routes).
+ * Trình duyệt không gọi thẳng API hãng tàu (CORS, lộ key) → gọi máy chủ PortRank `/api/schedules` (server/api.mjs),
+ * máy chủ giữ key của từng hãng trong biến môi trường. Chuyển đổi dữ liệu: src/lib/dcsa.ts.
  */
 export const DcsaScheduleProvider: ScheduleProvider = {
   id: 'dcsa',
-  label: 'API hãng tàu (chuẩn DCSA) – chưa bật',
-  enabled: false,
-  async getRoutings() {
-    return [];
+  label: 'API hãng tàu (chuẩn DCSA)',
+  enabled: true,
+  async getRoutings(q) {
+    const { fetchDcsaSchedules } = await import('../lib/dcsa');
+    const r = await fetchDcsaSchedules({ pol: q.pol, pod: q.pod, from: q.date, carriers: q.carrier ? [q.carrier] : [] });
+    return r.entries;
   },
 };
 
