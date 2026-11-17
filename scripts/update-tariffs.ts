@@ -20,7 +20,7 @@ import { fileURLToPath } from 'node:url';
 import { COUNTRIES } from '../src/data/countries';
 import { parseCsv } from '../src/lib/csv';
 import {
-  CH99_RANGES, TARIFF_SNAPSHOT, US_SPECIAL, htsLeaves, parseChapter99, parseUkCommodity, parseUkHeadingLeaves, ukEntry, usEntry,
+  CH99_RANGES, TARIFF_SNAPSHOT, US_SPECIAL, WITS_BULK, htsLeaves, parseWitsAll, witsReporter, type WitsBulkFile, parseChapter99, parseUkCommodity, parseUkHeadingLeaves, ukEntry, usEntry,
   type Chapter99Item, type HtsRow, type TariffSnapshot,
 } from '../src/lib/tariffSources';
 import { parseTariffRows, type TariffEntry } from '../src/providers/TariffProvider';
@@ -92,6 +92,41 @@ async function updateVat() {
   if (!CHECK_ONLY)
     writeFileSync(join(DATA, 'vatRates.json'), JSON.stringify({ source: 'npm sales-tax (MIT) – valeriansaliou/node-sales-tax', sourceUrl: 'https://github.com/valeriansaliou/node-sales-tax', fetchedAt: today, rates }, null, 0) + '\n');
   report.push(`✓ VAT/GST: ${Object.keys(rates).length} nước`);
+}
+
+/* ───────────── WITS / TRAINS – toàn bộ HS6 cho các nước chính ───────────── */
+const WITS = 'https://wits.worldbank.org/API/V1/SDMX/V21/datasource/TRN';
+async function updateWitsBulk() {
+  const dir = join(ROOT, 'public/data/wits');
+  mkdirSync(dir, { recursive: true });
+  const now = new Date().getFullYear();
+  const index: Record<string, { year: number; nomen: string; count: number }> = {};
+  const queue = [...WITS_BULK];
+  const worker = async () => {
+    for (let key = queue.shift(); key; key = queue.shift()) {
+      const reporter = witsReporter(key === 'EU' ? 'DE' : key);
+      if (!reporter) continue;
+      let done = false;
+      for (let year = now - 1; year >= now - 6 && !done; year--) {
+        try {
+          const doc = await get<unknown>(`${WITS}/reporter/${reporter}/partner/000/product/all/year/${year}/datatype/reported?format=JSON`, 'application/json', 3);
+          const { nomen, rates } = parseWitsAll(doc);
+          if (Object.keys(rates).length < 1000) continue;
+          const file: WitsBulkFile = { reporter, year, nomen, fetchedAt: today, rates };
+          if (!CHECK_ONLY) writeFileSync(join(dir, `${key}.json`), JSON.stringify(file) + '\n');
+          index[key] = { year, nomen, count: Object.keys(rates).length };
+          done = true;
+        } catch (e) {
+          if ((e as { status?: number }).status !== 404) throw new Error(`${key} ${year}: ${(e as Error).message}`);
+        }
+      }
+      if (!done) report.push(`! WITS ${key}: không có biểu thuế MFN trong 6 năm gần nhất`);
+    }
+  };
+  await Promise.all([worker(), worker(), worker(), worker()]);
+  if (!CHECK_ONLY) writeFileSync(join(dir, 'index.json'), JSON.stringify({ source: 'WITS – UNCTAD TRAINS (World Bank)', fetchedAt: today, countries: index }) + '\n');
+  const years = Object.values(index).map((x) => x.year);
+  report.push(`✓ WITS: ${Object.keys(index).length}/${WITS_BULK.length} nước, số liệu năm ${Math.min(...years)}–${Math.max(...years)}`);
 }
 
 /* ───────────── Mỹ – USITC HTS ───────────── */
@@ -180,6 +215,7 @@ const run = async <T>(name: string, job: () => Promise<T>, fallback: T): Promise
 
 await run('HS 2022', checkHs6, undefined);
 await run('VAT/GST', updateVat, undefined);
+await run('WITS', updateWitsBulk, undefined);
 const us = await run('US', updateUS, { entries: keep('us-'), chapter99: prev.chapter99, release: prev.sources.find((s) => s.id === 'us-hts')?.release ?? '' });
 const gb = await run('GB', updateGB, keep('uk-'));
 const manual = parseTariffRows(readCsv('tariffManual.csv'));

@@ -4,7 +4,8 @@ import { handleApi } from '../server/api.mjs';
 import { otherTaxesFor } from '../src/data/otherTaxes';
 import { standardVat, VAT_DATA } from '../src/data/vatRates';
 import { describeHs, fmtHsCode, hs6Of, indexHs, searchHs, type HsCatalog } from '../src/lib/hs';
-import { OFFICIAL_SOURCES, WitsTariffSource, clearTariffCache, parseWits, witsReporter } from '../src/lib/tariffSources';
+import { OFFICIAL_SOURCES, WITS_BULK, WitsTariffSource, clearTariffCache, parseWits, parseWitsAll, witsReporter, type WitsBulkFile } from '../src/lib/tariffSources';
+import witsAll from './fixtures/wits-918-000-all-2023-sample.json';
 import witsEu from './fixtures/wits-918-000-610910-2023.json';
 import witsJp from './fixtures/wits-392-000-610910-2023.json';
 
@@ -63,7 +64,8 @@ describe('WITS / UNCTAD TRAINS', () => {
     vi.stubGlobal('fetch', f);
     const r = await WitsTariffSource.lookup({ importCountry: 'DE', hs: '6109100010', origin: 'VN', preferFta: true });
     const urls = f.mock.calls.map((c) => String(c[0]));
-    expect(urls.every((u) => u.startsWith('/api/wits/reporter/918/'))).toBe(true);
+    expect(urls[0]).toBe('/data/wits/EU.json'); // thử file tải sẵn trước (ở đây: 404 → gọi trực tiếp)
+    expect(urls.slice(1).every((u) => u.startsWith('/api/wits/reporter/918/'))).toBe(true);
     expect(urls.some((u) => u.includes('/partner/704/'))).toBe(true);
     expect(r.entry).toMatchObject({ importCountry: 'DE', hs: '610910', dutyPct: 12, rateType: 'MFN', vatPct: 19, effectiveDate: '2023-01-01', verified: false });
     expect(r.entry?.id.startsWith('wits-')).toBe(true);
@@ -81,6 +83,38 @@ describe('WITS / UNCTAD TRAINS', () => {
     const r = await WitsTariffSource.lookup({ importCountry: 'KE', hs: '610910', origin: 'VN', preferFta: false });
     expect(r.entry).toBeNull();
     expect(r.error).toContain('chưa có thuế MFN');
+  });
+});
+
+describe('WITS tải sẵn (public/data/wits – trang tĩnh không gọi được WITS qua rewrite)', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    clearTariffCache();
+  });
+  const res = (status: number, body: unknown) => ({ ok: status < 300, status, json: async () => body }) as Response;
+  it('đọc product=all: mã sản phẩm nằm ở vị trí khác keyPosition khai báo', () => {
+    const { nomen, rates } = parseWitsAll(witsAll);
+    expect(nomen).toBe('H6');
+    expect(rates).toEqual({ '090111': 0, '220300': 0, '610910': 12, '640411': 16.9 });
+  });
+  it('nước có file tải sẵn → không gọi /api/wits để lấy MFN; WITS bị chặn (403) → vẫn có thuế, ghi chưa kiểm tra được ưu đãi', async () => {
+    const file: WitsBulkFile = { reporter: '918', year: 2023, nomen: 'H6', fetchedAt: '2026-11-17', rates: { '610910': 12, '640411': [16.9, 16.9, 17, 2] } };
+    const f = vi.fn(async (url: string) => (url === '/data/wits/EU.json' ? res(200, file) : res(403, {})));
+    vi.stubGlobal('fetch', f);
+    const r = await WitsTariffSource.lookup({ importCountry: 'FR', hs: '640411', origin: 'VN', preferFta: true });
+    expect(r.entry).toMatchObject({ importCountry: 'FR', dutyPct: 16.9, effectiveDate: '2023-01-01', vatPct: standardVat('FR')?.pct });
+    expect(r.notes.join(' ')).toContain('từ 16.9% đến 17%');
+    expect(r.notes.join(' ')).toContain('Chưa kiểm tra được thuế ưu đãi');
+    expect(f.mock.calls.filter((c) => String(c[0]).includes('/partner/000/'))).toHaveLength(0);
+  });
+  it('mã HS6 không có trong biểu thuế tải sẵn → báo lỗi, không đoán', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => res(200, { reporter: '918', year: 2023, nomen: 'H6', fetchedAt: '', rates: { '610910': 12 } })));
+    const r = await WitsTariffSource.lookup({ importCountry: 'DE', hs: '999999', origin: 'VN', preferFta: false });
+    expect(r.entry).toBeNull();
+    expect(r.error).toContain('không có mã HS6 999999');
+  });
+  it('danh sách tải sẵn gồm EU, Việt Nam và các nước nhập khẩu chính', () => {
+    for (const c of ['EU', 'VN', 'CN', 'JP', 'KR', 'IN', 'AU', 'CA', 'MX', 'BR', 'TH', 'ID']) expect(WITS_BULK).toContain(c);
   });
 });
 
