@@ -12,18 +12,6 @@ export interface RateRequest {
   readyDate?: string;
 }
 
-/**
- * Interface nguồn giá. Hiện dùng `ModelRateProvider` (mô hình ước tính).
- * Có thể thay bằng API giá thật (Freightos, Xeneta, API hãng tàu) hoặc bảng giá CSV của forwarder.
- */
-export interface RateProvider {
-  readonly id: string;
-  readonly label: string;
-  /** true nếu là giá thật (bỏ nhãn "ước tính") */
-  readonly isLive: boolean;
-  quote(req: RateRequest): Quote | Promise<Quote>;
-}
-
 export function destThcZone(pod: Port): keyof typeof PRICING.thcDest40 {
   if (EU_COUNTRIES.has(pod.country) || pod.country === 'GB') return 'EU_UK';
   if (pod.country === 'US' || pod.country === 'CA') return 'US_CA';
@@ -86,40 +74,3 @@ export function estimateQuote({ pod, route, shipment }: RateRequest): Quote {
   };
 }
 
-export const ModelRateProvider: RateProvider = {
-  id: 'model',
-  label: 'Mô hình ước tính PortRank',
-  isLive: false,
-  quote: estimateQuote,
-};
-
-/**
- * Ví dụ provider đọc bảng giá CSV của forwarder:
- *   pol,pod,container,ocean_freight_usd,baf_usd
- *   VNSGN,DEHAM,40HC,2350,420
- * Dòng khớp sẽ thay thế O/F + BAF của mô hình; các phí khác giữ nguyên.
- */
-export function createCsvRateProvider(csv: string): RateProvider {
-  const rows = csv
-    .trim()
-    .split(/\r?\n/)
-    .slice(1)
-    .map((l) => l.split(',').map((x) => x.trim()))
-    .filter((r) => r.length >= 5);
-  return {
-    id: 'csv',
-    label: 'Bảng giá CSV forwarder',
-    isLive: true,
-    quote(req) {
-      const base = estimateQuote(req);
-      const row = rows.find((r) => r[0] === req.pol.code && r[1] === req.pod.code && r[2] === req.shipment.container);
-      if (!row || req.shipment.mode !== 'FCL') return { ...base, provider: 'model' };
-      const q = Math.max(1, req.shipment.quantity);
-      const lines = base.lines.map((l) =>
-        l.id === 'of' ? { ...l, amount: +row[3] * q, note: 'Theo bảng giá CSV' } : l.id === 'baf' ? { ...l, amount: +row[4] * q } : l,
-      );
-      const total = lines.reduce((s, l) => s + l.amount, 0);
-      return { ...base, lines, total, low: total, high: total, provider: 'csv' };
-    },
-  };
-}

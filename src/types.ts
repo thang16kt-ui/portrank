@@ -135,4 +135,26 @@ export interface Quote {
   provider: string;
 }
 
-export type Incoterm = 'EXW' | 'FCA' | 'FOB' | 'CFR' | 'CIF' | 'CPT' | 'CIP' | 'DAP' | 'DPU' | 'DDP';
+export type Incoterm = 'EXW' | 'FCA' | 'FAS' | 'FOB' | 'CFR' | 'CIF' | 'CPT' | 'CIP' | 'DAP' | 'DPU' | 'DDP';
+
+/** Phương thức vận tải – mở rộng được (sau này thêm 'rail' | 'air', cũng dùng 7 điều kiện "mọi phương thức") */
+export type TransportMode = 'sea' | 'road';
+
+/** Điểm của một bên: nhánh A (quốc gia) hoặc nhánh B (địa chỉ/thành phố) */
+export interface Place {
+  kind: 'country' | 'address';
+  label: string;
+  /** ISO 3166-1 alpha-2 */
+  country: string;
+  countryName: string;
+  coord: LngLat;
+  source?: string;
+}
+
+/** Giá trị có nguồn – dùng cho thông tin cảng, thuế… */
+export interface Sourced<T> {
+  value: T;
+  source: string;
+  updatedAt: string; // YYYY-MM-DD
+  verified: boolean;
+}

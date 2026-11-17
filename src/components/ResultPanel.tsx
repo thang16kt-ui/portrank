@@ -1,145 +1,216 @@
-import { useMemo, useRef, useState } from 'react';
-import { CARGO_LABEL, CONTAINER_LABEL } from '../config/pricing';
-import { INCOTERMS, PARTY_LABEL, payerOf } from '../lib/incoterm';
-import { computePlan, fmtNm, usd, type PlanResult } from '../lib/results';
-import { fmtDate } from '../lib/transit';
-import { useAppStore, type ResultTab } from '../store/useAppStore';
-import type { Incoterm } from '../types';
-import AltRanking from './AltRanking';
-import Conditions from './Conditions';
-import CostTable from './CostTable';
-import IncotermTab from './IncotermBar';
-import Overview from './Overview';
+import { INCOTERMS } from '../config/incoterms';
+import { useCurrent, useRanked } from '../lib/actions';
+import { fmtDays, fmtKm, fmtNm, usd } from '../lib/format';
+import { sellerShare } from '../lib/incoterm';
+import type { Plan } from '../lib/plan';
+import type { RankedOption } from '../lib/ranking';
+import { useAppStore, type DetailTab } from '../store/useAppStore';
+import IncotermCard, { placeNamesOf } from './IncotermCard';
 
-const TABS: { id: ResultTab; label: string }[] = [
-  { id: 'overview', label: 'Tổng quan' },
-  { id: 'cost', label: 'Chi phí' },
-  { id: 'rules', label: 'Điều kiện' },
-  { id: 'incoterm', label: 'Incoterm' },
-  { id: 'alts', label: 'Cảng thay thế' },
-];
+const rankCls = (rank: number) => (rank === 1 ? 'bg-[#f59e0b] text-slate-900 shadow-[0_0_10px_rgba(251,191,36,.7)]' : rank <= 3 ? 'bg-[#38bdf8] text-slate-900' : 'bg-slate-600 text-white');
 
-export function usePlan(): PlanResult | null {
-  const computed = useAppStore((s) => s.computed);
-  const sim = useAppStore((s) => s.sim);
-  return useMemo(() => (computed && sim ? computePlan(computed, sim.pol, sim.pod, sim.route) : null), [computed, sim]);
+function Big({ label, value, sub, tone }: { label: string; value: React.ReactNode; sub?: React.ReactNode; tone?: string }) {
+  return (
+    <div className="rounded-lg border border-line bg-well px-2.5 py-2">
+      <div className="text-[10.5px] font-medium text-mute">{label}</div>
+      <div className={`text-[19px] leading-tight font-bold ${tone ?? 'text-fg'}`}>{value}</div>
+      {sub && <div className="mt-0.5 text-[10px] leading-snug text-mute">{sub}</div>}
+    </div>
+  );
 }
 
-export function quoteText(plan: PlanResult, incoterm: Incoterm): string {
-  const s = plan.shipment;
+/** Văn bản báo giá để copy */
+export function quoteText(plan: Plan, r: RankedOption, term: string): string {
+  const o = r.option, i = plan.input;
+  const cargo = i.shipment.mode === 'FCL' ? `${i.shipment.quantity} × ${i.shipment.container}` : `LCL ${i.shipment.cbm} CBM / ${i.shipment.weightKg} kg`;
   const lines = [
-    `BÁO GIÁ ƯỚC TÍNH – PortRank (mô hình ước tính, không phải giá thị trường)`,
-    `Tuyến: ${plan.pol.name} (${plan.pol.code}) → ${plan.pod.name} (${plan.pod.code})`,
-    `Hàng: ${CARGO_LABEL[s.cargo]} · ${s.mode === 'FCL' ? `${s.quantity} x ${CONTAINER_LABEL[s.container]}` : `LCL ${s.cbm} CBM / ${s.weightKg} kg`}`,
-    `Quãng đường: ${fmtNm(plan.route.distanceNm)} · Thời gian: ~${plan.days.toFixed(1)} ngày`,
-    `ETD ${fmtDate(plan.etd)} → ETA ${fmtDate(plan.eta)}`,
-    `Đi qua: ${plan.route.passages.map((p) => p.name).join(', ') || '—'}`,
-    `Incoterm: ${incoterm} – ${INCOTERMS[incoterm].name} (gợi ý: ${plan.suggestion.placeLabel})`,
-    '',
-    'Chi tiết (USD, ước tính):',
-    ...plan.quote.lines.map((l) => `- ${l.label}: ${Math.round(l.amount).toLocaleString('en-US')} [${PARTY_LABEL[payerOf(incoterm, l.segment)]}]`),
-    `TỔNG: ${usd(plan.quote.total)} (khoảng ${usd(plan.quote.low)} – ${usd(plan.quote.high)})`,
-    '',
-    'Chứng từ bắt buộc: ' + plan.checklist.filter((c) => c.severity === 'required').map((c) => c.title).join('; '),
+    `PORTRANK – PHƯƠNG ÁN #${r.rank} (${plan.scopeShort})`,
+    `Tuyến: ${plan.seller.label} → ${plan.buyer.label}`,
+    `${o.mode === 'sea' ? 'Đường biển' : 'Đường bộ'}: ${o.title}${o.route ? ` · ${fmtNm(o.route.distanceNm)}` : o.roadKm ? ` · ${fmtKm(o.roadKm)}` : ''}`,
+    `Hàng: ${cargo}${i.hs ? ` · HS ${i.hs}` : ''}${i.goodsValue ? ` · trị giá ${usd(i.goodsValue)} (${i.valueTerm})` : ''}`,
+    `Điều kiện: ${term} – ${INCOTERMS[term as keyof typeof INCOTERMS].nameVi}`,
+    `Thời gian: ${fmtDays(o.days.total)}${o.rate ? '' : ' (ước tính)'}`,
+    `Bạn trả: ${usd(r.youPay)} · Bên kia trả: ${usd(r.otherPays)} · Tổng 10 khoản: ${usd(o.total)} (khoảng ${usd(o.low)} – ${usd(o.high)})`,
+    `Thuế NK + VAT: ${o.duty.status === 'ok' ? `${usd(o.duty.total)} (nguồn: ${o.duty.entry!.source}, cập nhật ${o.duty.entry!.updatedAt})` : 'chưa có dữ liệu'}`,
+    `Giá cước: ${o.rate ? o.rate.label : 'ƯỚC TÍNH theo mô hình PortRank – không phải giá thị trường'}`,
+    'Số thuế là ước tính để lập kế hoạch; số chính thức do cơ quan hải quan xác định.',
   ];
   return lines.join('\n');
 }
 
-export default function ResultPanel() {
-  const plan = usePlan();
-  const tab = useAppStore((s) => s.tab);
-  const setTab = useAppStore((s) => s.setTab);
-  const open = useAppStore((s) => s.panelOpen);
-  const setOpen = useAppStore((s) => s.setPanelOpen);
-  const selected = useAppStore((s) => s.incoterm);
-  const saveQuote = useAppStore((s) => s.saveQuote);
+function Overview({ plan, r }: { plan: Plan; r: RankedOption }) {
+  const term = useAppStore((s) => s.form.term);
+  const destBySeller = useAppStore((s) => s.destChargesBySeller);
   const showToast = useAppStore((s) => s.showToast);
-  const computed = useAppStore((s) => s.computed);
-  const [height, setHeight] = useState(() => Math.round(window.innerHeight * 0.36));
-  const drag = useRef<{ y: number; h: number } | null>(null);
-
-  if (!plan || !computed) return null;
-  const incoterm: Incoterm = selected ?? plan.suggestion.primary;
-
-  const onPointerDown = (e: React.PointerEvent) => {
-    drag.current = { y: e.clientY, h: open ? height : 44 };
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-  };
-  const onPointerMove = (e: React.PointerEvent) => {
-    if (!drag.current) return;
-    const h = drag.current.h + (drag.current.y - e.clientY);
-    if (h < 90) setOpen(false);
-    else {
-      setOpen(true);
-      setHeight(Math.min(window.innerHeight * 0.85, Math.max(160, h)));
-    }
-  };
-  const onPointerUp = () => (drag.current = null);
-
-  const copy = async () => {
-    const text = quoteText(plan, incoterm);
-    try {
-      await navigator.clipboard.writeText(text);
-      showToast('Đã copy báo giá vào clipboard');
-    } catch {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      ta.remove();
-      showToast('Đã copy báo giá');
-    }
-  };
-  const save = () => {
-    saveQuote({
-      form: { ...computed, pol: plan.pol.code, pod: plan.pod.code },
-      incoterm,
-      summary: `${plan.pol.name} → ${plan.pod.name}`,
-      total: plan.quote.total,
-      low: plan.quote.low,
-      high: plan.quote.high,
-      days: plan.days,
-      distanceNm: plan.route.distanceNm,
-    });
-    showToast('Đã lưu báo giá (localStorage)');
-  };
-
+  const savePlan = useAppStore((s) => s.savePlan);
+  const form = useAppStore((s) => s.form);
+  const set = useAppStore((s) => s.set);
+  const o = r.option, role = plan.input.role;
+  const hasValue = plan.input.goodsValue > 0;
+  const priceAtTerm = o.value.exw + o.items.reduce((s, it) => s + (it.amount ?? 0) * sellerShare(term, it.n, { destChargesBySeller: destBySeller }), 0);
+  const landed = o.value.exw + o.total;
+  const d = o.days;
+  const duty = o.duty;
   return (
-    <div className="relative z-20 flex shrink-0 flex-col border-t border-slate-200 bg-white shadow-[0_-8px_24px_-12px_rgba(15,23,42,.35)]" style={{ height: open ? height : 44 }}>
-      <div
-        className="flex h-[44px] shrink-0 cursor-row-resize touch-none items-center gap-2 border-b border-slate-100 px-2 select-none"
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-      >
-        <div className="absolute top-1 left-1/2 h-1 w-10 -translate-x-1/2 rounded bg-slate-300" />
-        <div className="scroll-thin flex min-w-0 flex-1 gap-1 overflow-x-auto" onPointerDown={(e) => e.stopPropagation()}>
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`rounded-md px-3 py-1.5 text-sm whitespace-nowrap ${tab === t.id && open ? 'bg-brand-600 font-semibold text-white' : 'text-slate-600 hover:bg-slate-100'}`}
-            >
-              {t.label}
-            </button>
-          ))}
+    <div className="flex h-full flex-col">
+      <div className="mb-1.5">
+        <div className="flex items-center gap-1.5">
+          <span className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold ${rankCls(r.rank)}`}>#{r.rank}</span>
+          <span className="truncate text-[13px] font-semibold text-fg" title={o.title}>{o.title}</span>
         </div>
-        <div className="flex shrink-0 gap-1" onPointerDown={(e) => e.stopPropagation()}>
-          <button onClick={copy} className="rounded-md border border-slate-300 px-2 py-1 text-xs hover:bg-slate-50" title="Copy báo giá dạng text">📋<span className="hidden sm:inline"> Copy báo giá</span></button>
-          <button onClick={save} className="rounded-md border border-slate-300 px-2 py-1 text-xs hover:bg-slate-50" title="Lưu báo giá">💾<span className="hidden sm:inline"> Lưu</span></button>
-          <button onClick={() => setOpen(!open)} className="rounded-md px-2 py-1 text-xs text-slate-500 hover:bg-slate-100" title={open ? 'Thu gọn' : 'Mở rộng'}>{open ? '▾' : '▴'}</button>
+        <div className="mt-0.5 flex flex-wrap items-center gap-1 text-[10.5px] text-mute">
+          <span>{plan.scopeTitle}</span>
+          {o.rate ? <span className="chip chip-real" title={o.rate.label}>Giá thật</span> : <span className="chip chip-est">Ước tính ±12%</span>}
         </div>
       </div>
-      {open && (
-        <div className="scroll-thin flex-1 overflow-y-auto p-3 md:p-4">
-          {tab === 'overview' && <Overview plan={plan} incoterm={incoterm} />}
-          {tab === 'cost' && <CostTable plan={plan} incoterm={incoterm} />}
-          {tab === 'rules' && <Conditions plan={plan} />}
-          {tab === 'incoterm' && <IncotermTab plan={plan} incoterm={incoterm} />}
-          {tab === 'alts' && <AltRanking />}
+      <div className="grid grid-cols-2 gap-1.5">
+        <Big label={`Bạn trả (${role === 'seller' ? 'người bán' : 'người mua'})`} tone="text-amber-300" value={usd(r.youPay)} sub={<>logistics + thuế · bên kia trả {usd(r.otherPays)}</>} />
+        <Big
+          label="Tổng về đến kho"
+          value={usd(hasValue ? landed : o.total)}
+          sub={hasValue ? <>giá hàng {term} ≈ {usd(priceAtTerm)} + phần người mua trả</> : <>chưa gồm giá hàng · {usd(o.low)}–{usd(o.high)}</>}
+        />
+        <Big
+          label="Thời gian"
+          value={fmtDays(d.total)}
+          sub={o.mode === 'sea' ? <>{d.inlandO + d.inlandD > 0 ? `nội địa ${d.inlandO + d.inlandD} + ` : ''}chờ tàu {d.wait} + biển {d.main.toFixed(1)} + làm hàng {d.handling}</> : <>xe {d.main.toFixed(1)} + cửa khẩu {d.handling}</>}
+        />
+        <Big
+          label="Thuế và VAT"
+          tone={duty.status === 'ok' ? 'text-fg' : 'text-mute'}
+          value={duty.status === 'ok' ? usd(duty.total) : duty.status === 'domestic' ? '—' : <span className="text-[13px]">Chưa có dữ liệu</span>}
+          sub={
+            duty.status === 'ok' ? (
+              <>NK {duty.entry!.dutyPct}%{duty.vatMissing ? '' : ` · VAT ${duty.entry!.vatPct}%`} · {duty.entry!.verified ? 'đã xác minh' : 'chưa xác minh'}</>
+            ) : duty.status === 'no-value' ? (
+              <>nhập mã HS và giá trị hàng</>
+            ) : duty.status === 'domestic' ? (
+              <>nội địa</>
+            ) : (
+              <button className="text-sky underline" onClick={() => set({ detailTab: 'duty', detailOpen: true })}>Nhập thuế suất</button>
+            )
+          }
+        />
+      </div>
+      <div className="mt-1.5 flex gap-1.5">
+        <button className="btn flex-1 !text-[11px]" onClick={() => navigator.clipboard.writeText(quoteText(plan, r, term)).then(() => showToast('Đã copy báo giá'), () => showToast('Không copy được'))}>📋 Copy báo giá</button>
+        <button
+          className="btn flex-1 !text-[11px]"
+          onClick={() => {
+            savePlan({ form, optionKey: o.key, title: `${plan.seller.label} → ${plan.buyer.label}`, summary: `${o.title} · ${term}`, youPay: r.youPay, total: o.total, days: d.total });
+            showToast('Đã lưu phương án');
+          }}
+        >
+          💾 Lưu
+        </button>
+      </div>
+      {plan.notes.length > 0 && <ul className="mt-1.5 space-y-0.5 text-[10px] leading-snug text-mute">{plan.notes.map((n, i) => <li key={i}>ℹ️ {n}</li>)}</ul>}
+    </div>
+  );
+}
+
+function Ranking({ ranked }: { ranked: RankedOption[] }) {
+  const selectedKey = useAppStore((s) => s.selectedKey);
+  const hoverKey = useAppStore((s) => s.hoverKey);
+  const basis = useAppStore((s) => s.costBasis);
+  const set = useAppStore((s) => s.set);
+  const select = useAppStore((s) => s.select);
+  return (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="mb-1.5 flex items-center justify-between gap-2">
+        <span className="text-[12px] font-semibold text-fg">Xếp hạng tuyến <span className="font-normal text-mute">({ranked.length})</span></span>
+        <div className="flex overflow-hidden rounded-md border border-line text-[10.5px]">
+          <button className={`px-1.5 py-0.5 ${basis === 'mine' ? 'bg-gold/20 text-amber-200' : 'text-mute'}`} onClick={() => set({ costBasis: 'mine' })} title="Xếp theo phần bạn phải trả theo Incoterm đang chọn">Phần tôi trả</button>
+          <button className={`px-1.5 py-0.5 ${basis === 'total' ? 'bg-gold/20 text-amber-200' : 'text-mute'}`} onClick={() => set({ costBasis: 'total' })}>Tổng</button>
         </div>
+      </div>
+      <div className="min-h-0 flex-1 space-y-1 overflow-y-auto pr-0.5">
+        {ranked.map((r) => {
+          const o = r.option;
+          const on = selectedKey === o.key, hov = hoverKey === o.key;
+          return (
+            <button
+              key={o.key}
+              data-rank-row={r.rank}
+              onMouseEnter={() => set({ hoverKey: o.key })}
+              onMouseLeave={() => set({ hoverKey: null })}
+              onClick={() => select(on ? null : o.key)}
+              className={`block w-full rounded-lg border px-2 py-1.5 text-left transition ${on ? 'border-gold bg-gold/10' : hov ? 'border-sky/60 bg-sky/5' : 'border-line bg-well hover:border-line-strong'}`}
+            >
+              <div className="flex items-center gap-1.5">
+                <span className={`flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-bold ${rankCls(r.rank)}`}>{r.rank}</span>
+                <span className="min-w-0 flex-1 truncate text-[12px] font-medium text-fg">{o.title}</span>
+                <span className="text-[12px] font-semibold text-amber-200">{usd(basis === 'mine' ? r.youPay : o.total)}</span>
+              </div>
+              <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 pl-6 text-[10.5px] text-mute">
+                <span>{fmtDays(o.days.total)}</span>
+                <span>tổng {usd(o.total)}</span>
+                <span>điểm {r.score.toFixed(0)}</span>
+                {o.rate ? <span className="chip chip-real">Giá thật</span> : <span className="chip chip-est">Ước tính</span>}
+                {r.tags.map((t) => <span key={t} className="chip chip-sky">{t}</span>)}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+const DETAILS: { tab: DetailTab; icon: string; label: string; seaOnly?: boolean }[] = [
+  { tab: 'cost', icon: '📋', label: 'Bảng chi phí' },
+  { tab: 'duty', icon: '🧾', label: 'Thuế nhập khẩu' },
+  { tab: 'rules', icon: '✅', label: 'Điều kiện, chứng từ' },
+  { tab: 'history', icon: '📈', label: 'Biến động giá' },
+  { tab: 'schedule', icon: '🚢', label: 'Hãng tàu & lộ trình', seaOnly: true },
+];
+
+function Details({ mode }: { mode: 'sea' | 'road' }) {
+  const set = useAppStore((s) => s.set);
+  const tab = useAppStore((s) => s.detailTab);
+  const open = useAppStore((s) => s.detailOpen);
+  return (
+    <div className="flex h-full flex-col">
+      <div className="mb-1.5 text-[12px] font-semibold text-fg">Xem chi tiết</div>
+      <div className="space-y-1.5">
+        {DETAILS.filter((d) => !d.seaOnly || mode === 'sea').map((d) => (
+          <button key={d.tab} className={`btn w-full !justify-start !gap-1.5 !px-2 !py-1.5 !text-[11.5px] !whitespace-normal !text-left ${open && tab === d.tab ? 'btn-on' : ''}`} onClick={() => set({ detailTab: d.tab, detailOpen: !(open && tab === d.tab) })}>
+            <span>{d.icon}</span> {d.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Bảng kết quả nằm ngang – 4 phần, trái sang phải: Tổng quan | Sơ đồ Incoterm | Xếp hạng tuyến | Xem chi tiết */
+export default function ResultPanel() {
+  const plan = useAppStore((s) => s.plan);
+  const ranked = useRanked();
+  const cur = useCurrent();
+  const sec = 'card shrink-0 p-2.5 max-[899px]:w-full max-[899px]:!h-auto';
+  return (
+    <div className="flex h-full gap-2.5 overflow-x-auto p-2.5 max-[899px]:h-auto max-[899px]:flex-col max-[899px]:overflow-visible">
+      {plan && cur ? (
+        <section className={`${sec} w-[236px] overflow-y-auto`}><Overview plan={plan} r={cur} /></section>
+      ) : (
+        <section className={`${sec} flex w-[236px] flex-col justify-center text-center text-[12px] leading-relaxed text-mute`}>
+          <div className="text-2xl">🧭</div>
+          Nhập <b className="text-fg">bên tôi</b> và <b className="text-fg">bên đối tác</b> (quốc gia hoặc địa chỉ) rồi bấm <b className="text-amber-200">Tìm tuyến tối ưu</b>.
+          <div className="mt-1 text-[10.5px]">Mọi con số giá là ước tính, trừ khi bạn đã nhập bảng giá thật.</div>
+        </section>
+      )}
+      <section className={`${sec} min-w-[350px] flex-1 overflow-y-auto max-[899px]:min-w-0`}>
+        <IncotermCard plan={plan} option={cur?.option ?? null} />
+      </section>
+      {plan && cur && (
+        <>
+          <section className={`${sec} w-[264px] max-[899px]:max-h-[320px]`}><Ranking ranked={ranked} /></section>
+          <section className={`${sec} w-[150px]`}><Details mode={cur.option.mode} /></section>
+        </>
       )}
     </div>
   );
 }
+
+export { placeNamesOf };

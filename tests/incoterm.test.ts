@@ -1,60 +1,137 @@
 import { describe, expect, it } from 'vitest';
-import { PORT_BY_CODE as P } from '../src/data/ports';
-import { INCOTERMS, payerOf, splitCosts, suggestIncoterm } from '../src/lib/incoterm';
+import { COST_ITEMS, INCOTERMS, INCOTERM_ORDER, SEA_ONLY_EQUIVALENT, termsForMode } from '../src/config/incoterms';
+import { costCutMatchesMatrix, riskTransferText, sellerShare, splitItems, suggestIncoterm } from '../src/lib/incoterm';
+import { riskCellPos } from '../src/components/IncotermCard';
+import type { Incoterm } from '../src/types';
 
-describe('suggestIncoterm', () => {
-  it('Người bán tự book → CPT/CIP tại cảng đến (container)', () => {
-    const s = suggestIncoterm('seller', 'me', 'dry', P.VNSGN, P.DEHAM);
-    expect(s.primary).toBe('CPT');
-    expect(s.alternatives).toContain('CIP');
-    expect(s.alternatives).toContain('DAP');
-    expect(s.placeLabel).toContain('Hamburg');
+/** Ma trận phân chia theo đặc tả: các khoản NGƯỜI BÁN trả */
+const MATRIX: Record<Incoterm, number[]> = {
+  EXW: [],
+  FCA: [1, 2, 3],
+  FAS: [1, 2, 3], // + một phần 4
+  FOB: [1, 2, 3, 4],
+  CFR: [1, 2, 3, 4, 5],
+  CIF: [1, 2, 3, 4, 5, 6],
+  CPT: [1, 2, 3, 4, 5],
+  CIP: [1, 2, 3, 4, 5, 6],
+  DAP: [1, 2, 3, 4, 5, 7, 9],
+  DPU: [1, 2, 3, 4, 5, 7, 9, 10],
+  DDP: [1, 2, 3, 4, 5, 7, 8, 9],
+};
+
+describe('ma trận 11 điều kiện', () => {
+  it('đủ 11 điều kiện, xếp theo trách nhiệm người bán tăng dần', () => {
+    expect(INCOTERM_ORDER).toEqual(['EXW', 'FCA', 'FAS', 'FOB', 'CFR', 'CIF', 'CPT', 'CIP', 'DAP', 'DPU', 'DDP']);
   });
-  it('Người bán, người mua book → FCA cảng đi', () => {
-    const s = suggestIncoterm('seller', 'other', 'reefer', P.VNSGN, P.DEHAM);
-    expect(s.primary).toBe('FCA');
-    expect(s.placeLabel).toContain('Cát Lái');
+  for (const t of INCOTERM_ORDER) {
+    it(`${t}: khoản người bán trả khớp ma trận; điểm cắt chi phí khớp; có 3 điểm cần nhớ`, () => {
+      for (let n = 1; n <= 10; n++) {
+        const sh = sellerShare(t, n as never);
+        if (t === 'FAS' && n === 4) expect(sh).toBe(0.5);
+        else expect(sh).toBe(MATRIX[t].includes(n) ? 1 : 0);
+      }
+      expect(costCutMatchesMatrix(t)).toBe(true);
+      expect(INCOTERMS[t].keyPoints).toHaveLength(3);
+      expect(INCOTERMS[t].riskTransfer.length).toBeGreaterThan(20);
+    });
+  }
+  it('nhóm C: điểm cắt chi phí và điểm cắt rủi ro ở hai vị trí khác nhau; các điều kiện khác trùng nhau', () => {
+    for (const t of INCOTERM_ORDER) {
+      const d = INCOTERMS[t];
+      if (['CFR', 'CIF', 'CPT', 'CIP'].includes(t)) expect(d.costAt).toBeGreaterThan(d.riskAt);
+      else expect(d.costAt).toBe(d.riskAt);
+    }
   });
-  it('Người mua tự book → FCA cảng đi', () => {
-    expect(suggestIncoterm('buyer', 'me', 'dry', P.VNSGN, P.DEHAM).primary).toBe('FCA');
+  it('điểm chuyển rủi ro tăng dần: EXW < FCA < FAS < FOB < DAP < DPU; DDP = DAP', () => {
+    const r = (t: Incoterm) => INCOTERMS[t].riskAt;
+    expect(r('EXW')).toBeLessThan(r('FCA'));
+    expect(r('FCA')).toBeLessThan(r('FAS'));
+    expect(r('FAS')).toBeLessThan(r('FOB'));
+    expect(r('FOB')).toBeLessThan(r('DAP'));
+    expect(r('DAP')).toBeLessThan(r('DPU'));
+    expect(r('DDP')).toBe(r('DAP'));
+    expect(r('CPT')).toBe(r('FCA'));
+    expect(r('CFR')).toBe(r('FOB'));
   });
-  it('Người mua, người bán book → CIP cảng đến, DAP/DDP thay thế', () => {
-    const s = suggestIncoterm('buyer', 'other', 'dg', P.VNSGN, P.DEHAM);
-    expect(s.primary).toBe('CIP');
-    expect(s.alternatives).toEqual(expect.arrayContaining(['DAP', 'DDP']));
+  it('bảo hiểm chỉ ở CIF (ICC C) và CIP (ICC A); thông quan nhập chỉ người bán làm ở DDP', () => {
+    for (const t of INCOTERM_ORDER) {
+      expect(INCOTERMS[t].insurance.by === 'seller').toBe(t === 'CIF' || t === 'CIP');
+      expect(INCOTERMS[t].importClearance === 'seller').toBe(t === 'DDP');
+      expect(INCOTERMS[t].exportClearance === 'buyer').toBe(t === 'EXW');
+    }
+    expect(INCOTERMS.CIF.insurance.level).toContain('ICC C');
+    expect(INCOTERMS.CIP.insurance.level).toContain('ICC A');
   });
-  it('Hàng quá khổ → nhóm FOB/CFR/CIF', () => {
-    expect(suggestIncoterm('seller', 'me', 'oog', P.VNSGN, P.DEHAM).primary).toBe('CFR');
-    expect(suggestIncoterm('seller', 'other', 'oog', P.VNSGN, P.DEHAM).primary).toBe('FOB');
-    expect(suggestIncoterm('buyer', 'other', 'oog', P.VNSGN, P.DEHAM).primary).toBe('CIF');
+  it('cờ trên dải 10 ô: FOB sau ô 4, FCA sau ô 3, DPU cuối dải, EXW đầu dải', () => {
+    expect(riskCellPos('EXW')).toBe(0);
+    expect(riskCellPos('FCA')).toBe(3);
+    expect(riskCellPos('FOB')).toBe(4);
+    expect(riskCellPos('DPU')).toBe(10);
+    expect(riskCellPos('FAS')).toBeGreaterThan(3);
+    expect(riskCellPos('FAS')).toBeLessThan(4);
   });
-  it('Không bao giờ gợi ý FOB/CFR/CIF làm chính cho hàng container', () => {
-    for (const role of ['seller', 'buyer'] as const)
-      for (const booker of ['me', 'other'] as const)
-        for (const cargo of ['dry', 'reefer', 'dg'] as const)
-          expect(['FOB', 'CFR', 'CIF']).not.toContain(suggestIncoterm(role, booker, cargo, P.VNSGN, P.DEHAM).primary);
+  it('10 khoản có nhãn riêng cho đường biển và đường bộ', () => {
+    expect(COST_ITEMS).toHaveLength(10);
+    expect(COST_ITEMS[4].label.sea).toContain('Cước biển');
+    expect(COST_ITEMS[4].label.road).toContain('Cước xe');
   });
 });
 
-describe('phân chia trách nhiệm', () => {
-  it('5 chặng, EXW toàn bộ người mua, DDP toàn bộ người bán', () => {
-    expect(INCOTERMS.EXW.payer.every((p) => p === 'buyer')).toBe(true);
-    expect(INCOTERMS.DDP.payer.every((p) => p === 'seller')).toBe(true);
+describe('phương thức vận tải', () => {
+  it('đường biển 11 nút, đường bộ 7 nút (bỏ FAS, FOB, CFR, CIF)', () => {
+    expect(termsForMode('sea')).toHaveLength(11);
+    expect(termsForMode('road')).toEqual(['EXW', 'FCA', 'CPT', 'CIP', 'DAP', 'DPU', 'DDP']);
   });
-  it('CIF: người bán trả cước (chặng trên tàu) nhưng rủi ro chuyển tại cảng đi', () => {
-    expect(payerOf('CIF', 2)).toBe('seller');
-    expect(payerOf('CIF', 3)).toBe('buyer');
-    expect(INCOTERMS.CIF.riskAt).toBeLessThan(2);
+  it('quy đổi tương đương khi sang đường bộ', () => {
+    expect(SEA_ONLY_EQUIVALENT).toEqual({ FAS: 'FCA', FOB: 'FCA', CFR: 'CPT', CIF: 'CIP' });
   });
-  it('FCA: cước biển do người mua trả', () => {
-    expect(payerOf('FCA', 2)).toBe('buyer');
-    const lines = [
-      { id: 'thc_o', label: '', amount: 100, segment: 1 as const },
-      { id: 'of', label: '', amount: 1000, segment: 2 as const },
-      { id: 'thc_d', label: '', amount: 200, segment: 3 as const },
-    ];
-    expect(splitCosts('FCA', lines)).toEqual({ seller: 100, buyer: 1200 });
-    expect(splitCosts('CPT', lines)).toEqual({ seller: 1100, buyer: 200 });
-    expect(splitCosts('DAP', lines)).toEqual({ seller: 1300, buyer: 0 });
+  it('câu rủi ro chèn tên địa điểm và đổi từ theo phương thức', () => {
+    const names = { origin: 'Bình Dương', portO: 'Cái Mép', portD: 'Hamburg', dest: 'Munich' };
+    expect(riskTransferText('FOB', 'sea', names)).toBe('Hàng đã nằm trên tàu tại cảng đi Cái Mép.');
+    expect(riskTransferText('CIP', 'sea', names)).toContain('hãng vận tải (hãng tàu)');
+    expect(riskTransferText('CIP', 'sea', names)).toContain('cảng đến Hamburg');
+    const road = riskTransferText('CPT', 'road', names);
+    expect(road).toContain('nhà xe');
+    expect(road).not.toMatch(/tàu|cảng/);
+    expect(riskTransferText('DAP', 'road', names)).toContain('(Munich)');
+  });
+});
+
+describe('splitItems', () => {
+  const items = Array.from({ length: 10 }, (_, i) => ({ n: (i + 1) as never, amount: 100 }));
+  it('FOB: người bán 400 (khoản 1–4), người mua 600', () => {
+    const s = splitItems(items, 'FOB', 'seller');
+    expect(s.seller).toBe(400);
+    expect(s.buyer).toBe(600);
+    expect(s.you).toBe(400);
+  });
+  it('FAS: một nửa khoản 4', () => {
+    expect(splitItems(items, 'FAS', 'buyer').seller).toBe(350);
+  });
+  it('nhóm C: tùy chọn người bán trả phí cảng đến', () => {
+    expect(splitItems(items, 'CPT', 'seller').seller).toBe(500);
+    expect(splitItems(items, 'CPT', 'seller', { destChargesBySeller: true }).seller).toBe(600);
+    expect(splitItems(items, 'FOB', 'seller', { destChargesBySeller: true }).seller).toBe(400);
+  });
+  it('khoản chưa tính (null) coi như 0', () => {
+    const s = splitItems([{ n: 1, amount: null }, { n: 2, amount: 50 }], 'DDP', 'buyer');
+    expect(s.seller).toBe(50);
+    expect(s.you).toBe(0);
+  });
+});
+
+describe('suggestIncoterm', () => {
+  it('người bán book, hàng container → CIP', () => {
+    expect(suggestIncoterm('seller', true, 'dry', 'sea').term).toBe('CIP');
+  });
+  it('người mua book → FCA; hàng quá khổ đi biển → FOB / CIF', () => {
+    expect(suggestIncoterm('buyer', true, 'reefer', 'sea').term).toBe('FCA');
+    expect(suggestIncoterm('buyer', true, 'oog', 'sea').term).toBe('FOB');
+    expect(suggestIncoterm('buyer', false, 'oog', 'sea').term).toBe('CIF');
+  });
+  it('đường bộ chỉ gợi ý điều kiện mọi phương thức', () => {
+    for (const r of ['seller', 'buyer'] as const) for (const b of [true, false]) for (const c of ['dry', 'oog'] as const) {
+      expect(termsForMode('road')).toContain(suggestIncoterm(r, b, c, 'road').term);
+    }
   });
 });

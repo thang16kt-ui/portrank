@@ -8,7 +8,11 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "gen:ship": "node scripts/gen-ship-glb.mjs"
+    "gen:ship": "node scripts/gen-ship-glb.mjs",
+    "gen:crane": "node scripts/gen-crane-glb.mjs",
+    "start": "node server/index.mjs",
+    "tariffs:update": "tsx scripts/update-tariffs.ts",
+    "tariffs:check": "tsx scripts/update-tariffs.ts --check"
   },
   "dependencies": {
     "@deck.gl/core": "~9.4.1",
@@ -17,19 +21,24 @@
     "@deck.gl/layers": "~9.4.1",
     "@deck.gl/mapbox": "~9.4.1",
     "@deck.gl/mesh-layers": "~9.4.1",
+    "@loaders.gl/3d-tiles": "^4.5.4",
     "@loaders.gl/core": "^4.5.4",
     "@loaders.gl/gltf": "^4.5.4",
     "@luma.gl/core": "~9.4.0",
     "@luma.gl/engine": "~9.4.0",
+    "framer-motion": "^14.14.0",
+    "i18n-iso-countries": "^7.14.0",
     "maplibre-gl": "^5.24.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "read-excel-file": "^9.3.17",
     "recharts": "^3.10.1",
     "searoute-js": "^0.1.0",
     "zustand": "^5.1.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.5",
+    "@types/geojson": "^7946.0.16",
     "@types/node": "^26.6.6",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
@@ -42,5 +51,8 @@
     "vite": "^7.3.8",
     "vitest": "^3.2.7",
     "world-atlas": "^2.0.2"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

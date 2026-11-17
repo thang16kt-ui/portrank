@@ -1,0 +1,5 @@
+import_country,hs,origin,rate_type,fta,duty_pct,vat_pct,other_pct,source,effective_date,updated_at,verified
+EU,61091000,*,MFN,,12,,0,TARIC (nhập tay – chưa đối chiếu),,2026-11-17,0
+EU,09011100,*,MFN,,0,,0,TARIC (nhập tay – chưa đối chiếu),,2026-11-17,0
+EU,94035000,*,MFN,,0,,0,TARIC (nhập tay – chưa đối chiếu),,2026-11-17,0
+EU,64041100,*,MFN,,16.9,,0,TARIC (nhập tay – chưa đối chiếu),,2026-11-17,0

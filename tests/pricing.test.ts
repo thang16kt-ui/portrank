@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { PRICING } from '../src/config/pricing';
 import { PORT_BY_CODE as P } from '../src/data/ports';
-import { base40, createCsvRateProvider, destThcZone, estimateQuote } from '../src/lib/pricing';
+import { base40, destThcZone, estimateQuote } from '../src/lib/pricing';
+import { createTableRateProvider, parseRateRows } from '../src/providers/RateProvider';
+import { parseCsv } from '../src/lib/csv';
 import { transitDays } from '../src/lib/transit';
 import type { RouteResult, ShipmentInput } from '../src/types';
 
@@ -67,10 +69,23 @@ describe('pricing', () => {
     expect(transitDays(route(3840, ['SUEZ']), 'dry')).toBeCloseTo(13, 6);
     expect(transitDays(route(4080), 'reefer')).toBeCloseTo(12, 6);
   });
-  it('CSV RateProvider thay O/F + BAF', () => {
-    const p = createCsvRateProvider('pol,pod,container,of,baf\nVNSGN,DEHAM,40GP,2000,300');
-    const q = p.quote({ pol: P.VNSGN, pod: P.DEHAM, route: route(9000), shipment: fcl({ quantity: 2 }) }) as ReturnType<typeof estimateQuote>;
-    expect(q.lines.find((l) => l.id === 'of')!.amount).toBe(4000);
-    expect(q.provider).toBe('csv');
+});
+
+describe('Bảng giá của tôi (RateProvider)', () => {
+  const csv = 'Cảng đi;Cảng đến;Loại cont;Cước;Phụ phí;Hiệu lực từ;Hiệu lực đến;Hãng tàu;Nguồn\nVNCMT;DEHAM;40HC;2.150;"320";01/11/2026;30/11/2026;MAEU;FWD A\nVNCMT;DEHAM;40HC;1900;300;2026-10-01;2026-10-31;;FWD B\nXXXXX;DEHAM;40HC;1000;0;;;;';
+  const { entries, errors } = parseRateRows(parseCsv(csv));
+  it('đọc CSV tiêu đề tiếng Việt, dấu ; và số kiểu 2.150, ngày dd/mm/yyyy', () => {
+    expect(entries).toHaveLength(2);
+    expect(errors).toHaveLength(1);
+    expect(entries[0]).toMatchObject({ pol: 'VNCMT', pod: 'DEHAM', container: '40HC', freight: 2150, surcharges: 320, validFrom: '2026-11-01', validTo: '2026-11-30', carrier: 'MAERSK', source: 'FWD A' });
+  });
+  it('chỉ dùng giá còn hiệu lực theo ngày hàng sẵn sàng, gắn nhãn Giá thật + hết hạn', () => {
+    const p = createTableRateProvider(entries);
+    const hit = p.find({ pol: 'VNCMT', pod: 'DEHAM', container: '40HC', date: '2026-11-15', carriers: [] })!;
+    expect(hit.perContainer).toBe(2470);
+    expect(hit.label).toBe('Giá thật · FWD A · Maersk · hết hạn 30/11/2026');
+    expect(p.find({ pol: 'VNCMT', pod: 'DEHAM', container: '40HC', date: '2026-12-15', carriers: [] })).toBeNull();
+    expect(p.find({ pol: 'VNCMT', pod: 'DEHAM', container: '20GP', date: '2026-11-15', carriers: [] })).toBeNull();
+    expect(p.find({ pol: 'VNCMT', pod: 'DEHAM', container: '40HC', date: '2026-11-15', carriers: ['MSC'] })).toBeNull();
   });
 });
