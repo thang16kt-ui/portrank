@@ -1,0 +1,11 @@
+{
+ "source": "GitHub datasets/harmonized-system (UN Comtrade, HS 2022)",
+ "sourceUrl": "https://github.com/datasets/harmonized-system",
+ "fetchedAt": "2026-11-17T15:45:50.708Z",
+ "items": {
+  "610910": "T-shirts, singlets and other vests; of cotton, knitted or crocheted",
+  "640411": "Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like, with outer soles of rubber or plastics and uppers of textile materials",
+  "940350": "Furniture; wooden, for bedroom use",
+  "090111": "Coffee; not roasted or decaffeinated"
+ }
+}

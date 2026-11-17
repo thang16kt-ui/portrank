@@ -1,0 +1,8 @@
+# Danh mục hàng hoá: mỗi dòng 1 mặt hàng, 1 mã HS6 (HS 2022) và mã quốc gia của từng nước nhập khẩu.
+# Cột nước = mã ISO 2 chữ (US GB VN JP…) hoặc EU (dùng chung cho 27 nước EU). Để trống nếu chưa biết.
+# Sau khi sửa: chạy npm run tariffs:update để tải thuế và kiểm tra mã. Mã thiếu sẽ được gợi ý.
+sku,name,hs6,VN,EU,US,GB
+AT-CT01,Áo thun nam cotton,610910,,61091000,6109100012,6109100010
+CF-RB01,Cà phê nhân Robusta chưa rang,090111,,09011100,0901110040,0901110000
+GO-PN01,Giường gỗ phòng ngủ,940350,,94035000,9403509045,9403500000
+GI-TT01,Giày thể thao nam mũ vải đế cao su (trên 12 USD/đôi),640411,,64041100,6404119020,6404110000

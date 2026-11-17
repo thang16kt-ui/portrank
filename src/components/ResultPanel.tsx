@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import { CARGO_LABEL, CONTAINER_LABEL } from '../config/pricing';
 import { INCOTERMS, PARTY_LABEL, payerOf } from '../lib/incoterm';
 import { computePlan, fmtNm, usd, type PlanResult } from '../lib/results';
+import { fmtCode } from '../lib/tariff';
 import { fmtDate } from '../lib/transit';
 import { useAppStore, type ResultTab } from '../store/useAppStore';
 import type { Incoterm } from '../types';
@@ -10,10 +11,12 @@ import Conditions from './Conditions';
 import CostTable from './CostTable';
 import IncotermTab from './IncotermBar';
 import Overview from './Overview';
+import TaxTab from './TaxTab';
 
 const TABS: { id: ResultTab; label: string }[] = [
   { id: 'overview', label: 'Tổng quan' },
   { id: 'cost', label: 'Chi phí' },
+  { id: 'tax', label: 'Thuế NK' },
   { id: 'rules', label: 'Điều kiện' },
   { id: 'incoterm', label: 'Incoterm' },
   { id: 'alts', label: 'Cảng thay thế' },
@@ -39,6 +42,14 @@ export function quoteText(plan: PlanResult, incoterm: Incoterm): string {
     'Chi tiết (USD, ước tính):',
     ...plan.quote.lines.map((l) => `- ${l.label}: ${Math.round(l.amount).toLocaleString('en-US')} [${PARTY_LABEL[payerOf(incoterm, l.segment)]}]`),
     `TỔNG: ${usd(plan.quote.total)} (khoảng ${usd(plan.quote.low)} – ${usd(plan.quote.high)})`,
+    ...(plan.tax
+      ? [
+          '',
+          `Thuế nhập khẩu tại ${plan.pod.countryName} (mã ${fmtCode(plan.tax.code)}, xuất xứ ${plan.tax.input.origin}, trị giá ${plan.tax.basis} ${usd(plan.tax.customsValue)}):`,
+          ...plan.tax.rows.map((r) => `- ${r.label} ${r.rate}: ${r.amount === null ? 'chưa tính' : usd(r.amount)}`),
+          `Tổng thuế & phí NK: ${usd(plan.tax.total)}${plan.tax.references.length ? ` (+ ${plan.tax.references.length} thuế bổ sung cần xác minh)` : ''}`,
+        ]
+      : []),
     '',
     'Chứng từ bắt buộc: ' + plan.checklist.filter((c) => c.severity === 'required').map((c) => c.title).join('; '),
   ];
@@ -135,6 +146,7 @@ export default function ResultPanel() {
         <div className="scroll-thin flex-1 overflow-y-auto p-3 md:p-4">
           {tab === 'overview' && <Overview plan={plan} incoterm={incoterm} />}
           {tab === 'cost' && <CostTable plan={plan} incoterm={incoterm} />}
+          {tab === 'tax' && <TaxTab plan={plan} incoterm={incoterm} />}
           {tab === 'rules' && <Conditions plan={plan} />}
           {tab === 'incoterm' && <IncotermTab plan={plan} incoterm={incoterm} />}
           {tab === 'alts' && <AltRanking />}

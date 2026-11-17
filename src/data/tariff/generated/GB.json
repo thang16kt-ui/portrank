@@ -1,0 +1,4373 @@
+{
+ "country": "GB",
+ "source": "HMRC – UK Trade Tariff",
+ "sourceUrl": "https://www.trade-tariff.service.gov.uk/",
+ "fetchedAt": "2026-11-17T15:45:50.708Z",
+ "lines": [
+  {
+   "code": "6109100010",
+   "description": "T-shirts",
+   "measures": [
+    {
+     "kind": "mfn",
+     "label": "Thuế NK MFN (Third country duty)",
+     "rate": "12.00 %",
+     "pct": 12,
+     "specific": false,
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–EU TCA",
+     "agreement": "UK–EU TCA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AT",
+      "BE",
+      "BG",
+      "CY",
+      "CZ",
+      "DE",
+      "DK",
+      "EE",
+      "ES",
+      "EU",
+      "FI",
+      "FR",
+      "GR",
+      "HR",
+      "HU",
+      "IE",
+      "IT",
+      "LT",
+      "LU",
+      "LV",
+      "MT",
+      "NL",
+      "PL",
+      "PT",
+      "RO",
+      "SE",
+      "SI",
+      "SK"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi CARIFORUM",
+     "agreement": "CARIFORUM",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AG",
+      "BB",
+      "BS",
+      "BZ",
+      "DM",
+      "DO",
+      "GD",
+      "GY",
+      "JM",
+      "KN",
+      "LC",
+      "SR",
+      "TT",
+      "VC"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Eastern and Southern Africa States",
+     "agreement": "Eastern and Southern Africa States",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KM",
+      "MG",
+      "MU",
+      "SC",
+      "ZW"
+     ],
+     "excludedOrigins": [
+      "KM"
+     ],
+     "validFrom": "2024-08-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi SADC EPA",
+     "agreement": "SADC EPA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "BW",
+      "LS",
+      "MZ",
+      "NA",
+      "SZ"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi DCTS – Standard",
+     "agreement": "DCTS – Standard",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "9.60 %",
+     "pct": 9.6,
+     "specific": false,
+     "origins": [
+      "ID",
+      "IN"
+     ],
+     "validFrom": "2023-06-19",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi DCTS – Enhanced",
+     "agreement": "DCTS – Enhanced",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "BO",
+      "CG",
+      "CK",
+      "CV",
+      "DZ",
+      "FM",
+      "KG",
+      "LK",
+      "MN",
+      "NG",
+      "NU",
+      "PH",
+      "PK",
+      "SY",
+      "TJ",
+      "UZ",
+      "VU"
+     ],
+     "validFrom": "2023-06-19",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi DCTS – Comprehensive",
+     "agreement": "DCTS – Comprehensive",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AF",
+      "AO",
+      "BD",
+      "BF",
+      "BI",
+      "BJ",
+      "BT",
+      "CD",
+      "CF",
+      "DJ",
+      "ER",
+      "ET",
+      "GM",
+      "GN",
+      "GW",
+      "HT",
+      "KH",
+      "KI",
+      "KM",
+      "LA",
+      "LR",
+      "LS",
+      "MG",
+      "ML",
+      "MM",
+      "MR",
+      "MW",
+      "MZ",
+      "NE",
+      "NP",
+      "RW",
+      "SB",
+      "SD",
+      "SL",
+      "SN",
+      "SO",
+      "SS",
+      "ST",
+      "TD",
+      "TG",
+      "TL",
+      "TV",
+      "TZ",
+      "UG",
+      "YE",
+      "ZM"
+     ],
+     "validFrom": "2023-06-19",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "mfn",
+     "label": "Thuế NK riêng cho Channel Islands",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "GG",
+      "JE"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "vat",
+     "label": "Import VAT (Anh)",
+     "rate": "20.00 %",
+     "pct": 20,
+     "specific": false,
+     "validFrom": "2024-09-25",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API",
+     "note": "VAT 0.00 % cho trường hợp \"VAT zero rate\" (VATZ)."
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi CPTPP",
+     "agreement": "CPTPP",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AU",
+      "BN",
+      "CA",
+      "CL",
+      "JP",
+      "MX",
+      "MY",
+      "NZ",
+      "PE",
+      "SG",
+      "VN"
+     ],
+     "validFrom": "2026-06-22",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi OCTs (Overseas Countries and Territories)",
+     "agreement": "OCTs (Overseas Countries and Territories)",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AI",
+      "BM",
+      "FK",
+      "GS",
+      "IO",
+      "KY",
+      "MS",
+      "PN",
+      "SH",
+      "TC",
+      "VG"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Central America",
+     "agreement": "Central America",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CR",
+      "GT",
+      "HN",
+      "NI",
+      "PA",
+      "SV"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Andorra",
+     "agreement": "Andorra",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AD"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Albania",
+     "agreement": "Albania",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AL"
+     ],
+     "validFrom": "2021-05-03",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Australia FTA",
+     "agreement": "UK–Australia FTA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AU"
+     ],
+     "validFrom": "2023-05-31",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "additional",
+     "label": "Additional duties",
+     "rate": "35.00 %",
+     "pct": 35,
+     "specific": false,
+     "origins": [
+      "BY"
+     ],
+     "validFrom": "2022-06-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Canada TCA",
+     "agreement": "UK–Canada TCA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CA"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Switzerland TA",
+     "agreement": "UK–Switzerland TA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CH"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Ivory Coast",
+     "agreement": "Ivory Coast",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CI"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Chile",
+     "agreement": "Chile",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CL"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Cameroon",
+     "agreement": "Cameroon",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CM"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Colombia",
+     "agreement": "Colombia",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CO"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Ecuador",
+     "agreement": "Ecuador",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "EC"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Egypt",
+     "agreement": "Egypt",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "EG"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Fiji",
+     "agreement": "Fiji",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "FJ"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Faroe Islands",
+     "agreement": "Faroe Islands",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "FO"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Georgia",
+     "agreement": "Georgia",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "GE"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Ghana",
+     "agreement": "Ghana",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "GH"
+     ],
+     "validFrom": "2021-03-05",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Israel",
+     "agreement": "Israel",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IL"
+     ],
+     "validFrom": "2025-09-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–India CETA",
+     "agreement": "UK–India CETA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IN"
+     ],
+     "validFrom": "2026-07-15",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Iceland",
+     "agreement": "Iceland",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IS"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Jordan",
+     "agreement": "Jordan",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "JO"
+     ],
+     "validFrom": "2021-05-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Japan CEPA",
+     "agreement": "UK–Japan CEPA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "JP"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Kenya",
+     "agreement": "Kenya",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KE"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Korea FTA",
+     "agreement": "UK–Korea FTA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KR"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Lebanon",
+     "agreement": "Lebanon",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "LB"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Liechtenstein",
+     "agreement": "Liechtenstein",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "LI"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Morocco",
+     "agreement": "Morocco",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MA"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Moldova",
+     "agreement": "Moldova",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MD"
+     ],
+     "validFrom": "2023-07-31",
+     "validTo": "2029-07-31",
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi North Macedonia",
+     "agreement": "North Macedonia",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MK"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Mexico TCA",
+     "agreement": "UK–Mexico TCA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MX"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Norway",
+     "agreement": "Norway",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "NO"
+     ],
+     "validFrom": "2021-12-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–New Zealand FTA",
+     "agreement": "UK–New Zealand FTA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "NZ"
+     ],
+     "validFrom": "2023-05-31",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Peru",
+     "agreement": "Peru",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PE"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Papua New Guinea",
+     "agreement": "Papua New Guinea",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PG"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Palestine",
+     "agreement": "Palestine",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PS"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "additional",
+     "label": "Additional duties",
+     "rate": "35.00 %",
+     "pct": 35,
+     "specific": false,
+     "origins": [
+      "RU"
+     ],
+     "validFrom": "2022-06-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Solomon Islands",
+     "agreement": "Solomon Islands",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SB"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Singapore FTA",
+     "agreement": "UK–Singapore FTA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SG"
+     ],
+     "validFrom": "2024-11-21",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi San Marino",
+     "agreement": "San Marino",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SM"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Tunisia",
+     "agreement": "Tunisia",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "TN"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Türkiye FTA",
+     "agreement": "UK–Türkiye FTA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "TR"
+     ],
+     "validFrom": "2021-01-20",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Ukraine",
+     "agreement": "Ukraine",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "UA"
+     ],
+     "validFrom": "2022-05-10",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UKVFTA",
+     "agreement": "UKVFTA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "VN"
+     ],
+     "validFrom": "2025-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Samoa",
+     "agreement": "Samoa",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "WS"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Ceuta",
+     "agreement": "Ceuta",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "XC"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Kosovo",
+     "agreement": "Kosovo",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "XK"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Melilla",
+     "agreement": "Melilla",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "XL"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Serbia",
+     "agreement": "Serbia",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "XS"
+     ],
+     "validFrom": "2021-05-20",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi South Africa",
+     "agreement": "South Africa",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "ZA"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    }
+   ]
+  },
+  {
+   "code": "0901110000",
+   "description": "Not decaffeinated",
+   "measures": [
+    {
+     "kind": "mfn",
+     "label": "Thuế NK MFN (Third country duty)",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–EU TCA",
+     "agreement": "UK–EU TCA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AT",
+      "BE",
+      "BG",
+      "CY",
+      "CZ",
+      "DE",
+      "DK",
+      "EE",
+      "ES",
+      "EU",
+      "FI",
+      "FR",
+      "GR",
+      "HR",
+      "HU",
+      "IE",
+      "IT",
+      "LT",
+      "LU",
+      "LV",
+      "MT",
+      "NL",
+      "PL",
+      "PT",
+      "RO",
+      "SE",
+      "SI",
+      "SK"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi CARIFORUM",
+     "agreement": "CARIFORUM",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AG",
+      "BB",
+      "BS",
+      "BZ",
+      "DM",
+      "DO",
+      "GD",
+      "GY",
+      "JM",
+      "KN",
+      "LC",
+      "SR",
+      "TT",
+      "VC"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Eastern and Southern Africa States",
+     "agreement": "Eastern and Southern Africa States",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KM",
+      "MG",
+      "MU",
+      "SC",
+      "ZW"
+     ],
+     "excludedOrigins": [
+      "KM"
+     ],
+     "validFrom": "2024-08-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi SADC EPA",
+     "agreement": "SADC EPA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "BW",
+      "LS",
+      "MZ",
+      "NA",
+      "SZ"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi DCTS – Standard",
+     "agreement": "DCTS – Standard",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "ID",
+      "IN"
+     ],
+     "validFrom": "2023-06-19",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi DCTS – Enhanced",
+     "agreement": "DCTS – Enhanced",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "BO",
+      "CG",
+      "CK",
+      "CV",
+      "DZ",
+      "FM",
+      "KG",
+      "LK",
+      "MN",
+      "NG",
+      "NU",
+      "PH",
+      "PK",
+      "SY",
+      "TJ",
+      "UZ",
+      "VU"
+     ],
+     "validFrom": "2023-06-19",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi DCTS – Comprehensive",
+     "agreement": "DCTS – Comprehensive",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AF",
+      "AO",
+      "BD",
+      "BF",
+      "BI",
+      "BJ",
+      "BT",
+      "CD",
+      "CF",
+      "DJ",
+      "ER",
+      "ET",
+      "GM",
+      "GN",
+      "GW",
+      "HT",
+      "KH",
+      "KI",
+      "KM",
+      "LA",
+      "LR",
+      "LS",
+      "MG",
+      "ML",
+      "MM",
+      "MR",
+      "MW",
+      "MZ",
+      "NE",
+      "NP",
+      "RW",
+      "SB",
+      "SD",
+      "SL",
+      "SN",
+      "SO",
+      "SS",
+      "ST",
+      "TD",
+      "TG",
+      "TL",
+      "TV",
+      "TZ",
+      "UG",
+      "YE",
+      "ZM"
+     ],
+     "validFrom": "2023-06-19",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "mfn",
+     "label": "Thuế NK riêng cho Channel Islands",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "GG",
+      "JE"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi CPTPP",
+     "agreement": "CPTPP",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AU",
+      "BN",
+      "CA",
+      "CL",
+      "JP",
+      "MX",
+      "MY",
+      "NZ",
+      "PE",
+      "SG",
+      "VN"
+     ],
+     "validFrom": "2026-06-22",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi OCTs (Overseas Countries and Territories)",
+     "agreement": "OCTs (Overseas Countries and Territories)",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AI",
+      "BM",
+      "FK",
+      "GS",
+      "IO",
+      "KY",
+      "MS",
+      "PN",
+      "SH",
+      "TC",
+      "VG"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Central America",
+     "agreement": "Central America",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CR",
+      "GT",
+      "HN",
+      "NI",
+      "PA",
+      "SV"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Albania",
+     "agreement": "Albania",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AL"
+     ],
+     "validFrom": "2021-05-03",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Australia FTA",
+     "agreement": "UK–Australia FTA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AU"
+     ],
+     "validFrom": "2023-05-31",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "additional",
+     "label": "Additional duties",
+     "rate": "35.00 %",
+     "pct": 35,
+     "specific": false,
+     "origins": [
+      "BY"
+     ],
+     "validFrom": "2022-06-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Canada TCA",
+     "agreement": "UK–Canada TCA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CA"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Switzerland TA",
+     "agreement": "UK–Switzerland TA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CH"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Ivory Coast",
+     "agreement": "Ivory Coast",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CI"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Chile",
+     "agreement": "Chile",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CL"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Cameroon",
+     "agreement": "Cameroon",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CM"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Colombia",
+     "agreement": "Colombia",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CO"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Ecuador",
+     "agreement": "Ecuador",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "EC"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Egypt",
+     "agreement": "Egypt",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "EG"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Fiji",
+     "agreement": "Fiji",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "FJ"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Faroe Islands",
+     "agreement": "Faroe Islands",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "FO"
+     ],
+     "validFrom": "2023-03-17",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Georgia",
+     "agreement": "Georgia",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "GE"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Ghana",
+     "agreement": "Ghana",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "GH"
+     ],
+     "validFrom": "2021-03-05",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Israel",
+     "agreement": "Israel",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IL"
+     ],
+     "validFrom": "2025-09-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–India CETA",
+     "agreement": "UK–India CETA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IN"
+     ],
+     "validFrom": "2026-07-15",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Iceland",
+     "agreement": "Iceland",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IS"
+     ],
+     "validFrom": "2022-05-31",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Jordan",
+     "agreement": "Jordan",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "JO"
+     ],
+     "validFrom": "2021-05-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Japan CEPA",
+     "agreement": "UK–Japan CEPA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "JP"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Kenya",
+     "agreement": "Kenya",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KE"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Korea FTA",
+     "agreement": "UK–Korea FTA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KR"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Lebanon",
+     "agreement": "Lebanon",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "LB"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Liechtenstein",
+     "agreement": "Liechtenstein",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "LI"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Morocco",
+     "agreement": "Morocco",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MA"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Moldova",
+     "agreement": "Moldova",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MD"
+     ],
+     "validFrom": "2023-07-31",
+     "validTo": "2029-07-31",
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi North Macedonia",
+     "agreement": "North Macedonia",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MK"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Mexico TCA",
+     "agreement": "UK–Mexico TCA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MX"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Norway",
+     "agreement": "Norway",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "NO"
+     ],
+     "validFrom": "2021-12-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–New Zealand FTA",
+     "agreement": "UK–New Zealand FTA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "NZ"
+     ],
+     "validFrom": "2023-05-31",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Peru",
+     "agreement": "Peru",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PE"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Papua New Guinea",
+     "agreement": "Papua New Guinea",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PG"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Palestine",
+     "agreement": "Palestine",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PS"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "additional",
+     "label": "Additional duties",
+     "rate": "35.00 %",
+     "pct": 35,
+     "specific": false,
+     "origins": [
+      "RU"
+     ],
+     "validFrom": "2022-06-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Solomon Islands",
+     "agreement": "Solomon Islands",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SB"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Singapore FTA",
+     "agreement": "UK–Singapore FTA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SG"
+     ],
+     "validFrom": "2024-11-21",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi San Marino",
+     "agreement": "San Marino",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SM"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Türkiye FTA",
+     "agreement": "UK–Türkiye FTA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "TR"
+     ],
+     "validFrom": "2021-01-20",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Ukraine",
+     "agreement": "Ukraine",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "UA"
+     ],
+     "validFrom": "2022-05-10",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UKVFTA",
+     "agreement": "UKVFTA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "VN"
+     ],
+     "validFrom": "2022-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Samoa",
+     "agreement": "Samoa",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "WS"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Ceuta",
+     "agreement": "Ceuta",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "XC"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Kosovo",
+     "agreement": "Kosovo",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "XK"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Melilla",
+     "agreement": "Melilla",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "XL"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Serbia",
+     "agreement": "Serbia",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "XS"
+     ],
+     "validFrom": "2021-05-20",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi South Africa",
+     "agreement": "South Africa",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "ZA"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "vat",
+     "label": "Import VAT (Anh) – VAT zero rate",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "validFrom": "2024-09-25",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    }
+   ]
+  },
+  {
+   "code": "9403500000",
+   "description": "Wooden furniture of a kind used in the bedroom",
+   "measures": [
+    {
+     "kind": "mfn",
+     "label": "Thuế NK MFN (Third country duty)",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–EU TCA",
+     "agreement": "UK–EU TCA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AT",
+      "BE",
+      "BG",
+      "CY",
+      "CZ",
+      "DE",
+      "DK",
+      "EE",
+      "ES",
+      "EU",
+      "FI",
+      "FR",
+      "GR",
+      "HR",
+      "HU",
+      "IE",
+      "IT",
+      "LT",
+      "LU",
+      "LV",
+      "MT",
+      "NL",
+      "PL",
+      "PT",
+      "RO",
+      "SE",
+      "SI",
+      "SK"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi CARIFORUM",
+     "agreement": "CARIFORUM",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AG",
+      "BB",
+      "BS",
+      "BZ",
+      "DM",
+      "DO",
+      "GD",
+      "GY",
+      "JM",
+      "KN",
+      "LC",
+      "SR",
+      "TT",
+      "VC"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Eastern and Southern Africa States",
+     "agreement": "Eastern and Southern Africa States",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KM",
+      "MG",
+      "MU",
+      "SC",
+      "ZW"
+     ],
+     "excludedOrigins": [
+      "KM"
+     ],
+     "validFrom": "2024-08-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi SADC EPA",
+     "agreement": "SADC EPA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "BW",
+      "LS",
+      "MZ",
+      "NA",
+      "SZ"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi DCTS – Standard",
+     "agreement": "DCTS – Standard",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "ID",
+      "IN"
+     ],
+     "validFrom": "2023-06-19",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi DCTS – Enhanced",
+     "agreement": "DCTS – Enhanced",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "BO",
+      "CG",
+      "CK",
+      "CV",
+      "DZ",
+      "FM",
+      "KG",
+      "LK",
+      "MN",
+      "NG",
+      "NU",
+      "PH",
+      "PK",
+      "SY",
+      "TJ",
+      "UZ",
+      "VU"
+     ],
+     "validFrom": "2023-06-19",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi DCTS – Comprehensive",
+     "agreement": "DCTS – Comprehensive",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AF",
+      "AO",
+      "BD",
+      "BF",
+      "BI",
+      "BJ",
+      "BT",
+      "CD",
+      "CF",
+      "DJ",
+      "ER",
+      "ET",
+      "GM",
+      "GN",
+      "GW",
+      "HT",
+      "KH",
+      "KI",
+      "KM",
+      "LA",
+      "LR",
+      "LS",
+      "MG",
+      "ML",
+      "MM",
+      "MR",
+      "MW",
+      "MZ",
+      "NE",
+      "NP",
+      "RW",
+      "SB",
+      "SD",
+      "SL",
+      "SN",
+      "SO",
+      "SS",
+      "ST",
+      "TD",
+      "TG",
+      "TL",
+      "TV",
+      "TZ",
+      "UG",
+      "YE",
+      "ZM"
+     ],
+     "validFrom": "2023-06-19",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "mfn",
+     "label": "Thuế NK riêng cho Channel Islands",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "GG",
+      "JE"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "vat",
+     "label": "Import VAT (Anh)",
+     "rate": "20.00 %",
+     "pct": 20,
+     "specific": false,
+     "validFrom": "2024-09-25",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi CPTPP",
+     "agreement": "CPTPP",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AU",
+      "BN",
+      "CA",
+      "CL",
+      "JP",
+      "MX",
+      "MY",
+      "NZ",
+      "PE",
+      "SG",
+      "VN"
+     ],
+     "validFrom": "2026-06-22",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi OCTs (Overseas Countries and Territories)",
+     "agreement": "OCTs (Overseas Countries and Territories)",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AI",
+      "BM",
+      "FK",
+      "GS",
+      "IO",
+      "KY",
+      "MS",
+      "PN",
+      "SH",
+      "TC",
+      "VG"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Central America",
+     "agreement": "Central America",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CR",
+      "GT",
+      "HN",
+      "NI",
+      "PA",
+      "SV"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Andorra",
+     "agreement": "Andorra",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AD"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Albania",
+     "agreement": "Albania",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AL"
+     ],
+     "validFrom": "2021-05-03",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Australia FTA",
+     "agreement": "UK–Australia FTA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AU"
+     ],
+     "validFrom": "2023-05-31",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Canada TCA",
+     "agreement": "UK–Canada TCA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CA"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Switzerland TA",
+     "agreement": "UK–Switzerland TA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CH"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Ivory Coast",
+     "agreement": "Ivory Coast",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CI"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Chile",
+     "agreement": "Chile",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CL"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Cameroon",
+     "agreement": "Cameroon",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CM"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Colombia",
+     "agreement": "Colombia",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CO"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Ecuador",
+     "agreement": "Ecuador",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "EC"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Egypt",
+     "agreement": "Egypt",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "EG"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Fiji",
+     "agreement": "Fiji",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "FJ"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Faroe Islands",
+     "agreement": "Faroe Islands",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "FO"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Georgia",
+     "agreement": "Georgia",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "GE"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Ghana",
+     "agreement": "Ghana",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "GH"
+     ],
+     "validFrom": "2021-03-05",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Israel",
+     "agreement": "Israel",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IL"
+     ],
+     "validFrom": "2025-09-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–India CETA",
+     "agreement": "UK–India CETA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IN"
+     ],
+     "validFrom": "2026-07-15",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Iceland",
+     "agreement": "Iceland",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IS"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Jordan",
+     "agreement": "Jordan",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "JO"
+     ],
+     "validFrom": "2021-05-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Japan CEPA",
+     "agreement": "UK–Japan CEPA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "JP"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Kenya",
+     "agreement": "Kenya",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KE"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Korea FTA",
+     "agreement": "UK–Korea FTA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KR"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Lebanon",
+     "agreement": "Lebanon",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "LB"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Liechtenstein",
+     "agreement": "Liechtenstein",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "LI"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Morocco",
+     "agreement": "Morocco",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MA"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Moldova",
+     "agreement": "Moldova",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MD"
+     ],
+     "validFrom": "2023-07-31",
+     "validTo": "2029-07-31",
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi North Macedonia",
+     "agreement": "North Macedonia",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MK"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Mexico TCA",
+     "agreement": "UK–Mexico TCA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MX"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Norway",
+     "agreement": "Norway",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "NO"
+     ],
+     "validFrom": "2021-12-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–New Zealand FTA",
+     "agreement": "UK–New Zealand FTA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "NZ"
+     ],
+     "validFrom": "2023-05-31",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Peru",
+     "agreement": "Peru",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PE"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Papua New Guinea",
+     "agreement": "Papua New Guinea",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PG"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Palestine",
+     "agreement": "Palestine",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PS"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Solomon Islands",
+     "agreement": "Solomon Islands",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SB"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Singapore FTA",
+     "agreement": "UK–Singapore FTA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SG"
+     ],
+     "validFrom": "2024-11-21",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi San Marino",
+     "agreement": "San Marino",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SM"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Tunisia",
+     "agreement": "Tunisia",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "TN"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Türkiye FTA",
+     "agreement": "UK–Türkiye FTA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "TR"
+     ],
+     "validFrom": "2021-01-20",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Ukraine",
+     "agreement": "Ukraine",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "UA"
+     ],
+     "validFrom": "2022-05-10",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UKVFTA",
+     "agreement": "UKVFTA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "VN"
+     ],
+     "validFrom": "2022-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Samoa",
+     "agreement": "Samoa",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "WS"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Ceuta",
+     "agreement": "Ceuta",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "XC"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Kosovo",
+     "agreement": "Kosovo",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "XK"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Melilla",
+     "agreement": "Melilla",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "XL"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Serbia",
+     "agreement": "Serbia",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "XS"
+     ],
+     "validFrom": "2021-05-20",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi South Africa",
+     "agreement": "South Africa",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "ZA"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    }
+   ]
+  },
+  {
+   "code": "6404110000",
+   "description": "Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like",
+   "measures": [
+    {
+     "kind": "mfn",
+     "label": "Thuế NK MFN (Third country duty)",
+     "rate": "16.00 %",
+     "pct": 16,
+     "specific": false,
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–EU TCA",
+     "agreement": "UK–EU TCA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AT",
+      "BE",
+      "BG",
+      "CY",
+      "CZ",
+      "DE",
+      "DK",
+      "EE",
+      "ES",
+      "EU",
+      "FI",
+      "FR",
+      "GR",
+      "HR",
+      "HU",
+      "IE",
+      "IT",
+      "LT",
+      "LU",
+      "LV",
+      "MT",
+      "NL",
+      "PL",
+      "PT",
+      "RO",
+      "SE",
+      "SI",
+      "SK"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi CARIFORUM",
+     "agreement": "CARIFORUM",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AG",
+      "BB",
+      "BS",
+      "BZ",
+      "DM",
+      "DO",
+      "GD",
+      "GY",
+      "JM",
+      "KN",
+      "LC",
+      "SR",
+      "TT",
+      "VC"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Eastern and Southern Africa States",
+     "agreement": "Eastern and Southern Africa States",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KM",
+      "MG",
+      "MU",
+      "SC",
+      "ZW"
+     ],
+     "excludedOrigins": [
+      "KM"
+     ],
+     "validFrom": "2024-08-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi SADC EPA",
+     "agreement": "SADC EPA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "BW",
+      "LS",
+      "MZ",
+      "NA",
+      "SZ"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi DCTS – Standard",
+     "agreement": "DCTS – Standard",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "11.90 %",
+     "pct": 11.9,
+     "specific": false,
+     "origins": [
+      "ID",
+      "IN"
+     ],
+     "excludedOrigins": [
+      "ID"
+     ],
+     "validFrom": "2026-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi DCTS – Enhanced",
+     "agreement": "DCTS – Enhanced",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "BO",
+      "CG",
+      "CK",
+      "CV",
+      "DZ",
+      "FM",
+      "KG",
+      "LK",
+      "MN",
+      "NG",
+      "NU",
+      "PH",
+      "PK",
+      "SY",
+      "TJ",
+      "UZ",
+      "VU"
+     ],
+     "validFrom": "2023-06-19",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi DCTS – Comprehensive",
+     "agreement": "DCTS – Comprehensive",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AF",
+      "AO",
+      "BD",
+      "BF",
+      "BI",
+      "BJ",
+      "BT",
+      "CD",
+      "CF",
+      "DJ",
+      "ER",
+      "ET",
+      "GM",
+      "GN",
+      "GW",
+      "HT",
+      "KH",
+      "KI",
+      "KM",
+      "LA",
+      "LR",
+      "LS",
+      "MG",
+      "ML",
+      "MM",
+      "MR",
+      "MW",
+      "MZ",
+      "NE",
+      "NP",
+      "RW",
+      "SB",
+      "SD",
+      "SL",
+      "SN",
+      "SO",
+      "SS",
+      "ST",
+      "TD",
+      "TG",
+      "TL",
+      "TV",
+      "TZ",
+      "UG",
+      "YE",
+      "ZM"
+     ],
+     "validFrom": "2023-06-19",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "mfn",
+     "label": "Thuế NK riêng cho Channel Islands",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "GG",
+      "JE"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "vat",
+     "label": "Import VAT (Anh)",
+     "rate": "20.00 %",
+     "pct": 20,
+     "specific": false,
+     "validFrom": "2024-09-25",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API",
+     "note": "VAT 0.00 % cho trường hợp \"VAT zero rate\" (VATZ)."
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi CPTPP",
+     "agreement": "CPTPP",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AU",
+      "BN",
+      "CA",
+      "CL",
+      "JP",
+      "MX",
+      "MY",
+      "NZ",
+      "PE",
+      "SG",
+      "VN"
+     ],
+     "validFrom": "2026-06-22",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi OCTs (Overseas Countries and Territories)",
+     "agreement": "OCTs (Overseas Countries and Territories)",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AI",
+      "BM",
+      "FK",
+      "GS",
+      "IO",
+      "KY",
+      "MS",
+      "PN",
+      "SH",
+      "TC",
+      "VG"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Central America",
+     "agreement": "Central America",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CR",
+      "GT",
+      "HN",
+      "NI",
+      "PA",
+      "SV"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Andorra",
+     "agreement": "Andorra",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AD"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Albania",
+     "agreement": "Albania",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AL"
+     ],
+     "validFrom": "2021-05-03",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Australia FTA",
+     "agreement": "UK–Australia FTA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AU"
+     ],
+     "validFrom": "2023-05-31",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "additional",
+     "label": "Additional duties",
+     "rate": "35.00 %",
+     "pct": 35,
+     "specific": false,
+     "origins": [
+      "BY"
+     ],
+     "validFrom": "2022-06-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Canada TCA",
+     "agreement": "UK–Canada TCA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CA"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Switzerland TA",
+     "agreement": "UK–Switzerland TA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CH"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Ivory Coast",
+     "agreement": "Ivory Coast",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CI"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Chile",
+     "agreement": "Chile",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CL"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Cameroon",
+     "agreement": "Cameroon",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CM"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Colombia",
+     "agreement": "Colombia",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CO"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Ecuador",
+     "agreement": "Ecuador",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "EC"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Egypt",
+     "agreement": "Egypt",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "EG"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Fiji",
+     "agreement": "Fiji",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "FJ"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Faroe Islands",
+     "agreement": "Faroe Islands",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "FO"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Georgia",
+     "agreement": "Georgia",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "GE"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Ghana",
+     "agreement": "Ghana",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "GH"
+     ],
+     "validFrom": "2021-03-05",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Israel",
+     "agreement": "Israel",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IL"
+     ],
+     "validFrom": "2025-09-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–India CETA",
+     "agreement": "UK–India CETA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IN"
+     ],
+     "validFrom": "2026-07-15",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Iceland",
+     "agreement": "Iceland",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IS"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Jordan",
+     "agreement": "Jordan",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "JO"
+     ],
+     "validFrom": "2021-05-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Japan CEPA",
+     "agreement": "UK–Japan CEPA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "JP"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Kenya",
+     "agreement": "Kenya",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KE"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Korea FTA",
+     "agreement": "UK–Korea FTA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KR"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Lebanon",
+     "agreement": "Lebanon",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "LB"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Liechtenstein",
+     "agreement": "Liechtenstein",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "LI"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Morocco",
+     "agreement": "Morocco",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MA"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Moldova",
+     "agreement": "Moldova",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MD"
+     ],
+     "validFrom": "2023-07-31",
+     "validTo": "2029-07-31",
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi North Macedonia",
+     "agreement": "North Macedonia",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MK"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Mexico TCA",
+     "agreement": "UK–Mexico TCA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MX"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Norway",
+     "agreement": "Norway",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "NO"
+     ],
+     "validFrom": "2021-12-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–New Zealand FTA",
+     "agreement": "UK–New Zealand FTA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "NZ"
+     ],
+     "validFrom": "2023-05-31",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Peru",
+     "agreement": "Peru",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PE"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Papua New Guinea",
+     "agreement": "Papua New Guinea",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PG"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Palestine",
+     "agreement": "Palestine",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PS"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "additional",
+     "label": "Additional duties",
+     "rate": "35.00 %",
+     "pct": 35,
+     "specific": false,
+     "origins": [
+      "RU"
+     ],
+     "validFrom": "2022-06-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Solomon Islands",
+     "agreement": "Solomon Islands",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SB"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Singapore FTA",
+     "agreement": "UK–Singapore FTA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SG"
+     ],
+     "validFrom": "2024-11-21",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi San Marino",
+     "agreement": "San Marino",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SM"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Tunisia",
+     "agreement": "Tunisia",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "TN"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UK–Türkiye FTA",
+     "agreement": "UK–Türkiye FTA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "TR"
+     ],
+     "validFrom": "2021-01-20",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Ukraine",
+     "agreement": "Ukraine",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "UA"
+     ],
+     "validFrom": "2022-05-10",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi UKVFTA",
+     "agreement": "UKVFTA",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "VN"
+     ],
+     "validFrom": "2024-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Samoa",
+     "agreement": "Samoa",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "WS"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Ceuta",
+     "agreement": "Ceuta",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "XC"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Kosovo",
+     "agreement": "Kosovo",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "XK"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Melilla",
+     "agreement": "Melilla",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "XL"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi Serbia",
+     "agreement": "Serbia",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "XS"
+     ],
+     "validFrom": "2021-05-20",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi South Africa",
+     "agreement": "South Africa",
+     "proof": "Chứng từ xuất xứ (statement on origin / EUR.1) theo hiệp định",
+     "rate": "0.00 %",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "ZA"
+     ],
+     "validFrom": "2021-01-01",
+     "validTo": null,
+     "confidence": "official",
+     "source": "UK Trade Tariff API"
+    }
+   ]
+  }
+ ]
+}
