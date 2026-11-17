@@ -6,6 +6,8 @@
  *   GET /api/hts/search?keyword=…   → chuyển tiếp tới USITC HTS REST (https://hts.usitc.gov/reststop/search)
  *   GET /api/hts/exportList?from=…&to=…
  *                                   → https://hts.usitc.gov/reststop/exportList (đủ dòng tiêu đề trung gian, dùng cho Chương 99)
+ *   GET /api/taric/measures.jsp?… và /api/taric/measures_details.jsp?…
+ *                                   → EU TARIC (ec.europa.eu/taxation_customs/dds2/taric) – biện pháp thuế của EU theo mã + xuất xứ
  *   GET /api/wits/reporter/{nnn}/partner/{nnn}/product/{hs6}/year/{yyyy}/datatype/reported
  *                                   → WITS (World Bank) – UNCTAD TRAINS, thuế MFN/ưu đãi theo HS6 cho mọi nước
  *   GET /api/schedules?pol=&pod=&from=&to=&carrier=
@@ -23,6 +25,8 @@ const HTS_BASE = 'https://hts.usitc.gov/reststop/search';
 const HTS_EXPORT = 'https://hts.usitc.gov/reststop/exportList';
 const HTS_CODE = /^[0-9.]{4,13}$/;
 const WITS_BASE = 'https://wits.worldbank.org/API/V1/SDMX/V21/datasource/TRN';
+const TARIC_BASE = 'https://ec.europa.eu/taxation_customs/dds2/taric';
+const TARIC_PAGES = new Set(['/api/taric/measures.jsp', '/api/taric/measures_details.jsp']);
 const WITS_PATH = /^\/api\/wits(\/reporter\/\d{3}\/partner\/(?:\d{3}|all)\/product\/\d{6}\/year\/\d{4}\/datatype\/reported)$/;
 const LOCODE = /^[A-Z]{2}[A-Z2-9]{3}$/;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -87,6 +91,22 @@ async function handleHtsExport(url) {
   if (!HTS_CODE.test(from) || !HTS_CODE.test(to)) return json(400, { error: 'from/to phải là mã HTS, vd 9403.60 và 9403.60.99.99' });
   const q = new URLSearchParams({ from, to, format: 'JSON', styles: 'false' });
   return cachedJson(`export:${from}:${to}`, `${HTS_EXPORT}?${q}`);
+}
+
+const taricCache = new Map();
+
+/** Chuyển tiếp 2 trang TARIC cần thiết (trả HTML); mã hàng phải là 6–10 số */
+async function handleTaric(url) {
+  if (!TARIC_PAGES.has(url.pathname)) return json(404, { error: 'Không có API này' });
+  if (!/^\d{6,10}$/.test(url.searchParams.get('Taric') ?? '')) return json(400, { error: 'Taric phải là mã hàng 6–10 số' });
+  const target = `${TARIC_BASE}/${url.pathname.slice('/api/taric/'.length)}${url.search}`;
+  const hit = taricCache.get(target);
+  if (hit && Date.now() - hit.at < 6 * 3600e3) return hit.out;
+  const res = await fetchWithTimeout(target, { headers: { Accept: 'text/html' } });
+  if (!res.ok) return json(502, { error: `TARIC trả về HTTP ${res.status}` });
+  const out = { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'public, max-age=3600' }, body: await res.text() };
+  taricCache.set(target, { at: Date.now(), out });
+  return out;
 }
 
 const witsCache = new Map();
@@ -166,6 +186,7 @@ export async function handleApi(method, rawUrl, env = process.env) {
     if (url.pathname === '/api/hts/search') return await handleHts(url);
     if (url.pathname === '/api/hts/exportList') return await handleHtsExport(url);
     if (url.pathname.startsWith('/api/wits/')) return await handleWits(url);
+    if (url.pathname.startsWith('/api/taric/')) return await handleTaric(url);
     if (url.pathname === '/api/schedules') return await handleSchedules(url, env);
     return json(404, { error: 'Không có API này' });
   } catch (e) {

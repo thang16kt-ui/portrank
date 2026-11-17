@@ -168,6 +168,7 @@ export function finalize(items: CostItem[], input: PlanInput, importCountry: str
   if (duty.status === 'ok') {
     i8.lines.push({ label: `Thuế nhập khẩu ${duty.entry!.dutyPct}% × trị giá ${duty.basis.basis}`, amount: r0(duty.duty) });
     if (duty.other) i8.lines.push({ label: `Thuế khác ${duty.entry!.otherPct}%`, amount: r0(duty.other) });
+    if (duty.additional) i8.lines.push({ label: `${duty.entry!.additionalLabel || 'Thuế bổ sung'} ${duty.entry!.additionalPct}%`, amount: r0(duty.additional) });
     if (duty.fees) i8.lines.push({ label: `${duty.entry!.feeLabel || 'Phí theo trị giá'} ${duty.entry!.feePct}%`, amount: r0(duty.fees) });
     if (!duty.vatMissing) i8.lines.push({ label: `VAT/GST ${duty.entry!.vatPct}%`, amount: r0(duty.vat) });
     i8.estimated = false;

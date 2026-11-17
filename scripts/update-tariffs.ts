@@ -15,12 +15,14 @@
  * Một nguồn lỗi → giữ dữ liệu cũ của nguồn đó trong bản chụp và thoát với mã 1.
  */
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { inflateRawSync } from 'node:zlib';
+import countries from 'i18n-iso-countries';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { COUNTRIES } from '../src/data/countries';
+import { COUNTRIES, EU_SET } from '../src/data/countries';
 import { parseCsv } from '../src/lib/csv';
 import {
-  CH99_RANGES, TARIFF_SNAPSHOT, US_SPECIAL, WITS_BULK, htsLeaves, parseWitsAll, witsReporter, type WitsBulkFile, parseChapter99, parseUkCommodity, parseUkHeadingLeaves, ukEntry, usEntry,
+  CH99_RANGES, TARIFF_SNAPSHOT, US_SPECIAL, convertToHs2022, htsLeaves, parseWitsAll, type WitsBulkFile, type WitsRate, parseChapter99, parseUkCommodity, parseUkHeadingLeaves, ukEntry, usEntry,
   type Chapter99Item, type HtsRow, type TariffSnapshot,
 } from '../src/lib/tariffSources';
 import { parseTariffRows, type TariffEntry } from '../src/providers/TariffProvider';
@@ -53,7 +55,14 @@ async function get<T>(url: string, accept = 'application/json', tries = 4): Prom
       const r = await fetch(url, { headers: { Accept: accept, 'User-Agent': 'PortRank-tariff-updater/2.0' }, signal: AbortSignal.timeout(45_000) });
       if (r.status === 404) throw Object.assign(new Error(`404 ${url}`), { status: 404 });
       if (!r.ok) throw new Error(`HTTP ${r.status} ${url}`);
-      return (accept.includes('json') ? await r.json() : await r.text()) as T;
+      const text = await r.text();
+      if (!accept.includes('json')) return text as T;
+      try {
+        return JSON.parse(text) as T;
+      } catch {
+        // WITS đôi khi trả mảng có ô trống ("[,0,null" / ",,") – không hợp lệ JSON → điền null
+        return JSON.parse(text.replace(/\[,/g, '[null,').replace(/,(?=[,\]])/g, ',null')) as T;
+      }
     } catch (e) {
       if ((e as { status?: number }).status === 404 || i >= tries) throw e;
       await new Promise((res) => setTimeout(res, 1000 * 2 ** i));
@@ -94,39 +103,118 @@ async function updateVat() {
   report.push(`✓ VAT/GST: ${Object.keys(rates).length} nước`);
 }
 
-/* ───────────── WITS / TRAINS – toàn bộ HS6 cho các nước chính ───────────── */
+/* ───────────── WITS / TRAINS – toàn bộ HS6 cho mọi nước có số liệu ───────────── */
 const WITS = 'https://wits.worldbank.org/API/V1/SDMX/V21/datasource/TRN';
+const WITS_META = 'https://wits.worldbank.org/API/V1/wits/datasource/trn';
+const CONCORD = 'https://wits.worldbank.org/data/public/concordance';
+/** Mã ISO3 riêng của WITS → ISO2 */
+const WITS_ISO3: Record<string, string> = { EUN: 'EU', ROM: 'RO', SER: 'RS', SUD: 'SD', ZAR: 'CD', TMP: 'TL', MNT: 'ME' };
+/** Nhóm đối tác có Việt Nam là thành viên (ưu tiên từ trên xuống): VN, ASEAN, ASEAN–Úc–NZ */
+const VN_PARTNERS = ['704', 'N52', 'C02'];
+
+/** Đọc file .zip chỉ có 1 tệp (bảng tương quan của WITS) – không cần thư viện ngoài */
+function unzipFirst(buf: Buffer): string {
+  const eocd = buf.lastIndexOf(Buffer.from([0x50, 0x4b, 0x05, 0x06]));
+  const cd = buf.readUInt32LE(eocd + 16);
+  const method = buf.readUInt16LE(cd + 10), size = buf.readUInt32LE(cd + 20), local = buf.readUInt32LE(cd + 42);
+  const start = local + 30 + buf.readUInt16LE(local + 26) + buf.readUInt16LE(local + 28);
+  const data = buf.subarray(start, start + size);
+  return (method === 8 ? inflateRawSync(data) : data).toString('utf8');
+}
+
+/** Bảng tương quan HS 2022 → danh mục cũ (H5 = HS 2017, H4 = 2012, H3 = 2007, H2 = 2002, H1 = 1996, H0 = 1992) */
+const concords = new Map<string, Promise<Record<string, string[]>>>();
+function concordance(nomen: string) {
+  if (!concords.has(nomen))
+    concords.set(
+      nomen,
+      (async () => {
+        const r = await fetch(`${CONCORD}/Concordance_H6_to_${nomen}.zip`, { signal: AbortSignal.timeout(120_000) });
+        if (!r.ok) throw new Error(`Bảng tương quan H6→${nomen}: HTTP ${r.status}`);
+        const map: Record<string, string[]> = {};
+        for (const row of parseCsv(unzipFirst(Buffer.from(await r.arrayBuffer()))).slice(1)) {
+          const [h6, , old] = row;
+          if (!/^\d{6}$/.test(h6) || !/^\d{6}$/.test(old ?? '')) continue;
+          (map[h6] ??= []).includes(old) || map[h6].push(old);
+        }
+        return map;
+      })(),
+    );
+  return concords.get(nomen)!;
+}
+
 async function updateWitsBulk() {
   const dir = join(ROOT, 'public/data/wits');
   mkdirSync(dir, { recursive: true });
   const now = new Date().getFullYear();
-  const index: Record<string, { year: number; nomen: string; count: number }> = {};
-  const queue = [...WITS_BULK];
+  // danh sách nước báo cáo từ danh mục số liệu của WITS (bỏ nhóm nước, nước EU → biểu thuế chung EU)
+  const xml = await get<string>(`${WITS_META}/dataavailability/country/all/year/all`, 'text/xml');
+  const reporters = new Map<string, string>();
+  for (const m of xml.matchAll(/<wits:reporter countrycode="(\w+)" iso3Code="(\w*)" isgroup="No"/g)) {
+    const iso2 = WITS_ISO3[m[2]] ?? countries.alpha3ToAlpha2(m[2]);
+    if (!iso2 || (iso2 !== 'EU' && EU_SET.has(iso2)) || iso2 === 'US' || iso2 === 'GB') continue;
+    reporters.set(iso2, m[1]);
+  }
+  const index: Record<string, { year: number; nomen: string; count: number; converted?: string; prefVN?: { partner: string; year: number; count: number } }> = {};
+  // WITS_ONLY=TH,BR npm run tariffs:update -- --only-wits  → chạy thử vài nước
+  const only = process.env.WITS_ONLY?.split(',').map((x) => x.trim().toUpperCase()).filter(Boolean);
+  const queue = [...reporters.keys()].filter((k) => !only?.length || only.includes(k)).sort();
+  const missing: string[] = [];
+  const url = (r: string, p: string, y: number) => `${WITS}/reporter/${r}/partner/${p}/product/all/year/${y}/datatype/reported?format=JSON`;
+  const toHs22 = async (nomen: string, rates: Record<string, WitsRate>) => (nomen && nomen !== 'H6' ? convertToHs2022(rates, await concordance(nomen)) : { rates, conv: {} });
   const worker = async () => {
     for (let key = queue.shift(); key; key = queue.shift()) {
-      const reporter = witsReporter(key === 'EU' ? 'DE' : key);
-      if (!reporter) continue;
-      let done = false;
-      for (let year = now - 1; year >= now - 6 && !done; year--) {
+      const reporter = reporters.get(key)!;
+      let file: WitsBulkFile | null = null;
+      for (let year = now - 1; year >= now - 10 && !file; year--) {
         try {
-          const doc = await get<unknown>(`${WITS}/reporter/${reporter}/partner/000/product/all/year/${year}/datatype/reported?format=JSON`, 'application/json', 3);
-          const { nomen, rates } = parseWitsAll(doc);
+          const { nomen, rates } = parseWitsAll(await get<unknown>(url(reporter, '000', year), 'application/json', 3));
           if (Object.keys(rates).length < 1000) continue;
-          const file: WitsBulkFile = { reporter, year, nomen, fetchedAt: today, rates };
-          if (!CHECK_ONLY) writeFileSync(join(dir, `${key}.json`), JSON.stringify(file) + '\n');
-          index[key] = { year, nomen, count: Object.keys(rates).length };
-          done = true;
+          const c = await toHs22(nomen, rates);
+          file = { reporter, year, nomen, fetchedAt: today, rates: c.rates, ...(nomen !== 'H6' && { converted: nomen, conv: c.conv }) };
         } catch (e) {
           if ((e as { status?: number }).status !== 404) throw new Error(`${key} ${year}: ${(e as Error).message}`);
         }
       }
-      if (!done) report.push(`! WITS ${key}: không có biểu thuế MFN trong 6 năm gần nhất`);
+      if (!file) {
+        missing.push(key);
+        continue;
+      }
+      // thuế ưu đãi cho xuất xứ Việt Nam (chỉ giữ mã thấp hơn MFN)
+      for (const partner of key === 'VN' ? [] : VN_PARTNERS) {
+        for (let year = file.year; year >= file.year - 4 && !file.prefVN; year--) {
+          try {
+            const { nomen, rates } = parseWitsAll(await get<unknown>(url(reporter, partner, year), 'application/json', 2));
+            if (Object.keys(rates).length < 100) continue;
+            const c = await toHs22(nomen, rates);
+            const lower: Record<string, number> = {};
+            for (const [hs, v] of Object.entries(c.rates)) {
+              const p = Array.isArray(v) ? v[0] : v, m = file.rates[hs];
+              if (m != null && p < (Array.isArray(m) ? m[0] : m)) lower[hs] = p;
+            }
+            file.prefVN = { partner, year, rates: lower };
+          } catch (e) {
+            if ((e as { status?: number }).status !== 404) report.push(`! WITS ${key} ưu đãi ${partner} ${year}: ${(e as Error).message}`);
+          }
+        }
+        if (file.prefVN) break;
+      }
+      if (!CHECK_ONLY) writeFileSync(join(dir, `${key}.json`), JSON.stringify(file) + '\n');
+      index[key] = {
+        year: file.year, nomen: file.nomen, count: Object.keys(file.rates).length,
+        ...(file.converted && { converted: file.converted }),
+        ...(file.prefVN && { prefVN: { partner: file.prefVN.partner, year: file.prefVN.year, count: Object.keys(file.prefVN.rates).length } }),
+      };
     }
   };
-  await Promise.all([worker(), worker(), worker(), worker()]);
+  await Promise.all(Array.from({ length: 6 }, worker));
   if (!CHECK_ONLY) writeFileSync(join(dir, 'index.json'), JSON.stringify({ source: 'WITS – UNCTAD TRAINS (World Bank)', fetchedAt: today, countries: index }) + '\n');
-  const years = Object.values(index).map((x) => x.year);
-  report.push(`✓ WITS: ${Object.keys(index).length}/${WITS_BULK.length} nước, số liệu năm ${Math.min(...years)}–${Math.max(...years)}`);
+  const vals = Object.values(index);
+  report.push(
+    `✓ WITS: ${vals.length}/${reporters.size} nước, số liệu năm ${Math.min(...vals.map((x) => x.year))}–${Math.max(...vals.map((x) => x.year))}; ` +
+      `${vals.filter((x) => x.converted).length} nước quy đổi sang HS 2022; ${vals.filter((x) => x.prefVN).length} nước có thuế ưu đãi cho xuất xứ VN`,
+  );
+  if (missing.length) report.push(`! WITS không có số liệu 10 năm gần nhất: ${missing.join(', ')}`);
 }
 
 /* ───────────── Mỹ – USITC HTS ───────────── */
@@ -213,6 +301,11 @@ const run = async <T>(name: string, job: () => Promise<T>, fallback: T): Promise
   }
 };
 
+if (process.argv.includes('--only-wits')) {
+  await run('WITS', updateWitsBulk, undefined);
+  console.log(report.map((r) => '  ' + r).join('\n'));
+  process.exit(failed ? 1 : 0);
+}
 await run('HS 2022', checkHs6, undefined);
 await run('VAT/GST', updateVat, undefined);
 await run('WITS', updateWitsBulk, undefined);
