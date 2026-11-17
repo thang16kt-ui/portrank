@@ -476,6 +476,75 @@ export function witsReporter(iso2: string): string | null {
 const witsUrl = (reporter: string, partner: string, hs6: string, year: number) =>
   `${WITS_PROXY}/reporter/${reporter}/partner/${partner}/product/${hs6}/year/${year}/datatype/reported?format=JSON`;
 
+/**
+ * Các nước tải sẵn toàn bộ biểu thuế MFN theo HS6 (public/data/wits/{nước}.json – npm run tariffs:update).
+ * Lý do: tường lửa của World Bank chặn yêu cầu đi qua rewrite của Render (403), nên trang tĩnh đọc file tải sẵn;
+ * nước không có trong danh sách → gọi trực tiếp /api/wits (chạy được với dev server / npm start).
+ */
+export const WITS_BULK = [
+  'EU', 'VN', 'CN', 'JP', 'KR', 'IN', 'ID', 'TH', 'MY', 'PH', 'SG', 'KH', 'LA', 'MM', 'BN', 'HK', 'AU', 'NZ', 'CA', 'MX', 'BR', 'AR', 'CL', 'CO', 'PE',
+  'TR', 'AE', 'SA', 'QA', 'KW', 'OM', 'BH', 'IL', 'EG', 'MA', 'ZA', 'NG', 'KE', 'GH', 'PK', 'BD', 'LK', 'RU', 'UA', 'CH', 'NO', 'IS',
+];
+
+/** File tải sẵn: hs6 → thuế trung bình, hoặc [trung bình, min, max, số dòng] khi các dòng quốc gia khác nhau */
+export interface WitsBulkFile {
+  reporter: string;
+  year: number;
+  nomen: string;
+  fetchedAt: string;
+  rates: Record<string, number | [number, number, number, number]>;
+}
+
+/** Đọc phản hồi SDMX-JSON product=all → bảng thuế theo HS6. Hàm thuần. */
+export function parseWitsAll(doc: any): { nomen: string; rates: WitsBulkFile['rates'] } {
+  const dims: { id: string; values: { id: string }[] }[] = doc?.structure?.dimensions?.series ?? [];
+  const attrs: { id: string; values: { id?: string; name?: string }[] }[] = doc?.structure?.attributes?.observation ?? [];
+  const products = dims.find((d) => d.id === 'PRODUCTCODE')?.values ?? [];
+  // WITS xếp mã sản phẩm trong khoá series KHÔNG theo keyPosition khai báo → lấy vị trí có nhiều giá trị khác nhau nhất
+  const keys = Object.keys(doc?.dataSets?.[0]?.series ?? {}).map((k) => k.split(':'));
+  const distinct = keys[0]?.map((_, i) => new Set(keys.map((k) => k[i])).size) ?? [];
+  const pi = distinct.length && Math.max(...distinct) > 1 ? distinct.indexOf(Math.max(...distinct)) : -1;
+  const ai = (id: string) => attrs.findIndex((a) => a.id === id);
+  const [iMin, iMax, iLines, iNomen] = ['MIN_RATE', 'MAX_RATE', 'TOTALNOOFLINES', 'NOMENCODE'].map(ai);
+  const val = (obs: (number | null)[], i: number) => {
+    if (i < 0 || obs[i + 1] == null) return null;
+    const v = attrs[i].values[obs[i + 1]!];
+    return v?.id ?? v?.name ?? null;
+  };
+  const r2 = (x: number) => Math.round(x * 100) / 100;
+  const rates: WitsBulkFile['rates'] = {};
+  let nomen = '';
+  for (const [key, s] of Object.entries(doc?.dataSets?.[0]?.series ?? {})) {
+    const obs = (s as { observations?: Record<string, (number | null)[]> }).observations?.['0'];
+    if (!obs || obs[0] == null) continue;
+    const code = products[pi < 0 ? 0 : +key.split(':')[pi]]?.id;
+    if (!code || !/^\d{6}$/.test(code)) continue;
+    nomen ||= String(val(obs, iNomen) ?? '');
+    const avg = r2(obs[0]), min = val(obs, iMin), max = val(obs, iMax), lines = val(obs, iLines);
+    rates[code] = min != null && max != null && r2(+min) !== r2(+max) ? [avg, r2(+min), r2(+max), +(lines ?? 0)] : avg;
+  }
+  return { nomen, rates };
+}
+
+const bulkKey = (iso2: string) => (EU_SET.has(iso2) ? 'EU' : iso2);
+
+/** Thuế từ file tải sẵn; null nếu nước không có file (→ gọi trực tiếp) */
+async function witsFromBulk(iso2: string, hs6: string): Promise<{ year: number; t: WitsTariff | null; nomen?: string } | null> {
+  const key = bulkKey(iso2);
+  if (!WITS_BULK.includes(key)) return null;
+  const base = (import.meta as unknown as { env?: { BASE_URL?: string } }).env?.BASE_URL ?? '/';
+  let f: WitsBulkFile;
+  try {
+    f = await getJson<WitsBulkFile>(`${base}data/wits/${key}.json`);
+  } catch {
+    return null;
+  }
+  const r = f.rates[hs6];
+  if (r == null) return { year: f.year, t: null, nomen: f.nomen };
+  const [pct, min, max, lines] = Array.isArray(r) ? r : [r, r, r, null];
+  return { year: f.year, t: { pct, min, max, lines, tariffType: 'MFN', nomen: f.nomen } };
+}
+
 /** Năm gần nhất có dữ liệu (TRAINS thường trễ 1–3 năm) */
 async function witsLatest(reporter: string, partner: string, hs6: string, years: number[]): Promise<{ year: number; t: WitsTariff } | null> {
   for (const year of years) {
@@ -503,7 +572,13 @@ export const WitsTariffSource: OfficialTariffSource = {
     const now = new Date().getFullYear();
     const years = [now - 1, now - 2, now - 3, now - 4, now - 5, now - 6];
     try {
-      const mfn = await witsLatest(reporter, '000', hs6, years);
+      const bulk = await witsFromBulk(q.importCountry, hs6);
+      if (bulk && !bulk.t)
+        return {
+          ...base,
+          error: `Biểu thuế ${bulkKey(q.importCountry)} năm ${bulk.year} (TRAINS) không có mã HS6 ${hs6}${bulk.nomen && bulk.nomen !== 'H6' ? ` – biểu thuế này còn dùng ${NOMEN[bulk.nomen] ?? bulk.nomen}, mã có thể đã đổi sang HS 2022; tra ở nguồn chính thức của nước nhập` : ' – kiểm tra lại mã theo chuẩn HS6'}`,
+        };
+      const mfn = bulk?.t ? { year: bulk.year, t: bulk.t } : await witsLatest(reporter, '000', hs6, years);
       if (!mfn) return { ...base, error: `WITS chưa có thuế MFN của ${q.importCountry} cho HS ${hs6} (6 năm gần nhất)` };
       const notes: string[] = [];
       const { t, year } = mfn;
@@ -514,18 +589,25 @@ export const WitsTariffSource: OfficialTariffSource = {
       if (t.nomen && t.nomen !== 'H6') notes.push(`Biểu thuế năm ${year} dùng danh mục ${NOMEN[t.nomen] ?? t.nomen} – mã HS có thể khác HS 2022.`);
       // thuế ưu đãi theo đúng xuất xứ (TRAINS có dữ liệu cho một số cặp nước)
       let pref: WitsTariff | null = null;
+      let prefChecked = true;
       const partner = q.origin && q.origin !== '*' ? witsReporter(q.origin) : null;
       if (partner && partner !== reporter && !(isEu && EU_SET.has(q.origin))) {
         try {
           const p = parseWits(await getJson(witsUrl(reporter, partner, hs6, year)));
           if (p && p.tariffType !== 'MFN' && p.pct < t.pct) pref = p;
-        } catch {
-          /* không có dữ liệu ưu đãi */
+        } catch (e) {
+          // 404 = TRAINS không có số liệu ưu đãi; lỗi khác (vd. trang tĩnh bị chặn) = chưa kiểm tra được
+          if ((e as { status?: number }).status !== 404) prefChecked = false;
         }
       }
       const usePref = !!pref && q.preferFta;
       if (pref && !usePref) notes.push(`TRAINS ghi thuế ưu đãi ${pref.pct}% cho hàng xuất xứ ${q.origin} – tích “Có C/O” để áp dụng.`);
-      if (!pref) notes.push(`TRAINS năm ${year} không có thuế ưu đãi riêng cho xuất xứ ${q.origin}. Nếu có FTA, tra thuế ưu đãi ở nguồn chính thức rồi nhập vào trang Biểu thuế.`);
+      if (!pref)
+        notes.push(
+          prefChecked
+            ? `TRAINS năm ${year} không có thuế ưu đãi riêng cho xuất xứ ${q.origin}. Nếu có FTA, tra thuế ưu đãi ở nguồn chính thức rồi nhập vào trang Biểu thuế.`
+            : `Chưa kiểm tra được thuế ưu đãi cho xuất xứ ${q.origin} (WITS không phản hồi). Nếu có FTA, tra thuế ưu đãi ở nguồn chính thức rồi nhập vào trang Biểu thuế.`,
+        );
       const vat = standardVat(q.importCountry);
       if (vat) notes.push(`VAT/GST: dùng thuế suất tiêu chuẩn ${vat.pct}% (${VAT_DATA.source}) – một số mặt hàng có mức giảm/miễn.`);
       return {

@@ -36,7 +36,7 @@ dữ liệu cảng 3D (vector tiles OpenStreetMap qua OpenFreeMap). Bản đồ 
 
 | Lệnh | Mô tả |
 | --- | --- |
-| `npm test` | 147 unit test (Vitest): routing, pricing + bảng giá, incoterm (đủ 11 điều kiện), duty, ranking, plan (tiêu chí hoàn thành), track + cảnh cảng, rules, nguồn thuế UK/US/WITS + Chương 99 + bản chụp + chuẩn HS6, DCSA + máy chủ trung gian |
+| `npm test` | 151 unit test (Vitest): routing, pricing + bảng giá, incoterm (đủ 11 điều kiện), duty, ranking, plan (tiêu chí hoàn thành), track + cảnh cảng, rules, nguồn thuế UK/US/WITS + Chương 99 + bản chụp + chuẩn HS6, DCSA + máy chủ trung gian |
 | `npm start` | Máy chủ Node phục vụ `dist/` + API trung gian (`/api/hts`, `/api/schedules`) |
 | `npm run tariffs:update` | Tải lại bản chụp biểu thuế (Mỹ, Anh) cho `src/data/tariffProducts.csv`, danh mục HS 2022 chuẩn và VAT/GST tiêu chuẩn |
 | `npm run tariffs:check` | Kiểm tra mã trong danh mục hàng, gợi ý mã còn thiếu (không ghi file) |
@@ -110,6 +110,10 @@ thời gian quay về ước tính. Khi chọn một lộ trình: dòng thời g
 - Trung gian HTS: dev server (`npm run dev`) và `npm start` có sẵn; trên Render (trang tĩnh) dùng quy tắc **Rewrite** `/api/hts/search` → `https://hts.usitc.gov/reststop/search`
   và thêm `/api/hts/exportList` → `https://hts.usitc.gov/reststop/exportList` (thiếu quy tắc này app vẫn chạy: quay về `/search`, Chương 99 lấy từ bản chụp),
   `/api/wits/*` → `https://wits.worldbank.org/API/V1/SDMX/V21/datasource/TRN/*`.
+- **WITS tải sẵn:** tường lửa của World Bank chặn yêu cầu đi qua rewrite của Render (403). Vì vậy `npm run tariffs:update` tải sẵn
+  **toàn bộ biểu thuế MFN theo HS6** (1 lần gọi `product/all` mỗi nước) của EU, Việt Nam và ~45 nước nhập khẩu chính vào `public/data/wits/{nước}.json`
+  (~85 KB/nước, chỉ tải file của nước đang tra). Nước ngoài danh sách `WITS_BULK` (`src/lib/tariffSources.ts`) → gọi `/api/wits` trực tiếp
+  (chạy với `npm run dev` / `npm start`; trên trang tĩnh Render sẽ báo không gọi được).
 - Hai ưu đãi cùng thuế suất (vd. UKVFTA và CPTPP cùng 0%) → chọn hiệp định song phương.
 
 ### Chuẩn mã HS6, VAT/GST và các thuế khác
