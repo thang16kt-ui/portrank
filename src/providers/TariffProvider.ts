@@ -81,7 +81,8 @@ export const OFFICIAL_TARIFF_SOURCES: { id: string; label: string; url: string; 
   { id: 'us-hts', label: 'US HTS (USITC)', url: 'https://hts.usitc.gov/', enabled: true, note: 'Tự động cho nước nhập = Mỹ qua trung gian /api/hts: cột General / Special, phí MPF/HMF; thuế bổ sung Chương 99 theo xuất xứ hiện “cần xác minh”, không cộng vào tổng' },
   { id: 'taric', label: 'EU TARIC', url: 'https://ec.europa.eu/taxation_customs/dds2/taric/taric_consultation.jsp', enabled: false, note: 'Không có API công khai (trang HTML tải bằng JavaScript) – tra tay rồi nhập vào bảng' },
   { id: 'vn', label: 'Biểu thuế Việt Nam', url: 'https://www.customs.gov.vn/', enabled: false, note: 'Không có API công khai – tra tay' },
-  { id: 'wto', label: 'WTO Tariff & Trade Data', url: 'https://ttd.wto.org/', enabled: false, note: 'API cần đăng ký key, dữ liệu cập nhật chậm – chưa làm' },
+  { id: 'wits', label: 'WITS – UNCTAD TRAINS (World Bank)', url: 'https://wits.worldbank.org/', enabled: true, note: 'Tự động cho mọi nước nhập khác (gồm EU, Việt Nam) qua /api/wits: thuế MFN theo HS6 năm gần nhất có số liệu (trễ 1–3 năm), ưu đãi theo xuất xứ nếu TRAINS có; VAT/GST tiêu chuẩn từ gói sales-tax' },
+  { id: 'wto', label: 'WTO Tariff & Trade Data', url: 'https://ttd.wto.org/', enabled: false, note: 'API cần đăng ký key, dữ liệu cập nhật chậm – dùng WITS thay thế' },
 ];
 
 export const TARIFF_CSV_HEADER = ['import_country', 'hs', 'origin', 'rate_type', 'fta', 'duty_pct', 'vat_pct', 'other_pct', 'source', 'effective_date', 'updated_at', 'verified'];

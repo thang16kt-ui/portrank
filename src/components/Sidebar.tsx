@@ -10,6 +10,7 @@ import { suggestIncoterm } from '../lib/incoterm';
 import { useAppStore } from '../store/useAppStore';
 import type { CargoType, ContainerType, Incoterm, Priority, TransportMode } from '../types';
 import AddressInput from './AddressInput';
+import HsInput from './HsInput';
 
 const SELLER_C = '#38bdf8', BUYER_C = '#fb923c';
 
@@ -138,10 +139,10 @@ export default function Sidebar() {
             </div>
           </div>
         )}
-        <div className="grid grid-cols-[110px_1fr] gap-2">
+        <div className="grid grid-cols-[140px_1fr] gap-2">
           <div>
-            <label className="lbl">Mã HS (≥ 6 số)</label>
-            <input className="field" inputMode="numeric" placeholder="940360" value={f.hs} onChange={(e) => setForm({ hs: e.target.value.replace(/[^0-9.]/g, '').slice(0, 12) })} />
+            <label className="lbl">Mã HS (chuẩn HS6)</label>
+            <HsInput value={f.hs} onChange={(hs) => setForm({ hs })} onPickDesc={(d) => !f.hsDesc && setForm({ hsDesc: d })} />
           </div>
           <div>
             <label className="lbl">Mô tả hàng</label>

@@ -36,9 +36,9 @@ dữ liệu cảng 3D (vector tiles OpenStreetMap qua OpenFreeMap). Bản đồ 
 
 | Lệnh | Mô tả |
 | --- | --- |
-| `npm test` | 133 unit test (Vitest): routing, pricing + bảng giá, incoterm (đủ 11 điều kiện), duty, ranking, plan (tiêu chí hoàn thành), track + cảnh cảng, rules, nguồn thuế UK/US + Chương 99 + bản chụp, DCSA + máy chủ trung gian |
+| `npm test` | 147 unit test (Vitest): routing, pricing + bảng giá, incoterm (đủ 11 điều kiện), duty, ranking, plan (tiêu chí hoàn thành), track + cảnh cảng, rules, nguồn thuế UK/US/WITS + Chương 99 + bản chụp + chuẩn HS6, DCSA + máy chủ trung gian |
 | `npm start` | Máy chủ Node phục vụ `dist/` + API trung gian (`/api/hts`, `/api/schedules`) |
-| `npm run tariffs:update` | Tải lại bản chụp biểu thuế (Mỹ, Anh, HS 2022) cho `src/data/tariffProducts.csv` |
+| `npm run tariffs:update` | Tải lại bản chụp biểu thuế (Mỹ, Anh) cho `src/data/tariffProducts.csv`, danh mục HS 2022 chuẩn và VAT/GST tiêu chuẩn |
 | `npm run tariffs:check` | Kiểm tra mã trong danh mục hàng, gợi ý mã còn thiếu (không ghi file) |
 | `npm run build` | Kiểm tra type + build production vào `dist/` |
 | `npm run gen:ship` / `gen:crane` | Sinh lại mô hình tàu / cẩu bờ `.glb` (tự vẽ bằng code, CC0) |
@@ -102,13 +102,24 @@ thời gian quay về ước tính. Khi chọn một lộ trình: dòng thời g
 | --- | --- | --- | --- |
 | Anh | UK Trade Tariff API v2 (`/api/v2/headings`, `/api/v2/commodities`) | Trình duyệt gọi thẳng (API cho phép CORS) | Thuế MFN (Third country duty), ưu đãi theo xuất xứ (Tariff preference, có xét nhóm nước như CPTPP), VAT |
 | Mỹ | USITC HTS REST (`/reststop/exportList`, dự phòng `/reststop/search`) | Qua trung gian `/api/hts/exportList` và `/api/hts/search` (USITC chặn gọi từ trình duyệt) | Cột General (MFN), cột Special (FTA của Mỹ), phí MPF 0,3464% + HMF 0,125% (cộng vào tổng). Thuế bổ sung **Chương 99** theo xuất xứ (thuế đối ứng, Section 301 – vd. Việt Nam +20%) hiện mục **“Cần xác minh”**, KHÔNG cộng vào tổng vì phụ thuộc ngày xếp hàng và danh mục loại trừ |
-| EU, Việt Nam, WTO | – | Không làm | TARIC không có API công khai (trang HTML tải bằng JavaScript, yêu cầu lớn bị chuyển sang gửi email); biểu thuế VN không có API; WTO cần key và cập nhật chậm → tra tay ở trang **Biểu thuế** |
+| **Mọi nước khác** (EU, Việt Nam, Nhật, Hàn, Ấn Độ, ASEAN, Úc, Canada, Mexico, Brazil, Trung Đông, châu Phi…) | WITS – UNCTAD TRAINS (World Bank, SDMX API) | Qua trung gian `/api/wits/…` (WITS không có CORS) | Thuế MFN theo **HS6** của năm gần nhất có số liệu (thường trễ 1–3 năm), kèm khoảng thuế min–max giữa các dòng quốc gia; thuế ưu đãi theo đúng xuất xứ nếu TRAINS có. EU tra biểu thuế chung (mã 918). Ghi rõ năm số liệu, đánh dấu chưa xác minh |
+| EU TARIC, biểu thuế VN, WTO | – | Không làm | TARIC không có API công khai; biểu thuế VN không có API; WTO cần key → mức thuế theo mã quốc gia 8–10 số vẫn tra tay ở trang **Biểu thuế** (được ưu tiên hơn WITS) |
 
 - Mã HS 6 số ứng với nhiều dòng thuế 10 số → hiện danh sách để chọn (không tự đoán). Thuế phức hợp (vd “6,5% + 33 GBP/100 kg”) → báo cần tính tay.
 - Mỗi mức thuế lấy tự động ghi **nguồn (link trang chính thức)** và **ngày lấy**; có nút “Lưu vào biểu thuế của tôi”. Tắt/bật ở trang Biểu thuế.
 - Trung gian HTS: dev server (`npm run dev`) và `npm start` có sẵn; trên Render (trang tĩnh) dùng quy tắc **Rewrite** `/api/hts/search` → `https://hts.usitc.gov/reststop/search`
-  và thêm `/api/hts/exportList` → `https://hts.usitc.gov/reststop/exportList` (thiếu quy tắc này app vẫn chạy: quay về `/search`, Chương 99 lấy từ bản chụp).
+  và thêm `/api/hts/exportList` → `https://hts.usitc.gov/reststop/exportList` (thiếu quy tắc này app vẫn chạy: quay về `/search`, Chương 99 lấy từ bản chụp),
+  `/api/wits/*` → `https://wits.worldbank.org/API/V1/SDMX/V21/datasource/TRN/*`.
 - Hai ưu đãi cùng thuế suất (vd. UKVFTA và CPTPP cùng 0%) → chọn hiệp định song phương.
+
+### Chuẩn mã HS6, VAT/GST và các thuế khác
+- **Ô nhập mã HS** theo chuẩn **HS6 (HS 2022 của WCO)**: gợi ý khi gõ số hoặc từ khoá tiếng Anh, kiểm tra mã có trong danh mục, hiện mô tả
+  chương › nhóm › phân nhóm. Nhập mã quốc gia 8–10 số vẫn được: 6 số đầu phải là HS6 hợp lệ, phần sau là mở rộng của từng nước.
+  Danh mục `public/data/hs6.json` (5.600+ mã HS6, tải khi mở ô nhập) lấy từ GitHub [`datasets/harmonized-system`](https://github.com/datasets/harmonized-system).
+- **VAT/GST tiêu chuẩn** ~130 nước: `src/data/vatRates.json` từ gói npm [`sales-tax`](https://github.com/valeriansaliou/node-sales-tax) (MIT) – chỉ là thuế suất tiêu chuẩn.
+- **Các thuế / phí khác có thể áp dụng** (`src/data/otherTaxes.ts`): theo nước nhập và chương HS – TTĐB & thuế BVMT (VN), thuế tiêu dùng (TQ, Hàn),
+  SWS/IGST (Ấn Độ), PPh 22 (Indonesia), excise các nước, CBAM & excise (EU), Section 232 (Mỹ), DTA/IEPS (Mexico), IPI/PIS/COFINS/ICMS (Brazil),
+  excise GCC, thuế bổ sung Thổ Nhĩ Kỳ, chống bán phá giá… – **danh mục tham khảo, chưa xác minh, không cộng vào tổng**.
 
 ### Bản chụp biểu thuế & cập nhật định kỳ
 `npm run tariffs:update` (`scripts/update-tariffs.ts`) tải thuế cho danh mục hàng `src/data/tariffProducts.csv` từ nguồn chính thức,
