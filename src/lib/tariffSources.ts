@@ -529,7 +529,7 @@ export function parseWitsAll(doc: any): { nomen: string; rates: WitsBulkFile['ra
 const bulkKey = (iso2: string) => (EU_SET.has(iso2) ? 'EU' : iso2);
 
 /** Thuế từ file tải sẵn; null nếu nước không có file (→ gọi trực tiếp) */
-async function witsFromBulk(iso2: string, hs6: string): Promise<{ year: number; t: WitsTariff | null } | null> {
+async function witsFromBulk(iso2: string, hs6: string): Promise<{ year: number; t: WitsTariff | null; nomen?: string } | null> {
   const key = bulkKey(iso2);
   if (!WITS_BULK.includes(key)) return null;
   const base = (import.meta as unknown as { env?: { BASE_URL?: string } }).env?.BASE_URL ?? '/';
@@ -540,7 +540,7 @@ async function witsFromBulk(iso2: string, hs6: string): Promise<{ year: number; 
     return null;
   }
   const r = f.rates[hs6];
-  if (r == null) return { year: f.year, t: null };
+  if (r == null) return { year: f.year, t: null, nomen: f.nomen };
   const [pct, min, max, lines] = Array.isArray(r) ? r : [r, r, r, null];
   return { year: f.year, t: { pct, min, max, lines, tariffType: 'MFN', nomen: f.nomen } };
 }
@@ -573,7 +573,11 @@ export const WitsTariffSource: OfficialTariffSource = {
     const years = [now - 1, now - 2, now - 3, now - 4, now - 5, now - 6];
     try {
       const bulk = await witsFromBulk(q.importCountry, hs6);
-      if (bulk && !bulk.t) return { ...base, error: `Biểu thuế ${bulkKey(q.importCountry)} năm ${bulk.year} (TRAINS) không có mã HS6 ${hs6} – kiểm tra lại mã theo chuẩn HS6` };
+      if (bulk && !bulk.t)
+        return {
+          ...base,
+          error: `Biểu thuế ${bulkKey(q.importCountry)} năm ${bulk.year} (TRAINS) không có mã HS6 ${hs6}${bulk.nomen && bulk.nomen !== 'H6' ? ` – biểu thuế này còn dùng ${NOMEN[bulk.nomen] ?? bulk.nomen}, mã có thể đã đổi sang HS 2022; tra ở nguồn chính thức của nước nhập` : ' – kiểm tra lại mã theo chuẩn HS6'}`,
+        };
       const mfn = bulk?.t ? { year: bulk.year, t: bulk.t } : await witsLatest(reporter, '000', hs6, years);
       if (!mfn) return { ...base, error: `WITS chưa có thuế MFN của ${q.importCountry} cho HS ${hs6} (6 năm gần nhất)` };
       const notes: string[] = [];
