@@ -25,6 +25,11 @@ export interface TariffEntry {
   feePct?: number;
   /** Tên các khoản phí trong feePct, để hiển thị */
   feeLabel?: string;
+  /** Thuế bổ sung theo xuất xứ (chống bán phá giá / chống trợ cấp / tự vệ…) % trên trị giá tính thuế – có chịu VAT */
+  additionalPct?: number;
+  additionalLabel?: string;
+  /** Phần thuế tuyệt đối / theo lượng (vd. "90¢/pr.", "2.50 EUR / 100 kg") – hiển thị, CHƯA cộng vào tổng */
+  specificDuty?: string;
   /** Link hoặc số hiệu văn bản nguồn */
   source: string;
   effectiveDate: string;

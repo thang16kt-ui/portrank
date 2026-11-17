@@ -133,6 +133,8 @@ function DutyPanel({ plan, r }: { plan: Plan; r: RankedOption }) {
               <tr><td>Trị giá tính thuế ({d.basis.basis})</td><td className="text-right">{usd(d.customsValue)}</td></tr>
               <tr><td>Thuế nhập khẩu {e.dutyPct}% <span className="chip chip-sky">{e.rateType === 'FTA' ? `Ưu đãi ${e.fta || 'FTA'}` : 'MFN'}</span></td><td className="text-right">{usd(d.duty)}</td></tr>
               {d.other > 0 && <tr><td>Thuế khác {e.otherPct}%</td><td className="text-right">{usd(d.other)}</td></tr>}
+              {d.additional > 0 && <tr><td>{e.additionalLabel || 'Thuế bổ sung'} {e.additionalPct}% <span className="chip chip-warn">theo xuất xứ</span></td><td className="text-right">{usd(d.additional)}</td></tr>}
+              {e.specificDuty && <tr><td colSpan={2} className="text-amber-200">+ Phần thuế tuyệt đối: <b className="font-mono">{e.specificDuty}</b> <span className="text-mute">– tính theo khối lượng / số lượng, chưa cộng vào tổng</span></td></tr>}
               {d.fees > 0 && <tr><td>{e.feeLabel || 'Phí theo trị giá'} {e.feePct}% <span className="text-[10.5px] text-mute">(không chịu VAT)</span></td><td className="text-right">{usd(d.fees)}</td></tr>}
               <tr><td>VAT/GST {d.vatMissing ? <span className="chip chip-warn">chưa nhập</span> : `${e.vatPct}%`}</td><td className="text-right">{d.vatMissing ? '—' : usd(d.vat)}</td></tr>
               <tr><td className="font-semibold text-fg">Tổng thuế</td><td className="text-right font-bold text-amber-200">{usd(d.total)}</td></tr>
