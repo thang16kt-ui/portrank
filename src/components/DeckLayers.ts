@@ -36,6 +36,24 @@ export interface LayerContext {
   onPortHover: (code: string | null) => void;
 }
 
+// Keep static path data referentially stable between animation frames.
+const routeData = new WeakMap<RouteResult, { path: LngLat[]; timestamps: number[] }[]>();
+const doneData = new WeakMap<RouteResult, { index: number; data: { path: LngLat[] }[] }>();
+function staticRouteData(route: RouteResult) {
+  let data = routeData.get(route);
+  if (!data) { data = [{ path: route.coords, timestamps: route.cumNm }]; routeData.set(route, data); }
+  return data;
+}
+function completedRouteData(route: RouteResult, index: number) {
+  let cached = doneData.get(route);
+  if (!cached || cached.index !== index) {
+    cached = { index, data: [{ path: route.coords.slice(0, index + 2) }] };
+    doneData.set(route, cached);
+  }
+  return cached.data;
+}
+const dashedPath = new PathStyleExtension({ dash: true });
+
 export function buildLayers(ctx: LayerContext): Layer[] {
   const layers: Layer[] = [];
   const { route, progress } = ctx;
@@ -63,7 +81,7 @@ export function buildLayers(ctx: LayerContext): Layer[] {
   );
   // 2) Tuyến
   if (route) {
-    const data = [{ path: route.coords, timestamps: route.cumNm }];
+    const data = staticRouteData(route);
     layers.push(
       new PathLayer({
         id: `route-full-${ctx.routeKey}`,
@@ -74,7 +92,7 @@ export function buildLayers(ctx: LayerContext): Layer[] {
         widthUnits: 'pixels',
         getDashArray: [6, 5],
         dashJustified: true,
-        extensions: [new PathStyleExtension({ dash: true })],
+        extensions: [dashedPath],
         parameters: { depthCompare: 'always' },
       } as any),
       new PathLayer({
@@ -103,13 +121,12 @@ export function buildLayers(ctx: LayerContext): Layer[] {
       // phần đã đi qua (mờ)
       new PathLayer({
         id: `route-done-${ctx.routeKey}`,
-        data: [{ path: route.coords.slice(0, positionAt(route.coords, route.cumNm, currentNm).index + 2) }],
+        data: completedRouteData(route, positionAt(route.coords, route.cumNm, currentNm).index),
         getPath: (d: { path: LngLat[] }) => d.path,
         getColor: [253, 186, 54, 90],
         getWidth: 2.5,
         widthUnits: 'pixels',
         parameters: { depthCompare: 'always' },
-        updateTriggers: { getPath: [Math.round(currentNm)] },
       }),
     );
 

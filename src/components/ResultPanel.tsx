@@ -1,9 +1,9 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo } from 'react';
 import { CARGO_LABEL, CONTAINER_LABEL } from '../config/pricing';
 import { INCOTERMS, PARTY_LABEL, payerOf } from '../lib/incoterm';
 import { computePlan, fmtNm, usd, type PlanResult } from '../lib/results';
 import { fmtDate } from '../lib/transit';
-import { useAppStore, type ResultTab } from '../store/useAppStore';
+import { useAppStore, usePlayback, type ResultTab } from '../store/useAppStore';
 import type { Incoterm } from '../types';
 import AltRanking from './AltRanking';
 import Conditions from './Conditions';
@@ -49,32 +49,17 @@ export default function ResultPanel() {
   const plan = usePlan();
   const tab = useAppStore((s) => s.tab);
   const setTab = useAppStore((s) => s.setTab);
-  const open = useAppStore((s) => s.panelOpen);
   const setOpen = useAppStore((s) => s.setPanelOpen);
   const selected = useAppStore((s) => s.incoterm);
   const saveQuote = useAppStore((s) => s.saveQuote);
   const showToast = useAppStore((s) => s.showToast);
   const computed = useAppStore((s) => s.computed);
-  const [height, setHeight] = useState(() => Math.round(window.innerHeight * 0.36));
-  const drag = useRef<{ y: number; h: number } | null>(null);
+  const form = useAppStore((s) => s.form);
+  const setView = useAppStore((s) => s.setWorkspaceView);
+  const stale = computed && JSON.stringify(form) !== JSON.stringify(computed);
 
   if (!plan || !computed) return null;
   const incoterm: Incoterm = selected ?? plan.suggestion.primary;
-
-  const onPointerDown = (e: React.PointerEvent) => {
-    drag.current = { y: e.clientY, h: open ? height : 44 };
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-  };
-  const onPointerMove = (e: React.PointerEvent) => {
-    if (!drag.current) return;
-    const h = drag.current.h + (drag.current.y - e.clientY);
-    if (h < 90) setOpen(false);
-    else {
-      setOpen(true);
-      setHeight(Math.min(window.innerHeight * 0.85, Math.max(160, h)));
-    }
-  };
-  const onPointerUp = () => (drag.current = null);
 
   const copy = async () => {
     const text = quoteText(plan, incoterm);
@@ -102,44 +87,32 @@ export default function ResultPanel() {
       days: plan.days,
       distanceNm: plan.route.distanceNm,
     });
-    showToast('Đã lưu báo giá (localStorage)');
+    showToast('Đã lưu phương án trên trình duyệt này');
   };
 
   return (
-    <div className="relative z-20 flex shrink-0 flex-col border-t border-slate-200 bg-white shadow-[0_-8px_24px_-12px_rgba(15,23,42,.35)]" style={{ height: open ? height : 44 }}>
-      <div
-        className="flex h-[44px] shrink-0 cursor-row-resize touch-none items-center gap-2 border-b border-slate-100 px-2 select-none"
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-      >
-        <div className="absolute top-1 left-1/2 h-1 w-10 -translate-x-1/2 rounded bg-slate-300" />
-        <div className="scroll-thin flex min-w-0 flex-1 gap-1 overflow-x-auto" onPointerDown={(e) => e.stopPropagation()}>
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`rounded-md px-3 py-1.5 text-sm whitespace-nowrap ${tab === t.id && open ? 'bg-brand-600 font-semibold text-white' : 'text-slate-600 hover:bg-slate-100'}`}
-            >
-              {t.label}
-            </button>
-          ))}
+    <div className="flex h-full min-h-0 flex-col bg-slate-50">
+      <div className="shrink-0 border-b border-slate-200 bg-white p-4 md:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div><p className="text-xs font-semibold uppercase tracking-wider text-brand-600">Kết quả lập kế hoạch</p><h2 className="mt-1 text-xl font-bold text-brand-900">{plan.pol.name} → {plan.pod.name}</h2></div>
+          <div className="flex flex-wrap gap-2">
+            <button onClick={() => { usePlayback.getState().setProgress(0); usePlayback.getState().setPlaying(true); setView('map'); }} className="min-h-11 rounded-lg bg-brand-600 px-4 text-sm font-semibold text-white">▶ Xem mô phỏng</button>
+            <button onClick={save} className="min-h-11 rounded-lg border border-slate-300 px-3 text-sm">Lưu phương án</button>
+            <button onClick={copy} className="min-h-11 rounded-lg border border-slate-300 px-3 text-sm">Sao chép</button>
+          </div>
         </div>
-        <div className="flex shrink-0 gap-1" onPointerDown={(e) => e.stopPropagation()}>
-          <button onClick={copy} className="rounded-md border border-slate-300 px-2 py-1 text-xs hover:bg-slate-50" title="Copy báo giá dạng text">📋<span className="hidden sm:inline"> Copy báo giá</span></button>
-          <button onClick={save} className="rounded-md border border-slate-300 px-2 py-1 text-xs hover:bg-slate-50" title="Lưu báo giá">💾<span className="hidden sm:inline"> Lưu</span></button>
-          <button onClick={() => setOpen(!open)} className="rounded-md px-2 py-1 text-xs text-slate-500 hover:bg-slate-100" title={open ? 'Thu gọn' : 'Mở rộng'}>{open ? '▾' : '▴'}</button>
-        </div>
+        {stale && <div role="status" className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">Thông tin lô hàng đã thay đổi. Kết quả dưới đây thuộc lần tính trước. <button onClick={() => setView('setup')} className="font-semibold underline">Mở lô hàng để tính lại</button>.</div>}
       </div>
-      {open && (
-        <div className="scroll-thin flex-1 overflow-y-auto p-3 md:p-4">
-          {tab === 'overview' && <Overview plan={plan} incoterm={incoterm} />}
-          {tab === 'cost' && <CostTable plan={plan} incoterm={incoterm} />}
-          {tab === 'rules' && <Conditions plan={plan} />}
-          {tab === 'incoterm' && <IncotermTab plan={plan} incoterm={incoterm} />}
-          {tab === 'alts' && <AltRanking />}
-        </div>
-      )}
+      <nav aria-label="Chi tiết kết quả" className="flex shrink-0 gap-1 overflow-x-auto border-b border-slate-200 bg-white px-4 py-2">
+        {TABS.map((t) => <button key={t.id} onClick={() => { setTab(t.id); setOpen(true); }} aria-current={tab === t.id ? 'page' : undefined} className={`min-h-11 rounded-lg px-3 text-sm whitespace-nowrap ${tab === t.id ? 'bg-brand-50 font-semibold text-brand-700' : 'text-slate-600 hover:bg-slate-50'}`}>{t.label}</button>)}
+      </nav>
+      <div className="scroll-thin min-h-0 flex-1 overflow-y-auto p-4 md:p-6">
+        {tab === 'overview' && <Overview plan={plan} incoterm={incoterm} />}
+        {tab === 'cost' && <CostTable plan={plan} incoterm={incoterm} />}
+        {tab === 'rules' && <Conditions plan={plan} />}
+        {tab === 'incoterm' && <IncotermTab plan={plan} incoterm={incoterm} />}
+        {tab === 'alts' && <AltRanking />}
+      </div>
     </div>
   );
 }

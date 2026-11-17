@@ -1,3 +1,4 @@
+import { validateShipment } from './validation';
 import { getPort } from '../data/ports';
 import type { FormState } from '../store/useAppStore';
 import type { Port, Quote, RouteResult, ShipmentInput } from '../types';
@@ -36,6 +37,7 @@ export const routeOptionsOf = (f: FormState) => ({ avoidRedSea: f.avoidRedSea, a
 
 /** Tính toàn bộ kết quả cho một cặp cảng – hàm thuần */
 export function computePlan(f: FormState, polCode = f.pol, podCode = f.pod, route?: RouteResult): PlanResult | null {
+  if (validateShipment({ ...f, pol: polCode, pod: podCode })) return null;
   const pol = getPort(polCode), pod = getPort(podCode);
   if (!pol || !pod || pol.code === pod.code) return null;
   const r = route ?? findRoute(pol, pod, routeOptionsOf(f));

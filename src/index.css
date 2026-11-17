@@ -47,3 +47,13 @@ input[type=range] { accent-color: #0f5cb8; }
 .pr-pass-tip span { opacity: .75; }
 .pr-pass:hover .pr-pass-tip { display: block; }
 .passage-popup .maplibregl-popup-content { padding: 6px 10px; border-radius: 8px; }
+
+/* UI 1.1: readable controls and clear focus on keyboard/mobile. */
+html, body, #root { height: 100dvh; }
+button, summary, input, select { -webkit-tap-highlight-color: transparent; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid #60a5fa; outline-offset: 3px; }
+.section-heading { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; color: #0a2540; }
+.section-heading span { padding: 5px 7px; border-radius: 7px; background: #eef6ff; color: #0f5cb8; font-size: 11px; }
+@media (max-width: 899px) { input:not([type=range]):not([type=checkbox]), select { font-size: 16px; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }

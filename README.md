@@ -1,4 +1,17 @@
-# PortRank – Global Freight Planner
+# PortRank 1.1 – Giao diện lập kế hoạch
+
+Bản riêng trên nhánh `codex/portrank-v1.1-ui`, xuất phát từ commit `e60878a6bfa0f07b4286269e0aa6d98903a32c1e`. Xem [VERSION_1_1.md](VERSION_1_1.md) để biết thay đổi và giới hạn kiểm thử.
+
+Chạy trong terminal Codex hoặc trên máy cá nhân:
+
+```bash
+npm ci
+npm run dev
+```
+
+Mở địa chỉ mà Vite in ra (mặc định http://127.0.0.1:5173). Nếu dùng Codex Cloud, cần chức năng chuyển tiếp cổng/preview của môi trường để xem từ máy cá nhân. Không mở `index.html` bằng cách nhấp đúp.
+
+## Chức năng gốc
 
 Web app chạy local (giao diện tiếng Việt) để lập kế hoạch vận tải biển container:
 
@@ -13,7 +26,7 @@ Web app chạy local (giao diện tiếng Việt) để lập kế hoạch vận
 ## Chạy
 
 ```bash
-npm install
+npm ci
 npm run dev        # http://localhost:5173
 ```
 

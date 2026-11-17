@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { WEIGHT_PRESETS, type Weights } from '../config/weights';
 import type { Booker, CargoType, ContainerType, Incoterm, Priority, Role, RouteResult, ShipMode } from '../types';
 
+export type WorkspaceView = 'setup' | 'results' | 'map';
 export type Page = 'plan' | 'prices' | 'saved';
 export type PickTarget = 'pol' | 'pod';
 export type ResultTab = 'overview' | 'cost' | 'rules' | 'incoterm' | 'alts';
@@ -68,6 +69,8 @@ function persistSaved(list: SavedQuote[]) {
 
 interface AppState {
   page: Page;
+  workspaceView: WorkspaceView;
+  setWorkspaceView: (view: WorkspaceView) => void;
   form: FormState;
   pickTarget: PickTarget;
   weights: Weights;
@@ -129,6 +132,8 @@ let toastTimer: ReturnType<typeof setTimeout> | undefined;
 
 export const useAppStore = create<AppState>((set, get) => ({
   page: 'plan',
+  workspaceView: 'setup',
+  setWorkspaceView: (workspaceView) => set({ workspaceView }),
   form: DEFAULT_FORM,
   pickTarget: 'pol',
   weights: WEIGHT_PRESETS.balanced,
@@ -168,6 +173,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     const f = get().form;
     set((s) => ({
       computed: { ...f },
+      workspaceView: 'results',
+      tab: 'overview',
       sim: { pol: f.pol!, pod: f.pod!, route, runId: (s.sim?.runId ?? 0) + 1 },
       incoterm: null,
       panelOpen: true,

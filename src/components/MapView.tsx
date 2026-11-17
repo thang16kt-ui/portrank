@@ -3,8 +3,9 @@ import maplibregl from 'maplibre-gl';
 import { useEffect, useRef, useState } from 'react';
 import { ANIMATION_CONFIG } from '../config/routing';
 import { PORT_BY_CODE, getPort } from '../data/ports';
-import { bbox, positionAt } from '../lib/geo';
+import { positionAt } from '../lib/geo';
 import { dayAt } from '../lib/transit';
+import { mapHandle, fitRoute } from '../lib/mapControls';
 import { useAppStore, usePlayback } from '../store/useAppStore';
 import type { PassageHit, RouteResult } from '../types';
 import { buildLayers } from './DeckLayers';
@@ -12,8 +13,6 @@ import { flag } from './PortCombobox';
 
 const STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
 
-/** Map dùng chung (để component khác điều khiển camera) */
-export const mapHandle: { map: maplibregl.Map | null } = { map: null };
 
 export function animationSeconds(nm: number) {
   const { minSec, maxSec, nmForMax } = ANIMATION_CONFIG;
@@ -47,14 +46,21 @@ export default function MapView() {
   /* ───────── Khởi tạo bản đồ ───────── */
   useEffect(() => {
     if (!container.current) return;
-    const map = new maplibregl.Map({
-      container: container.current,
-      style: STYLE_URL,
-      center: [105, 14],
-      zoom: 1.6,
-      attributionControl: { compact: true },
-      maxPitch: 75,
-    });
+    let map: maplibregl.Map;
+    try {
+      map = new maplibregl.Map({
+        container: container.current,
+        style: STYLE_URL,
+        center: [105, 14],
+        zoom: 1.6,
+        attributionControl: { compact: true },
+        maxPitch: 75,
+      });
+    } catch {
+      usePlayback.getState().setPlaying(false);
+      setMapError('Thiết bị này chưa mở được bản đồ 3D. Bạn vẫn có thể tính chi phí và xem kết quả ở mục Kết quả.');
+      return;
+    }
     mapHandle.map = map;
     if (import.meta.env.DEV) (window as unknown as { __map: maplibregl.Map }).__map = map;
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
@@ -91,6 +97,7 @@ export default function MapView() {
       map.setSky?.({ 'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 1, 5, 1, 7, 0] } as any);
     });
     map.on('load', () => {
+      setMapError(null);
       addPortLabels(map);
       map.addControl(overlay as unknown as maplibregl.IControl);
       setReady(true);
@@ -115,6 +122,8 @@ export default function MapView() {
       .catch(() => (st.current.shipModelOk = false));
 
     return () => {
+      clearTimeout(st.current.popupTimer);
+      st.current.popup?.remove();
       map.remove();
       mapHandle.map = null;
     };
@@ -152,6 +161,7 @@ export default function MapView() {
 
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame);
+      if (document.hidden) { last = now; return; }
       const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
       const app = useAppStore.getState();
@@ -236,7 +246,7 @@ export default function MapView() {
       {!ready && !mapError && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-blue-100">Đang tải bản đồ…</div>
       )}
-      {mapError && <div className="absolute inset-x-4 top-16 rounded-lg bg-red-600/90 p-3 text-sm text-white">{mapError}</div>}
+      {mapError && <div className="absolute inset-x-4 top-48 rounded-lg bg-red-600/90 p-3 text-sm text-white">{mapError}</div>}
     </div>
   );
 }
@@ -251,24 +261,6 @@ const tooltipStyle = {
   lineHeight: '1.45',
 };
 
-export function fitRoute(map: maplibregl.Map, route: RouteResult) {
-  const [a, b, c, d] = bbox(route.coords);
-  const w = map.getContainer().clientWidth;
-  const pad = Math.min(120, Math.max(40, w * 0.08));
-  const isGlobe = useAppStore.getState().mapMode === 'globe';
-  const cam = map.cameraForBounds(
-    [
-      [a, b],
-      [c, d],
-    ],
-    { padding: { top: pad, bottom: pad + 40, left: pad, right: pad } },
-  );
-  const center: [number, number] = [((a + c) / 2 + 540) % 360 - 180, (b + d) / 2];
-  // globe: xoay để tuyến nằm giữa
-  // globe ở zoom thấp hiển thị lớn hơn mercator → lùi thêm
-  const zoom = Math.min(5, Math.max(isGlobe ? 0.9 : 0.4, (cam?.zoom ?? 2) - (isGlobe ? 0.9 : 0.1)));
-  map.flyTo({ center, zoom, pitch: 0, bearing: 0, duration: 1800, essential: true });
-}
 
 function showPassagePopup(map: maplibregl.Map, route: RouteResult, p: PassageHit, day: number, s: { popup: maplibregl.Popup | null; popupTimer: ReturnType<typeof setTimeout> }) {
   const pos = positionAt(route.coords, route.cumNm, p.atNm).pos;

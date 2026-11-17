@@ -32,6 +32,7 @@ export default function AltRanking() {
   const list = useAlternatives(form);
   if (!form) return null;
   const top = list.slice(0, 5);
+  const current = list.find((c) => c.isCurrent);
   const totalW = Object.values(weights).reduce((a, b) => a + b, 0);
 
   return (
@@ -69,6 +70,7 @@ export default function AltRanking() {
               <th className="px-2 py-2 text-left">Cặp cảng</th>
               <th className="px-2 py-2 text-right">Điểm</th>
               <th className="px-2 py-2 text-right">Cước (ước tính)</th>
+              <th className="px-2 py-2 text-right">So với tuyến gốc</th>
               <th className="px-2 py-2 text-right">Ngày</th>
               <th className="px-2 py-2 text-right" title="Hệ số biến thiên giá 12 tháng (mô phỏng)">CV giá</th>
               <th className="px-2 py-2 text-right">Tàu/tuần</th>
@@ -84,10 +86,13 @@ export default function AltRanking() {
                   onClick={() => {
                     showRoute(c.pol.code, c.pod.code, c.route);
                     usePlayback.getState().setProgress(0);
-                    usePlayback.getState().setPlaying(true);
+                    usePlayback.getState().setPlaying(false);
+                    useAppStore.getState().setTab('overview');
                   }}
                   className={`cursor-pointer border-t border-slate-100 hover:bg-brand-50 ${active ? 'bg-brand-50' : ''}`}
-                  title="Click để vẽ tuyến này trên bản đồ"
+                  title="Chọn để xem chi tiết phương án"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.currentTarget.click(); } }}
                 >
                   <td className="px-2 py-2 font-bold text-slate-400">{i + 1}</td>
                   <td className="px-2 py-2">
@@ -108,6 +113,7 @@ export default function AltRanking() {
                     </div>
                   </td>
                   <td className="px-2 py-2 text-right font-mono text-xs">{usd(c.cost)}</td>
+                  <td className="px-2 py-2 text-right text-xs">{current ? <><div>{c.cost <= current.cost ? 'Giảm ' : 'Tăng '}{usd(Math.abs(c.cost - current.cost))}</div><div className="text-slate-500">{c.days <= current.days ? 'Nhanh hơn ' : 'Lâu hơn '}{Math.abs(c.days - current.days).toFixed(1)} ngày</div></> : '—'}</td>
                   <td className="px-2 py-2 text-right">{c.days.toFixed(1)}</td>
                   <td className="px-2 py-2 text-right">{(c.cv * 100).toFixed(1)}%</td>
                   <td className="px-2 py-2 text-right">{c.frequency}</td>

@@ -41,13 +41,13 @@ export default function PriceWatch() {
     <div className="scroll-thin h-full overflow-y-auto bg-slate-50 p-4 md:p-6">
       <div className="mx-auto max-w-5xl space-y-4">
         <div>
-          <h1 className="text-xl font-bold">Theo dõi giá cước</h1>
+          <h1 className="text-xl font-bold">Giá cước mô phỏng</h1>
           <p className="text-sm text-slate-500">
             Diễn biến 12 tháng cho cặp cảng và các cặp thay thế lân cận ({form.mode === 'FCL' ? `${form.quantity} × ${CONTAINER_LABEL[form.container]}` : `LCL ${form.cbm} CBM`}).
           </p>
         </div>
         <div className="rounded-lg border border-violet-300 bg-violet-50 px-3 py-2 text-xs text-violet-900">
-          📊 <b>DỮ LIỆU MÔ PHỎNG</b> – chuỗi giá sinh ngẫu nhiên có seed cố định theo cặp cảng, chỉ để minh họa cách tính độ ổn định giá (CV). Có thể thay bằng dữ liệu thật qua <code>RateProvider</code>.
+          📊 <b>DỮ LIỆU MÔ PHỎNG</b> – chuỗi giá sinh ngẫu nhiên có seed cố định theo cặp cảng, chỉ để minh họa cách tính độ ổn định giá (CV). Không thể dùng biểu đồ này để xác định giá thị trường hoặc dự báo giá thực tế.
         </div>
         <div className="grid gap-3 rounded-xl border border-slate-200 bg-white p-4 md:grid-cols-2">
           <PortCombobox label="Cảng đi" accent="pol" value={pol} onChange={setPol} />

@@ -15,7 +15,7 @@ export default function SavedQuotes() {
       <div className="mx-auto max-w-4xl space-y-4">
         <div>
           <h1 className="text-xl font-bold">Báo giá đã lưu</h1>
-          <p className="text-sm text-slate-500">Lưu trong trình duyệt (localStorage) của bạn. Giá là mô hình ước tính tại thời điểm lưu.</p>
+          <p className="text-sm text-slate-500">Lưu trên trình duyệt này, chưa đồng bộ sang thiết bị khác. Giá là mô hình ước tính tại thời điểm lưu.</p>
         </div>
         {saved.length === 0 && (
           <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
@@ -54,10 +54,10 @@ export default function SavedQuotes() {
                     compute(findRoute(pol, pod, routeOptionsOf(q.form)));
                     useAppStore.getState().setIncoterm(q.incoterm);
                     usePlayback.getState().setProgress(0);
-                    usePlayback.getState().setPlaying(true);
+                    usePlayback.getState().setPlaying(false);
                   }}
                 >
-                  Mở & mô phỏng lại
+                  Mở phương án
                 </button>
                 <button className="rounded-md border border-slate-300 px-3 py-1.5 text-xs hover:bg-red-50 hover:text-red-700" onClick={() => del(q.id)}>
                   Xóa

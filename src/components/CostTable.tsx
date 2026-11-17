@@ -5,7 +5,7 @@ import type { Incoterm } from '../types';
 export function EstimateBanner({ compact }: { compact?: boolean }) {
   return (
     <div className={`rounded-lg border border-amber-300 bg-amber-50 text-amber-900 ${compact ? 'px-2 py-1 text-[11px]' : 'px-3 py-2 text-xs'}`}>
-      ⚠️ <b>MÔ HÌNH ƯỚC TÍNH</b> – không phải giá thị trường. Hệ số trong <code>src/config/pricing.ts</code>; dùng để so sánh tương đối và lập kế hoạch.
+      ⚠️ <b>MÔ HÌNH ƯỚC TÍNH</b> – không phải giá thị trường. Dùng để tham khảo và so sánh tương đối; cần xác nhận với đơn vị vận chuyển trước khi đặt tàu.
     </div>
   );
 }
@@ -64,7 +64,7 @@ export default function CostTable({ plan, incoterm }: { plan: PlanResult; incote
         </table>
       </div>
       <p className="text-[11px] text-slate-500">
-        Chưa gồm: vận tải nội địa, thông quan, thuế nhập khẩu, bảo hiểm hàng hóa, phí lưu container (DEM/DET), phụ phí mùa cao điểm (PSS) và phí rủi ro chiến tranh. Nguồn giá: mô hình (<code>RateProvider</code> có thể thay bằng API Freightos/Xeneta/hãng tàu hoặc file CSV).
+        Chưa gồm: vận tải nội địa, thông quan, thuế nhập khẩu, bảo hiểm hàng hóa, phí lưu container (DEM/DET), phụ phí mùa cao điểm (PSS) và phí rủi ro chiến tranh. Nguồn giá: mô hình ước tính PortRank, chưa kết nối bảng giá của hãng tàu.
       </p>
     </div>
   );
