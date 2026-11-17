@@ -85,6 +85,15 @@ export const useDataStore = create<DataState>()(
       setMapGlow: (glow) => set((s) => ({ mapTheme: { ...s.mapTheme, glow } })),
       resetMapTheme: () => set({ mapTheme: DEFAULT_THEME_SETTING }),
     }),
-    { name: 'portrank.data.v2', merge: (persisted, cur) => ({ ...cur, ...(persisted as object), mapTheme: { ...DEFAULT_THEME_SETTING, ...((persisted as { mapTheme?: MapThemeSetting })?.mapTheme ?? {}) } }) },
+    {
+      name: 'portrank.data.v2',
+      version: 1,
+      // v0 → v1: nền mặc định đổi từ "Tối phát sáng" sang "Bản đồ chi tiết"; giữ nguyên nếu người dùng đã tự chọn/chỉnh
+      migrate: (persisted: unknown, version: number) => {
+        const st = (persisted ?? {}) as { mapTheme?: MapThemeSetting };
+        if (version < 1 && st.mapTheme && st.mapTheme.base === 'glow' && !Object.keys(st.mapTheme.overrides ?? {}).length && st.mapTheme.glow == null) st.mapTheme = DEFAULT_THEME_SETTING;
+        return st as never;
+      },
+      merge: (persisted, cur) => ({ ...cur, ...(persisted as object), mapTheme: { ...DEFAULT_THEME_SETTING, ...((persisted as { mapTheme?: MapThemeSetting })?.mapTheme ?? {}) } }) },
   ),
 );

@@ -2,11 +2,18 @@ import { describe, expect, it } from 'vitest';
 import { COLOR_FIELDS, DEFAULT_THEME_SETTING, MAP_THEMES, hexToRgb, labelVars, luminance, mix, resolveTheme } from '../src/config/mapThemes';
 
 describe('chủ đề màu bản đồ', () => {
-  it('mặc định là "Tối phát sáng" với nền #070b14 như đặc tả', () => {
+  it('mặc định là "Bản đồ chi tiết" (nền OpenFreeMap Liberty như V1); "Tối phát sáng" vẫn có', () => {
     const t = resolveTheme(DEFAULT_THEME_SETTING);
-    expect(t.id).toBe('glow');
-    expect(t.colors.sea).toBe('#070b14');
-    expect(t.light).toBe(false);
+    expect(t.id).toBe('detail');
+    expect(t.basemap).toBe('liberty');
+    expect(t.light).toBe(true);
+    const g = resolveTheme({ base: 'glow', overrides: {}, glow: null });
+    expect(g.colors.sea).toBe('#070b14');
+    expect(g.basemap).toBeUndefined();
+  });
+  it('ghi nhận các màu người dùng tự chỉnh (nền chi tiết chỉ đổi màu những phần này)', () => {
+    expect(resolveTheme({ base: 'detail', overrides: { sea: '#112233', land: 'xx' }, glow: null }).custom).toEqual(['sea']);
+    expect(resolveTheme(DEFAULT_THEME_SETTING).custom).toEqual([]);
   });
   it('mọi chủ đề có đủ màu cho mọi ô tùy chỉnh, mã màu hợp lệ', () => {
     for (const th of MAP_THEMES) for (const f of COLOR_FIELDS) expect(th.colors[f.key]).toMatch(/^#[0-9a-f]{6}$/i);
@@ -15,7 +22,7 @@ describe('chủ đề màu bản đồ', () => {
     const t = resolveTheme({ base: 'navy', overrides: { rank1: '#FF0000', land: 'red', sea: '#12' as string }, glow: null });
     expect(t.colors.rank1).toBe('#ff0000');
     expect(t.colors.land).toBe(MAP_THEMES.find((x) => x.id === 'navy')!.colors.land);
-    expect(resolveTheme({ base: 'khong-co', overrides: {}, glow: null }).id).toBe('glow');
+    expect(resolveTheme({ base: 'khong-co', overrides: {}, glow: null }).id).toBe('detail');
   });
   it('nền sáng/tối theo màu biển → nhãn đổi chữ tối/sáng', () => {
     expect(resolveTheme({ base: 'chart', overrides: {}, glow: null }).light).toBe(true);

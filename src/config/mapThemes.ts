@@ -23,6 +23,10 @@ export interface MapColors {
 export interface MapTheme {
   id: string;
   name: string;
+  /** Dùng nền bản đồ vector chi tiết OpenFreeMap Liberty (như V1) thay cho nền tự vẽ */
+  basemap?: 'liberty';
+  /** Các màu người dùng đã tự chỉnh (với nền Liberty chỉ đổi màu khi người dùng chỉnh) */
+  custom?: (keyof MapColors)[];
   /** Nền sáng → nhãn trên bản đồ dùng chữ tối */
   light: boolean;
   colors: MapColors;
@@ -31,6 +35,10 @@ export interface MapTheme {
 }
 
 export const MAP_THEMES: MapTheme[] = [
+  {
+    id: 'detail', name: 'Bản đồ chi tiết', light: true, glow: 0, basemap: 'liberty',
+    colors: { sea: '#a0c8f0', land: '#f8f4f0', border: '#9e9cab', coast: '#7aa7d6', coastGlow: '#93c5fd', rank1: '#ea580c', rank23: '#2563eb', rankOther: '#64748b', road: '#16a34a', inland: '#7c3aed', ports: '#0891b2', seller: '#2563eb', buyer: '#f97316' },
+  },
   {
     id: 'glow', name: 'Tối phát sáng', light: false, glow: 0.4,
     colors: { sea: '#070b14', land: '#0c1a2c', border: '#1f3a5c', coast: '#7fe3f5', coastGlow: '#22d3ee', rank1: '#fbbf24', rank23: '#38d6ee', rankOther: '#6086b0', road: '#a3e635', inland: '#c4b5fd', ports: '#a5f3fc', seller: '#38bdf8', buyer: '#fb923c' },
@@ -57,7 +65,7 @@ export const MAP_THEMES: MapTheme[] = [
   },
 ];
 
-export const DEFAULT_THEME_ID = 'glow';
+export const DEFAULT_THEME_ID = 'detail';
 
 /** Nhãn hiển thị cho từng màu tùy chỉnh (theo thứ tự trong bảng chỉnh) */
 export const COLOR_FIELDS: { key: keyof MapColors; label: string }[] = [
@@ -95,7 +103,8 @@ export function resolveTheme(s: MapThemeSetting): MapTheme {
   // nền sáng/tối theo độ sáng của màu biển (để nhãn luôn đọc được khi người dùng tự đổi màu biển)
   const light = luminance(colors.sea) > 0.45;
   const glow = s.glow == null || !isFinite(s.glow) ? base.glow : Math.max(0, Math.min(1, s.glow));
-  return { ...base, colors, light, glow };
+  const custom = (Object.keys(s.overrides ?? {}) as (keyof MapColors)[]).filter((k) => colors[k] === (s.overrides[k] ?? '').toLowerCase());
+  return { ...base, colors, light, glow, custom };
 }
 
 export function hexToRgb(hex: string): [number, number, number] {

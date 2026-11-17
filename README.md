@@ -36,7 +36,7 @@ dữ liệu cảng 3D (vector tiles OpenStreetMap qua OpenFreeMap). Bản đồ 
 
 | Lệnh | Mô tả |
 | --- | --- |
-| `npm test` | 118 unit test (Vitest): routing, pricing + bảng giá, incoterm (đủ 11 điều kiện), duty, ranking, plan (tiêu chí hoàn thành), track + cảnh cảng, rules, nguồn thuế UK/US, DCSA + máy chủ trung gian |
+| `npm test` | 121 unit test (Vitest): routing, pricing + bảng giá, incoterm (đủ 11 điều kiện), duty, ranking, plan (tiêu chí hoàn thành), track + cảnh cảng, rules, nguồn thuế UK/US, DCSA + máy chủ trung gian |
 | `npm start` | Máy chủ Node phục vụ `dist/` + API trung gian (`/api/hts`, `/api/schedules`) |
 | `npm run build` | Kiểm tra type + build production vào `dist/` |
 | `npm run gen:ship` / `gen:crane` | Sinh lại mô hình tàu / cẩu bờ `.glb` (tự vẽ bằng code, CC0) |
@@ -47,7 +47,7 @@ dữ liệu cảng 3D (vector tiles OpenStreetMap qua OpenFreeMap). Bản đồ 
 - **Bảng nhập dọc (380 px)**: `1 · Tuyến` (tôi là, bên tôi, bên đối tác, hãng tàu) · `2 · Hàng hóa` (loại hàng, FCL/LCL, container,
   mã HS, giá trị hàng + Incoterm của giá đó) · `3 · Điều kiện giao hàng` – **chỉ hai hàng nút**: Phương thức (🚢 Đường biển / 🚚 Đường bộ)
   và Điều kiện (11 nút, đường bộ còn 7). Mục ít dùng gập trong **Tùy chọn thêm**. Dưới 900 px thành bottom sheet.
-- **Bản đồ**: mặc định nền `#070B14`, đất xanh than, viền bờ biển phát sáng (2 lớp line). Nút **🎨 Màu bản đồ** đổi chủ đề (Tối phát sáng, Hải quân, Hải đồ, Sáng tối giản, Neon tím, Đen trắng) hoặc chỉnh từng màu (biển, đất, biên giới, viền bờ, quầng sáng, tuyến theo hạng, đường bộ, nội địa, cảng, bên bán/mua) và độ phát sáng; lưu trên trình duyệt (`src/config/mapThemes.ts`). Hạng 1 vàng cam có hạt sáng chạy liên tục,
+- **Bản đồ**: mặc định là **Bản đồ chi tiết** – nền vector OpenFreeMap Liberty (như V1), tên địa danh tiếng Việt. Chủ đề tự vẽ từ Natural Earth (nền `#070B14`, đất xanh than, viền bờ biển phát sáng 2 lớp line) vẫn chọn được. Nút **🎨 Màu bản đồ** đổi chủ đề (Bản đồ chi tiết, Tối phát sáng, Hải quân, Hải đồ, Sáng tối giản, Neon tím, Đen trắng) hoặc chỉnh từng màu (biển, đất, biên giới, viền bờ, quầng sáng, tuyến theo hạng, đường bộ, nội địa, cảng, bên bán/mua) và độ phát sáng; lưu trên trình duyệt (`src/config/mapThemes.ts`). Hạng 1 vàng cam có hạt sáng chạy liên tục,
   hạng 2–3 xanh lơ, còn lại rất mờ. Đoạn nội địa đứt nét. Nhánh A tô sáng viền quốc gia; nhánh B có ghim công ty với vòng sáng lan tỏa.
   Nhãn cảng: tên + UN/LOCODE + tổng chi phí của phương án tốt nhất qua cảng. Hover → tooltip; click → chọn phương án:
   các đường khác mờ đi, hiện **đường biển thật** (nút bật/tắt) với tàu chạy, ghim eo biển / kênh đào.

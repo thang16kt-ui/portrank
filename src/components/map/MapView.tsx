@@ -24,6 +24,26 @@ import { labelVars, mix, resolveTheme, type MapTheme } from '../../config/mapThe
 export const mapHandle: { map: maplibregl.Map | null } = { map: null };
 
 const SEA = '#070B14';
+/** Nền bản đồ vector chi tiết (như V1) – OpenFreeMap, không cần key */
+const LIBERTY_URL = 'https://tiles.openfreemap.org/styles/liberty';
+const EMPTY_STYLE: maplibregl.StyleSpecification = { version: 8, sources: {}, layers: [{ id: 'bg', type: 'background', paint: { 'background-color': SEA } }] };
+const styleFor = (t: MapTheme) => (t.basemap === 'liberty' ? LIBERTY_URL : EMPTY_STYLE);
+/** Lớp nền tự vẽ – ẩn khi dùng nền Liberty (Liberty đã có đất, biển, biên giới) */
+const OWN_BASE_LAYERS = ['land-fill', 'borders', 'coast-glow', 'coast'];
+
+/** Đổi nhãn địa danh của nền Liberty sang tiếng Việt (giống V1) */
+function localizeLabels(map: maplibregl.Map) {
+  for (const layer of map.getStyle()?.layers ?? []) {
+    if (layer.type !== 'symbol') continue;
+    const tf = map.getLayoutProperty(layer.id, 'text-field');
+    if (!tf || !JSON.stringify(tf).includes('name')) continue;
+    try {
+      map.setLayoutProperty(layer.id, 'text-field', ['coalesce', ['get', 'name:vi'], ['get', 'name:latin'], ['get', 'name_en'], ['get', 'name']]);
+    } catch {
+      /* bỏ qua */
+    }
+  }
+}
 
 const WORLD_LAYERS = ['land-fill', 'borders', 'coast-glow', 'coast', 'hlA-fill', 'hlA-glow', 'hlA-line', 'hlB-fill', 'hlB-glow', 'hlB-line', 'ports-glow', 'ports-dot'];
 const PORT_VIEW_LAYERS = ['p-landuse', 'p-water', 'p-water-glow', 'p-water-edge', 'p-pier', 'p-pier-line', 'p-road', 'p-rail', 'p-building'];
@@ -34,7 +54,11 @@ const tooltipStyle = {
 };
 
 function addBaseLayers(map: maplibregl.Map) {
+  if (map.getSource('world')) return;
   const empty: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] };
+  // với nền Liberty: chèn lớp của PortRank dưới lớp chữ đầu tiên để tên địa danh vẫn nổi
+  const firstSymbol = map.getStyle()?.layers?.find((l) => l.type === 'symbol')?.id;
+  const add = (l: maplibregl.AddLayerObject) => map.addLayer(l, l.id.startsWith('ports') ? undefined : firstSymbol);
   map.addSource('world', { type: 'geojson', data: empty });
   map.addSource('landmass', { type: 'geojson', data: empty });
   map.addSource('country-lines', { type: 'geojson', data: empty });
@@ -42,33 +66,33 @@ function addBaseLayers(map: maplibregl.Map) {
     type: 'geojson',
     data: { type: 'FeatureCollection', features: PORTS.map((p) => ({ type: 'Feature', properties: { code: p.code, name: p.name }, geometry: { type: 'Point', coordinates: p.coord } })) },
   });
-  map.addLayer({ id: 'land-fill', type: 'fill', source: 'world', paint: { 'fill-color': '#0c1a2c' } });
-  map.addLayer({ id: 'borders', type: 'line', source: 'country-lines', paint: { 'line-color': '#1f3a5c', 'line-width': 0.5, 'line-opacity': 0.7 } });
+  add({ id: 'land-fill', type: 'fill', source: 'world', paint: { 'fill-color': '#0c1a2c' } });
+  add({ id: 'borders', type: 'line', source: 'country-lines', paint: { 'line-color': '#1f3a5c', 'line-width': 0.5, 'line-opacity': 0.7 } });
   // Viền bờ biển phát sáng: 1 lớp dày mờ + 1 lớp mảnh sáng
-  map.addLayer({ id: 'coast-glow', type: 'line', source: 'landmass', paint: { 'line-color': '#22d3ee', 'line-width': 5, 'line-blur': 5, 'line-opacity': 0.4 } });
-  map.addLayer({ id: 'coast', type: 'line', source: 'landmass', paint: { 'line-color': '#7fe3f5', 'line-width': 0.7, 'line-opacity': 0.9 } });
+  add({ id: 'coast-glow', type: 'line', source: 'landmass', paint: { 'line-color': '#22d3ee', 'line-width': 5, 'line-blur': 5, 'line-opacity': 0.4 } });
+  add({ id: 'coast', type: 'line', source: 'landmass', paint: { 'line-color': '#7fe3f5', 'line-width': 0.7, 'line-opacity': 0.9 } });
   for (const [k, c] of [['hlA', '#38bdf8'], ['hlB', '#fb923c']] as const) {
     const filter: maplibregl.FilterSpecification = ['==', ['get', 'iso2'], '__'];
-    map.addLayer({ id: `${k}-fill`, type: 'fill', source: 'world', filter, paint: { 'fill-color': c, 'fill-opacity': 0.1 } });
-    map.addLayer({ id: `${k}-glow`, type: 'line', source: 'country-lines', filter, paint: { 'line-color': c, 'line-width': 7, 'line-blur': 6, 'line-opacity': 0.75 } });
-    map.addLayer({ id: `${k}-line`, type: 'line', source: 'country-lines', filter, paint: { 'line-color': c, 'line-width': 1.4 } });
+    add({ id: `${k}-fill`, type: 'fill', source: 'world', filter, paint: { 'fill-color': c, 'fill-opacity': 0.1 } });
+    add({ id: `${k}-glow`, type: 'line', source: 'country-lines', filter, paint: { 'line-color': c, 'line-width': 7, 'line-blur': 6, 'line-opacity': 0.75 } });
+    add({ id: `${k}-line`, type: 'line', source: 'country-lines', filter, paint: { 'line-color': c, 'line-width': 1.4 } });
   }
-  map.addLayer({ id: 'ports-glow', type: 'circle', source: 'ports', paint: { 'circle-radius': 5, 'circle-color': '#22d3ee', 'circle-blur': 1, 'circle-opacity': 0.5 } });
-  map.addLayer({ id: 'ports-dot', type: 'circle', source: 'ports', paint: { 'circle-radius': 2, 'circle-color': '#a5f3fc' } });
+  add({ id: 'ports-glow', type: 'circle', source: 'ports', paint: { 'circle-radius': 5, 'circle-color': '#22d3ee', 'circle-blur': 1, 'circle-opacity': 0.5 } });
+  add({ id: 'ports-dot', type: 'circle', source: 'ports', paint: { 'circle-radius': 2, 'circle-color': '#a5f3fc' } });
 
   // ── Lớp cảng 3D (Mức 1): vector tiles OpenStreetMap theo schema OpenMapTiles – chỉ nạp khi bật ──
   map.addSource('omt', { type: 'vector', url: 'https://tiles.openfreemap.org/planet' });
   const hide = { visibility: 'none' as const };
   const cls = (...c: string[]): maplibregl.ExpressionSpecification => ['in', ['get', 'class'], ['literal', c]];
-  map.addLayer({ id: 'p-landuse', type: 'fill', source: 'omt', 'source-layer': 'landuse', filter: cls('industrial', 'commercial', 'railway'), layout: hide, paint: { 'fill-color': '#15294a' } });
-  map.addLayer({ id: 'p-water', type: 'fill', source: 'omt', 'source-layer': 'water', layout: hide, paint: { 'fill-color': '#050b16' } });
-  map.addLayer({ id: 'p-water-glow', type: 'line', source: 'omt', 'source-layer': 'water', layout: hide, paint: { 'line-color': '#22d3ee', 'line-width': 5, 'line-blur': 5, 'line-opacity': 0.35 } });
-  map.addLayer({ id: 'p-water-edge', type: 'line', source: 'omt', 'source-layer': 'water', layout: hide, paint: { 'line-color': '#7fe3f5', 'line-width': 0.8, 'line-opacity': 0.8 } });
-  map.addLayer({ id: 'p-pier', type: 'fill', source: 'omt', 'source-layer': 'transportation', filter: ['all', ['==', ['geometry-type'], 'Polygon'], ['==', ['get', 'class'], 'pier']], layout: hide, paint: { 'fill-color': '#27466f' } });
-  map.addLayer({ id: 'p-pier-line', type: 'line', source: 'omt', 'source-layer': 'transportation', filter: ['all', ['==', ['geometry-type'], 'LineString'], ['==', ['get', 'class'], 'pier']], layout: hide, paint: { 'line-color': '#27466f', 'line-width': ['interpolate', ['exponential', 2], ['zoom'], 12, 1, 16, 14] } });
-  map.addLayer({ id: 'p-road', type: 'line', source: 'omt', 'source-layer': 'transportation', filter: ['all', ['==', ['geometry-type'], 'LineString'], cls('motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'minor', 'service')], layout: hide, paint: { 'line-color': '#34527c', 'line-width': ['interpolate', ['linear'], ['zoom'], 12, 0.6, 16, 3] } });
-  map.addLayer({ id: 'p-rail', type: 'line', source: 'omt', 'source-layer': 'transportation', filter: ['all', ['==', ['geometry-type'], 'LineString'], cls('rail')], layout: hide, paint: { 'line-color': '#b98a3c', 'line-width': 1.2, 'line-dasharray': [3, 2] } });
-  map.addLayer({
+  add({ id: 'p-landuse', type: 'fill', source: 'omt', 'source-layer': 'landuse', filter: cls('industrial', 'commercial', 'railway'), layout: hide, paint: { 'fill-color': '#15294a' } });
+  add({ id: 'p-water', type: 'fill', source: 'omt', 'source-layer': 'water', layout: hide, paint: { 'fill-color': '#050b16' } });
+  add({ id: 'p-water-glow', type: 'line', source: 'omt', 'source-layer': 'water', layout: hide, paint: { 'line-color': '#22d3ee', 'line-width': 5, 'line-blur': 5, 'line-opacity': 0.35 } });
+  add({ id: 'p-water-edge', type: 'line', source: 'omt', 'source-layer': 'water', layout: hide, paint: { 'line-color': '#7fe3f5', 'line-width': 0.8, 'line-opacity': 0.8 } });
+  add({ id: 'p-pier', type: 'fill', source: 'omt', 'source-layer': 'transportation', filter: ['all', ['==', ['geometry-type'], 'Polygon'], ['==', ['get', 'class'], 'pier']], layout: hide, paint: { 'fill-color': '#27466f' } });
+  add({ id: 'p-pier-line', type: 'line', source: 'omt', 'source-layer': 'transportation', filter: ['all', ['==', ['geometry-type'], 'LineString'], ['==', ['get', 'class'], 'pier']], layout: hide, paint: { 'line-color': '#27466f', 'line-width': ['interpolate', ['exponential', 2], ['zoom'], 12, 1, 16, 14] } });
+  add({ id: 'p-road', type: 'line', source: 'omt', 'source-layer': 'transportation', filter: ['all', ['==', ['geometry-type'], 'LineString'], cls('motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'minor', 'service')], layout: hide, paint: { 'line-color': '#34527c', 'line-width': ['interpolate', ['linear'], ['zoom'], 12, 0.6, 16, 3] } });
+  add({ id: 'p-rail', type: 'line', source: 'omt', 'source-layer': 'transportation', filter: ['all', ['==', ['geometry-type'], 'LineString'], cls('rail')], layout: hide, paint: { 'line-color': '#b98a3c', 'line-width': 1.2, 'line-dasharray': [3, 2] } });
+  add({
     id: 'p-building', type: 'fill-extrusion', source: 'omt', 'source-layer': 'building', layout: hide, minzoom: 12,
     paint: { 'fill-extrusion-color': '#2b4a78', 'fill-extrusion-height': ['coalesce', ['get', 'render_height'], 8], 'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0], 'fill-extrusion-opacity': 0.9 },
   });
@@ -78,6 +102,21 @@ function addBaseLayers(map: maplibregl.Map) {
 function applyTheme(map: maplibregl.Map, t: MapTheme, portView: boolean) {
   const C = t.colors;
   const paint = (id: string, prop: string, v: unknown) => map.getLayer(id) && map.setPaintProperty(id, prop as never, v as never);
+  const liberty = t.basemap === 'liberty';
+  for (const id of OWN_BASE_LAYERS) map.getLayer(id) && map.setLayoutProperty(id, 'visibility', liberty || portView ? 'none' : 'visible');
+  if (liberty) {
+    // chỉ đổi màu lớp của Liberty khi người dùng đã tự chỉnh màu đó (giữ nguyên màu gốc của bản đồ chi tiết)
+    const custom = new Set(t.custom ?? []);
+    for (const l of map.getStyle()?.layers ?? []) {
+      const sl = (l as { 'source-layer'?: string })['source-layer'];
+      if (custom.has('sea') && l.type === 'fill' && sl === 'water') paint(l.id, 'fill-color', C.sea);
+      if (custom.has('land') && l.type === 'background') paint(l.id, 'background-color', C.land);
+      if (custom.has('border') && l.type === 'line' && sl === 'boundary') paint(l.id, 'line-color', C.border);
+    }
+  }
+  paint('ports-dot', 'circle-radius', t.light ? 3.5 : 2);
+  paint('ports-dot', 'circle-stroke-color', '#ffffff');
+  paint('ports-dot', 'circle-stroke-width', t.light ? 1.2 : 0);
   paint('bg', 'background-color', portView ? C.land : C.sea);
   paint('land-fill', 'fill-color', C.land);
   paint('borders', 'line-color', C.border);
@@ -91,7 +130,7 @@ function applyTheme(map: maplibregl.Map, t: MapTheme, portView: boolean) {
     paint(`${k}-line`, 'line-color', c);
   }
   paint('ports-glow', 'circle-color', C.coastGlow);
-  paint('ports-glow', 'circle-opacity', t.light ? 0.25 : 0.5);
+  paint('ports-glow', 'circle-opacity', t.light ? 0 : 0.5);
   paint('ports-dot', 'circle-color', C.ports);
   // cảnh cảng 3D (OpenStreetMap)
   paint('p-water', 'fill-color', t.light ? C.sea : mix(C.sea, '#000000', 0.25));
@@ -173,6 +212,8 @@ export default function MapView() {
   const container = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
   const [worldReady, setWorldReady] = useState(false);
+  /** Tăng mỗi lần style bản đồ được nạp lại → các effect gắn lớp/filter chạy lại */
+  const [styleRev, setStyleRev] = useState(0);
   const [mapError, setMapError] = useState<string | null>(null);
   const [scene, setScene] = useState<PortScene | null>(null);
   const [sceneBusy, setSceneBusy] = useState(false);
@@ -241,6 +282,7 @@ export default function MapView() {
     truck: null as maplibregl.Marker | null,
     shipModelOk: false,
     followBearing: 0,
+    liberty: false,
     prevCam: null as null | { center: maplibregl.LngLatLike; zoom: number },
     grid: null as PortGrid | null,
     lastT: 0,
@@ -253,7 +295,7 @@ export default function MapView() {
     if (!container.current) return;
     const map = new maplibregl.Map({
       container: container.current,
-      style: { version: 8, sources: {}, layers: [{ id: 'bg', type: 'background', paint: { 'background-color': SEA } }] },
+      style: styleFor(resolveTheme(useDataStore.getState().mapTheme)),
       center: [70, 22],
       zoom: 1.4,
       maxPitch: 75,
@@ -280,18 +322,30 @@ export default function MapView() {
     });
     st.current.overlay = overlay;
 
-    map.on('load', () => {
-      addBaseLayers(map);
-      map.addControl(overlay as unknown as maplibregl.IControl);
-      setReady(true);
+    const fillWorld = () =>
       loadWorld()
         .then((w) => {
-          (map.getSource('world') as maplibregl.GeoJSONSource).setData(w.countries as GeoJSON.FeatureCollection);
-          (map.getSource('landmass') as maplibregl.GeoJSONSource).setData(w.coastLines as GeoJSON.FeatureCollection);
-          (map.getSource('country-lines') as maplibregl.GeoJSONSource).setData(w.countryLines as GeoJSON.FeatureCollection);
+          (map.getSource('world') as maplibregl.GeoJSONSource | undefined)?.setData(w.countries as GeoJSON.FeatureCollection);
+          (map.getSource('landmass') as maplibregl.GeoJSONSource | undefined)?.setData(w.coastLines as GeoJSON.FeatureCollection);
+          (map.getSource('country-lines') as maplibregl.GeoJSONSource | undefined)?.setData(w.countryLines as GeoJSON.FeatureCollection);
           setWorldReady(true);
         })
         .catch(() => setMapError('Không nạp được dữ liệu bản đồ thế giới.'));
+    // chạy mỗi lần nạp style (lần đầu và khi đổi giữa nền tự vẽ ↔ nền chi tiết): thêm lại lớp của PortRank
+    map.on('style.load', () => {
+      st.current.liberty = !!map.getSource('openmaptiles');
+      if (st.current.liberty) localizeLabels(map);
+      addBaseLayers(map);
+      fillWorld();
+      setStyleRev((r) => r + 1);
+    });
+    map.on('load', () => {
+      map.addControl(overlay as unknown as maplibregl.IControl);
+      setReady(true);
+    });
+    map.on('error', (e) => {
+      const msg = (e as { error?: Error }).error?.message ?? '';
+      if (/style|Failed to fetch/i.test(msg) && !map.isStyleLoaded()) setMapError('Không tải được bản đồ nền chi tiết OpenFreeMap (kiểm tra kết nối mạng) – chọn chủ đề khác trong 🎨 Màu bản đồ.');
     });
     const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 8, className: 'port-tip' });
     map.on('mouseenter', 'ports-dot', (e) => {
@@ -385,7 +439,7 @@ export default function MapView() {
         s.coMarkers.push(new maplibregl.Marker({ element: el, anchor: 'center', opacityWhenCovered: '0' }).setLngLat(p.coord as [number, number]).addTo(map));
       }
     }
-  }, [ready, mine, partner, role, portView, theme]);
+  }, [ready, mine, partner, role, portView, theme, styleRev]);
 
   /* ───────── Khi chọn điểm (chưa tính): đưa bản đồ về vùng đó ───────── */
   useEffect(() => {
@@ -428,7 +482,7 @@ export default function MapView() {
     } catch (e) {
       console.warn('setProjection', e);
     }
-  }, [ready, view3d, portView]);
+  }, [ready, view3d, portView, styleRev]);
 
   /* ───────── Ghim cảng + nhãn, eo biển/kênh đào, cảng chuyển tải, cửa khẩu ───────── */
   useEffect(() => {
@@ -555,11 +609,16 @@ export default function MapView() {
   useEffect(() => {
     const map = mapHandle.map;
     if (!map || !ready) return;
+    // đổi giữa nền tự vẽ và nền chi tiết → nạp lại style (style.load sẽ thêm lại lớp và chạy lại effect này)
+    if ((theme.basemap === 'liberty') !== st.current.liberty) {
+      map.setStyle(styleFor(theme), { diff: false });
+      return;
+    }
     applyTheme(map, theme, !!portView);
     // nhãn HTML cần đo lại kích thước khi đổi kiểu chữ/nền
     requestAnimationFrame(() => declutter(map));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, theme]);
+  }, [ready, theme, styleRev]);
 
   /* ───────── Mức 2: ảnh thực Google – ẩn lớp OSM khi bật; tắt khi rời chế độ cảng ───────── */
   useEffect(() => {
@@ -572,7 +631,7 @@ export default function MapView() {
       setCredits('');
       resetGoogleLayer();
     }
-  }, [ready, portView, photoreal]);
+  }, [ready, portView, photoreal, styleRev]);
   useEffect(() => {
     if (!portView) {
       setPhotoreal(false);
@@ -680,7 +739,7 @@ export default function MapView() {
         )}
 
         {sel && track && !portView && (
-          <div className="pointer-events-auto absolute right-3 bottom-3 left-3">
+          <div className="pointer-events-auto absolute right-3 bottom-8 left-3">
             <PlaybackBar track={track} />
           </div>
         )}
