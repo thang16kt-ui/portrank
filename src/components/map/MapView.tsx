@@ -18,13 +18,12 @@ import type { LngLat, Place } from '../../types';
 import { aggregateCredits, buildLayers, preflightGoogleTiles, resetGoogleLayer, type GoogleTilesCtx } from './mapLayers';
 import { buildScene, fetchOsmCranes, scanPort, type PortGrid, type PortScene } from './portScene';
 import PlaybackBar from '../PlaybackBar';
+import MapThemePanel from './MapThemePanel';
+import { labelVars, mix, resolveTheme, type MapTheme } from '../../config/mapThemes';
 
 export const mapHandle: { map: maplibregl.Map | null } = { map: null };
 
 const SEA = '#070B14';
-const LAND = '#0c1a2c';
-const SELLER_C = '#38bdf8';
-const BUYER_C = '#fb923c';
 
 const WORLD_LAYERS = ['land-fill', 'borders', 'coast-glow', 'coast', 'hlA-fill', 'hlA-glow', 'hlA-line', 'hlB-fill', 'hlB-glow', 'hlB-line', 'ports-glow', 'ports-dot'];
 const PORT_VIEW_LAYERS = ['p-landuse', 'p-water', 'p-water-glow', 'p-water-edge', 'p-pier', 'p-pier-line', 'p-road', 'p-rail', 'p-building'];
@@ -42,12 +41,12 @@ function addBaseLayers(map: maplibregl.Map) {
     type: 'geojson',
     data: { type: 'FeatureCollection', features: PORTS.map((p) => ({ type: 'Feature', properties: { code: p.code, name: p.name }, geometry: { type: 'Point', coordinates: p.coord } })) },
   });
-  map.addLayer({ id: 'land-fill', type: 'fill', source: 'world', paint: { 'fill-color': LAND } });
+  map.addLayer({ id: 'land-fill', type: 'fill', source: 'world', paint: { 'fill-color': '#0c1a2c' } });
   map.addLayer({ id: 'borders', type: 'line', source: 'world', paint: { 'line-color': '#1f3a5c', 'line-width': 0.5, 'line-opacity': 0.7 } });
   // Viền bờ biển phát sáng: 1 lớp dày mờ + 1 lớp mảnh sáng
   map.addLayer({ id: 'coast-glow', type: 'line', source: 'landmass', paint: { 'line-color': '#22d3ee', 'line-width': 5, 'line-blur': 5, 'line-opacity': 0.4 } });
   map.addLayer({ id: 'coast', type: 'line', source: 'landmass', paint: { 'line-color': '#7fe3f5', 'line-width': 0.7, 'line-opacity': 0.9 } });
-  for (const [k, c] of [['hlA', SELLER_C], ['hlB', BUYER_C]] as const) {
+  for (const [k, c] of [['hlA', '#38bdf8'], ['hlB', '#fb923c']] as const) {
     const filter: maplibregl.FilterSpecification = ['==', ['get', 'iso2'], '__'];
     map.addLayer({ id: `${k}-fill`, type: 'fill', source: 'world', filter, paint: { 'fill-color': c, 'fill-opacity': 0.1 } });
     map.addLayer({ id: `${k}-glow`, type: 'line', source: 'world', filter, paint: { 'line-color': c, 'line-width': 7, 'line-blur': 6, 'line-opacity': 0.75 } });
@@ -72,6 +71,37 @@ function addBaseLayers(map: maplibregl.Map) {
     id: 'p-building', type: 'fill-extrusion', source: 'omt', 'source-layer': 'building', layout: hide, minzoom: 12,
     paint: { 'fill-extrusion-color': '#2b4a78', 'fill-extrusion-height': ['coalesce', ['get', 'render_height'], 8], 'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0], 'fill-extrusion-opacity': 0.9 },
   });
+}
+
+/** Áp chủ đề màu lên các lớp nền MapLibre */
+function applyTheme(map: maplibregl.Map, t: MapTheme, portView: boolean) {
+  const C = t.colors;
+  const paint = (id: string, prop: string, v: unknown) => map.getLayer(id) && map.setPaintProperty(id, prop as never, v as never);
+  paint('bg', 'background-color', portView ? C.land : C.sea);
+  paint('land-fill', 'fill-color', C.land);
+  paint('borders', 'line-color', C.border);
+  paint('borders', 'line-opacity', t.light ? 0.9 : 0.7);
+  paint('coast-glow', 'line-color', C.coastGlow);
+  paint('coast-glow', 'line-opacity', t.glow);
+  paint('coast', 'line-color', C.coast);
+  for (const [k, c] of [['hlA', C.seller], ['hlB', C.buyer]] as const) {
+    paint(`${k}-fill`, 'fill-color', c);
+    paint(`${k}-glow`, 'line-color', c);
+    paint(`${k}-line`, 'line-color', c);
+  }
+  paint('ports-glow', 'circle-color', C.coastGlow);
+  paint('ports-glow', 'circle-opacity', t.light ? 0.25 : 0.5);
+  paint('ports-dot', 'circle-color', C.ports);
+  // cảnh cảng 3D (OpenStreetMap)
+  paint('p-water', 'fill-color', t.light ? C.sea : mix(C.sea, '#000000', 0.25));
+  paint('p-water-glow', 'line-color', C.coastGlow);
+  paint('p-water-glow', 'line-opacity', t.glow * 0.9);
+  paint('p-water-edge', 'line-color', C.coast);
+  paint('p-landuse', 'fill-color', mix(C.land, C.coast, 0.12));
+  paint('p-pier', 'fill-color', mix(C.land, t.light ? '#000000' : '#ffffff', 0.15));
+  paint('p-pier-line', 'line-color', mix(C.land, t.light ? '#000000' : '#ffffff', 0.15));
+  paint('p-road', 'line-color', mix(C.land, t.light ? '#000000' : '#ffffff', 0.22));
+  paint('p-building', 'fill-extrusion-color', mix(C.land, C.coast, 0.3));
 }
 
 /** Căn khung nhìn theo tập toạ độ (kinh độ đã liên tục – không bị cắt ở 180°) */
@@ -132,6 +162,7 @@ interface Latest {
   follow: boolean;
   scene: PortScene | null;
   google: GoogleTilesCtx | null;
+  theme: MapTheme;
 }
 
 /** Key Map Tiles API (build-time). Không có key → ẩn nút "Ảnh thực". */
@@ -194,6 +225,8 @@ export default function MapView() {
   const role = useAppStore((s) => s.form.role);
   const toast = useAppStore((s) => s.toast);
   const set = useAppStore((s) => s.set);
+  const themeSetting = useDataStore((s) => s.mapTheme);
+  const theme = useMemo(() => resolveTheme(themeSetting), [themeSetting]);
   const ranked = useRanked();
   const cur = useCurrent();
   const schedule = useSchedule();
@@ -211,8 +244,8 @@ export default function MapView() {
     grid: null as PortGrid | null,
     lastT: 0,
   });
-  const latest = useRef<Latest>({ plan, ranked, current, selectedKey, hoverKey, track, showSeaRoute, view3d, portView, follow, scene, google });
-  latest.current = { plan, ranked, current, selectedKey, hoverKey, track, showSeaRoute, view3d, portView, follow, scene, google };
+  const latest = useRef<Latest>({ plan, ranked, current, selectedKey, hoverKey, track, showSeaRoute, view3d, portView, follow, scene, google, theme });
+  latest.current = { plan, ranked, current, selectedKey, hoverKey, track, showSeaRoute, view3d, portView, follow, scene, google, theme };
 
   /* ───────── Khởi tạo bản đồ: style rỗng (chỉ nền màu), không dùng tile server cho bản đồ chính ───────── */
   useEffect(() => {
@@ -298,7 +331,7 @@ export default function MapView() {
         layers: buildLayers({
           plan: L.plan, ranked: L.ranked, current: L.current, selectedKey: L.selectedKey, hoverKey: L.hoverKey,
           now: ts / 1000, track: L.track, day, showSeaRoute: L.showSeaRoute, view3d: L.view3d, portView: !!L.portView,
-          shipModelOk: s.shipModelOk, scene: L.scene, google: L.portView ? L.google : null,
+          shipModelOk: s.shipModelOk, scene: L.scene, google: L.portView ? L.google : null, theme: L.theme,
           onHover: (k) => useAppStore.getState().hoverKey !== k && useAppStore.getState().set({ hoverKey: k }),
           onClick: (k) => useAppStore.getState().select(k),
         }),
@@ -338,8 +371,8 @@ export default function MapView() {
     s.coMarkers.forEach((m) => m.remove());
     s.coMarkers = [];
     const sides = [
-      { p: role === 'seller' ? mine : partner, k: 'hlA', c: SELLER_C, tag: `Bên bán${role === 'seller' ? ' · bạn' : ' · đối tác'}` },
-      { p: role === 'seller' ? partner : mine, k: 'hlB', c: BUYER_C, tag: `Bên mua${role === 'buyer' ? ' · bạn' : ' · đối tác'}` },
+      { p: role === 'seller' ? mine : partner, k: 'hlA', c: theme.colors.seller, tag: `Bên bán${role === 'seller' ? ' · bạn' : ' · đối tác'}` },
+      { p: role === 'seller' ? partner : mine, k: 'hlB', c: theme.colors.buyer, tag: `Bên mua${role === 'buyer' ? ' · bạn' : ' · đối tác'}` },
     ];
     for (const { p, k, c, tag } of sides) {
       const filter: maplibregl.FilterSpecification = ['==', ['get', 'iso2'], p && p.kind === 'country' ? p.country : '__'];
@@ -350,7 +383,7 @@ export default function MapView() {
         s.coMarkers.push(new maplibregl.Marker({ element: el, anchor: 'center', opacityWhenCovered: '0' }).setLngLat(p.coord as [number, number]).addTo(map));
       }
     }
-  }, [ready, mine, partner, role, portView]);
+  }, [ready, mine, partner, role, portView, theme]);
 
   /* ───────── Khi chọn điểm (chưa tính): đưa bản đồ về vùng đó ───────── */
   useEffect(() => {
@@ -420,7 +453,7 @@ export default function MapView() {
       const el = document.createElement('div');
       el.dataset.rank = String(r.rank);
       el.dataset.key = r.option.key;
-      const c = r.rank === 1 ? '#fbbf24' : r.rank <= 3 ? '#38d6ee' : '#7ea3c8';
+      const c = r.rank === 1 ? theme.colors.rank1 : r.rank <= 3 ? theme.colors.rank23 : theme.colors.rankOther;
       el.innerHTML = `<div style="position:relative"><div class="pr-port${inSel ? ' sel' : ''}${selOpt && !inSel ? ' dim' : ''}" style="--c:${c}"></div>` +
         `<div class="pr-port-label${side.get(code) === 'o' ? ' left' : ''}"${selOpt && !inSel ? ' style="opacity:.4"' : ''}><b>${p.name}</b><span>${p.code} · <em>${usdK(r.option.total)}</em> · #${r.rank}</span></div></div>`;
       el.onclick = (ev) => { ev.stopPropagation(); useAppStore.getState().set({ portCard: code }); };
@@ -448,7 +481,7 @@ export default function MapView() {
       }
     }
     requestAnimationFrame(() => declutter(map));
-  }, [ready, plan, ranked, selectedKey, current, track, showSeaRoute, view3d, portView]);
+  }, [ready, plan, ranked, selectedKey, current, track, showSeaRoute, view3d, portView, theme]);
 
   /* ───────── Chế độ "Cảng 3D" ───────── */
   useEffect(() => {
@@ -459,7 +492,7 @@ export default function MapView() {
     if (!portView) {
       vis(PORT_VIEW_LAYERS, false);
       vis(WORLD_LAYERS, true);
-      map.setPaintProperty('bg', 'background-color', SEA);
+      applyTheme(map, latest.current.theme, false);
       setScene(null);
       if (s.prevCam) {
         map.flyTo({ ...s.prevCam, pitch: 0, bearing: 0, duration: 1600 });
@@ -473,7 +506,7 @@ export default function MapView() {
     if (!s.prevCam) s.prevCam = { center: map.getCenter(), zoom: map.getZoom() };
     vis(WORLD_LAYERS, false);
     vis(PORT_VIEW_LAYERS, true);
-    map.setPaintProperty('bg', 'background-color', LAND);
+    applyTheme(map, latest.current.theme, true);
     setScene(null);
     setSceneBusy(true);
     map.flyTo({ center: port.coord as [number, number], zoom: 14, pitch: 0, bearing: 0, duration: 2200, essential: true });
@@ -516,6 +549,16 @@ export default function MapView() {
     };
   }, [ready, portView]);
 
+  /* ───────── Chủ đề màu bản đồ ───────── */
+  useEffect(() => {
+    const map = mapHandle.map;
+    if (!map || !ready) return;
+    applyTheme(map, theme, !!portView);
+    // nhãn HTML cần đo lại kích thước khi đổi kiểu chữ/nền
+    requestAnimationFrame(() => declutter(map));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready, theme]);
+
   /* ───────── Mức 2: ảnh thực Google – ẩn lớp OSM khi bật; tắt khi rời chế độ cảng ───────── */
   useEffect(() => {
     const map = mapHandle.map;
@@ -539,11 +582,11 @@ export default function MapView() {
   const portName = portView ? PORT_BY_CODE[portView]?.name : null;
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-ink">
+    <div className="relative h-full w-full overflow-hidden" style={{ background: theme.colors.sea, ...(labelVars(theme) as React.CSSProperties) }}>
       <div ref={container} style={{ position: 'absolute', inset: 0 }} />
       <div className="pointer-events-none absolute inset-0">
         {/* Nút điều khiển */}
-        <div className="pointer-events-auto absolute top-3 left-3 flex flex-wrap gap-2 pr-14">
+        <div className="pointer-events-auto absolute top-3 left-3 flex flex-wrap gap-2 pr-[170px] max-[899px]:pr-[100px]">
           {portView ? (
             <>
               <button className="btn btn-on" onClick={() => set({ portView: null })}>← Thoát cảng 3D</button>
@@ -588,6 +631,8 @@ export default function MapView() {
           )}
         </div>
 
+        <MapThemePanel />
+
         {planning && (
           <div className="absolute top-14 left-1/2 -translate-x-1/2 rounded-full border border-line bg-panel/95 px-4 py-1.5 text-xs text-fg shadow-lg">
             ⏳ Đang tính tuyến… {planning.total > 1 ? `${planning.done}/${planning.total}` : ''}
@@ -624,10 +669,10 @@ export default function MapView() {
         {/* Chú giải */}
         {plan && !portView && !sel && (
           <div className="absolute bottom-3 left-3 rounded-lg border border-line bg-panel/90 px-3 py-2 text-[11px] text-mute max-[899px]:hidden">
-            <div className="flex items-center gap-2"><span className="h-1 w-6 rounded bg-gold shadow-[0_0_6px_#fbbf24]" /> Hạng 1</div>
-            <div className="flex items-center gap-2"><span className="h-0.5 w-6 rounded bg-sky" /> Hạng 2–3</div>
-            <div className="flex items-center gap-2"><span className="h-px w-6 bg-slate-500" /> Hạng 4 trở đi</div>
-            <div className="flex items-center gap-2"><span className="w-6 border-t border-dashed border-violet-300" /> Nội địa (kho ↔ cảng)</div>
+            <div className="flex items-center gap-2"><span className="h-1 w-6 rounded" style={{ background: theme.colors.rank1, boxShadow: `0 0 6px ${theme.colors.rank1}` }} /> Hạng 1</div>
+            <div className="flex items-center gap-2"><span className="h-0.5 w-6 rounded" style={{ background: theme.colors.rank23 }} /> Hạng 2–3</div>
+            <div className="flex items-center gap-2"><span className="h-px w-6" style={{ background: theme.colors.rankOther }} /> Hạng 4 trở đi</div>
+            <div className="flex items-center gap-2"><span className="w-6 border-t border-dashed" style={{ borderColor: theme.colors.inland }} /> Nội địa (kho ↔ cảng)</div>
             <div className="mt-1 max-w-[210px] text-[10px] leading-tight">Đường cong chỉ thể hiện kết nối; quãng đường và thời gian tính theo đường biển thật.</div>
           </div>
         )}

@@ -4,6 +4,7 @@ import type { RateEntry } from '../providers/RateProvider';
 import type { ScheduleEntry } from '../providers/ScheduleProvider';
 import type { TariffEntry } from '../providers/TariffProvider';
 import type { Sourced } from '../types';
+import { DEFAULT_THEME_SETTING, type MapColors, type MapThemeSetting } from '../config/mapThemes';
 
 /** Dữ liệu người dùng tự nhập – lưu localStorage: bảng giá, biểu thuế, lịch tàu, thông tin cảng */
 interface DataState {
@@ -15,6 +16,8 @@ interface DataState {
   explainerAutoplay: boolean;
   /** Tự lấy thuế từ nguồn chính thức (UK Trade Tariff, US HTS) khi biểu thuế của bạn chưa có */
   officialTariffs: boolean;
+  /** Chủ đề màu bản đồ + màu người dùng chỉnh */
+  mapTheme: MapThemeSetting;
 
   addRates: (e: RateEntry[]) => void;
   removeRate: (id: string) => void;
@@ -29,6 +32,10 @@ interface DataState {
   setPortInfoBulk: (rows: { code: string; field: string; v: Sourced<string> }[]) => void;
   setExplainerAutoplay: (b: boolean) => void;
   setOfficialTariffs: (b: boolean) => void;
+  setMapThemeBase: (id: string) => void;
+  setMapColor: (k: keyof MapColors, v: string | null) => void;
+  setMapGlow: (g: number | null) => void;
+  resetMapTheme: () => void;
 }
 
 export const useDataStore = create<DataState>()(
@@ -40,6 +47,7 @@ export const useDataStore = create<DataState>()(
       portInfo: {},
       explainerAutoplay: true,
       officialTariffs: true,
+      mapTheme: DEFAULT_THEME_SETTING,
 
       addRates: (e) => set((s) => ({ rates: [...e, ...s.rates] })),
       removeRate: (id) => set((s) => ({ rates: s.rates.filter((r) => r.id !== id) })),
@@ -65,7 +73,18 @@ export const useDataStore = create<DataState>()(
         }),
       setExplainerAutoplay: (explainerAutoplay) => set({ explainerAutoplay }),
       setOfficialTariffs: (officialTariffs) => set({ officialTariffs }),
+      // chọn chủ đề có sẵn → bỏ các màu đã tự chỉnh
+      setMapThemeBase: (base) => set({ mapTheme: { base, overrides: {}, glow: null } }),
+      setMapColor: (k, v) =>
+        set((s) => {
+          const overrides = { ...s.mapTheme.overrides };
+          if (v) overrides[k] = v;
+          else delete overrides[k];
+          return { mapTheme: { ...s.mapTheme, overrides } };
+        }),
+      setMapGlow: (glow) => set((s) => ({ mapTheme: { ...s.mapTheme, glow } })),
+      resetMapTheme: () => set({ mapTheme: DEFAULT_THEME_SETTING }),
     }),
-    { name: 'portrank.data.v2' },
+    { name: 'portrank.data.v2', merge: (persisted, cur) => ({ ...cur, ...(persisted as object), mapTheme: { ...DEFAULT_THEME_SETTING, ...((persisted as { mapTheme?: MapThemeSetting })?.mapTheme ?? {}) } }) },
   ),
 );

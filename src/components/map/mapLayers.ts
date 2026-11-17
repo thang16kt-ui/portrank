@@ -11,6 +11,7 @@ import type { RankedOption } from '../../lib/ranking';
 import { trackPosition, type Track } from '../../lib/track';
 import type { LngLat } from '../../types';
 import type { Box, PortScene } from './portScene';
+import { hexToRgb, mix, type MapTheme } from '../../config/mapThemes';
 
 const svg = (s: string) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(s)}`;
 
@@ -24,14 +25,6 @@ export const SHIP_ICON = svg(`<svg xmlns="http://www.w3.org/2000/svg" width="40"
   <rect x="9" y="94" width="22" height="14" rx="2" fill="#f8fafc"/></svg>`);
 
 export type RGB = [number, number, number];
-export const GOLD: RGB = [251, 191, 36];
-export const SKY: RGB = [56, 214, 238];
-export const DIMC: RGB = [96, 134, 176];
-export const ROAD: RGB = [163, 230, 53];
-export const INLAND: RGB = [196, 181, 253];
-
-/** Màu theo hạng: 1 = vàng cam, 2–3 = xanh lơ, còn lại rất mờ */
-export const rankColor = (rank: number): RGB => (rank === 1 ? GOLD : rank <= 3 ? SKY : DIMC);
 
 interface ArcDatum {
   key: string;
@@ -39,6 +32,23 @@ interface ArcDatum {
   path: LngLat[];
   timestamps: number[];
   road: boolean;
+}
+
+/** Màu RGB của chủ đề (cache theo đối tượng chủ đề để không tính lại mỗi khung hình) */
+const paletteCache = new WeakMap<MapTheme, ReturnType<typeof makePalette>>();
+function makePalette(t: MapTheme) {
+  const C = t.colors;
+  return {
+    key: `${t.id}:${Object.values(C).join(',')}`,
+    rank1: hexToRgb(C.rank1), rank23: hexToRgb(C.rank23), rankOther: hexToRgb(C.rankOther), road: hexToRgb(C.road), inland: hexToRgb(C.inland),
+    spark: hexToRgb(t.light ? C.rank1 : mix(C.rank1, '#ffffff', 0.6)),
+    routeDash: (t.light ? [51, 65, 85, 170] : [226, 232, 240, 150]) as [number, number, number, number],
+  };
+}
+export function palette(t: MapTheme) {
+  let p = paletteCache.get(t);
+  if (!p) paletteCache.set(t, (p = makePalette(t)));
+  return p;
 }
 
 /* Dữ liệu ổn định giữa các khung hình (deck.gl tính lại thuộc tính nếu mảng data đổi) */
@@ -84,6 +94,8 @@ export interface LayerCtx {
   scene: PortScene | null;
   /** Ảnh thực Google Photorealistic 3D Tiles (Mức 2) – chỉ khi người dùng bật và có key */
   google?: GoogleTilesCtx | null;
+  /** Chủ đề màu bản đồ */
+  theme: MapTheme;
   onHover: (key: string | null) => void;
   onClick: (key: string) => void;
 }
@@ -105,9 +117,10 @@ export function buildLayers(c: LayerCtx): Layer[] {
     if (c.hoverKey) return d.key === c.hoverKey ? Math.max(base, 230) : base * 0.55;
     return base;
   };
-  const colorOf = (d: ArcDatum): RGB => (d.road ? (d.rank === 1 ? ROAD : d.rank <= 3 ? [132, 204, 22] : [90, 120, 60]) : rankColor(d.rank));
+  const P = palette(c.theme);
+  const colorOf = (d: ArcDatum): RGB => (d.road ? (d.rank <= 3 ? P.road : P.rankOther) : d.rank === 1 ? P.rank1 : d.rank <= 3 ? P.rank23 : P.rankOther);
   const widthOf = (d: ArcDatum) => (d.key === focus ? 4 : d.rank === 1 ? 3.2 : d.rank <= 3 ? 1.8 : 1);
-  const trig = [sel, c.hoverKey];
+  const trig = [sel, c.hoverKey, P.key];
   // Chế độ 3D: chỉ vẽ tuyến đã chọn
   const showArcs = !c.view3d && arcs.length > 0;
 
@@ -152,7 +165,7 @@ export function buildLayers(c: LayerCtx): Layer[] {
             data: lit,
             getPath: (d) => d.path,
             getTimestamps: (d) => d.timestamps,
-            getColor: [255, 244, 200],
+            getColor: P.spark,
             widthMinPixels: 3.5,
             capRounded: true,
             jointRounded: true,
@@ -178,7 +191,7 @@ export function buildLayers(c: LayerCtx): Layer[] {
           id: `inland-${o.key}`,
           data: legs,
           getPath: (d: { path: LngLat[] }) => d.path,
-          getColor: [...INLAND, 230],
+          getColor: [...P.inland, 230],
           getWidth: 2,
           widthUnits: 'pixels',
           extensions: DASH,
@@ -193,13 +206,13 @@ export function buildLayers(c: LayerCtx): Layer[] {
   // Tuyến đã chọn: đường biển thật / đường bộ + phương tiện chạy dọc tuyến
   const t = c.track;
   if (sel && t && c.current && (c.current.mode === 'road' || c.showSeaRoute || c.view3d)) {
-    const col = c.current.mode === 'road' ? ROAD : GOLD;
+    const col = c.current.mode === 'road' ? P.road : P.rank1;
     layers.push(
       new PathLayer({
         id: 'route-full',
         data: trackData(t),
         getPath: (d: { path: LngLat[] }) => d.path,
-        getColor: [226, 232, 240, 150],
+        getColor: P.routeDash,
         getWidth: 1.6,
         widthUnits: 'pixels',
         extensions: DASH,
