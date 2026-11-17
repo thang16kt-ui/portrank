@@ -260,7 +260,7 @@ export default function Sidebar() {
       <button
         onClick={() => runPlan()}
         disabled={!!planning}
-        className="w-full rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-3 text-sm font-bold text-slate-900 shadow-[0_0_24px_rgba(251,191,36,.35)] transition hover:brightness-110 disabled:opacity-60"
+        className="w-full rounded-xl btn-primary px-4 py-3 text-sm font-bold transition disabled:opacity-60"
       >
         {planning ? `Đang tính… ${planning.total > 1 ? `${planning.done}/${planning.total}` : ''}` : '🔎 Tìm tuyến tối ưu'}
       </button>

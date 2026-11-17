@@ -7,7 +7,7 @@ import type { RankedOption } from '../lib/ranking';
 import { useAppStore, type DetailTab } from '../store/useAppStore';
 import IncotermCard, { placeNamesOf } from './IncotermCard';
 
-const rankCls = (rank: number) => (rank === 1 ? 'bg-gold text-slate-900 shadow-[0_0_10px_rgba(251,191,36,.7)]' : rank <= 3 ? 'bg-sky/80 text-slate-900' : 'bg-slate-600 text-white');
+const rankCls = (rank: number) => (rank === 1 ? 'bg-[#f59e0b] text-slate-900 shadow-[0_0_10px_rgba(251,191,36,.7)]' : rank <= 3 ? 'bg-[#38bdf8] text-slate-900' : 'bg-slate-600 text-white');
 
 function Big({ label, value, sub, tone }: { label: string; value: React.ReactNode; sub?: React.ReactNode; tone?: string }) {
   return (

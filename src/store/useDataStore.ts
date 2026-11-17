@@ -51,7 +51,7 @@ export const useDataStore = create<DataState>()(
       explainerAutoplay: true,
       officialTariffs: true,
       mapTheme: DEFAULT_THEME_SETTING,
-      uiTheme: 'dark',
+      uiTheme: 'light',
 
       addRates: (e) => set((s) => ({ rates: [...e, ...s.rates] })),
       removeRate: (id) => set((s) => ({ rates: s.rates.filter((r) => r.id !== id) })),
@@ -92,11 +92,13 @@ export const useDataStore = create<DataState>()(
     }),
     {
       name: 'portrank.data.v2',
-      version: 1,
+      version: 2,
       // v0 → v1: nền mặc định đổi từ "Tối phát sáng" sang "Bản đồ chi tiết"; giữ nguyên nếu người dùng đã tự chọn/chỉnh
       migrate: (persisted: unknown, version: number) => {
-        const st = (persisted ?? {}) as { mapTheme?: MapThemeSetting };
+        const st = (persisted ?? {}) as { mapTheme?: MapThemeSetting; uiTheme?: string };
         if (version < 1 && st.mapTheme && st.mapTheme.base === 'glow' && !Object.keys(st.mapTheme.overrides ?? {}).length && st.mapTheme.glow == null) st.mapTheme = DEFAULT_THEME_SETTING;
+        // v1 → v2: giao diện mặc định đổi sang nền trắng kiểu V1
+        if (version < 2) (st as { uiTheme?: string }).uiTheme = 'light';
         return st as never;
       },
       merge: (persisted, cur) => ({ ...cur, ...(persisted as object), mapTheme: { ...DEFAULT_THEME_SETTING, ...((persisted as { mapTheme?: MapThemeSetting })?.mapTheme ?? {}) } }) },

@@ -34,31 +34,33 @@
 /* ───────── Giao diện SÁNG (nút ☀️ ở góc trên bên phải) ─────────
    Đổi các biến màu chung; các lớp màu chữ nhạt (amber-200, cyan-100…) dùng trên nền tối được đổi sang tông đậm cho dễ đọc trên nền trắng. */
 :root[data-ui="light"] {
+  /* Giao diện sáng theo phong cách V1: nền trắng, viền xám nhạt, điểm nhấn xanh dương brand, thanh tiêu đề navy */
   color-scheme: light;
-  --color-ink: #eef2f7;
+  --color-ink: #f4f7fb;
   --color-panel: #ffffff;
-  --color-panel2: #f1f5f9;
-  --color-line: #dbe3ee;
-  --color-line-strong: #94a3b8;
+  --color-panel2: #f8fafc;
+  --color-line: #e2e8f0;
+  --color-line-strong: #cbd5e1;
   --color-fg: #0f172a;
-  --color-mute: #5b6b82;
-  --color-sky: #0891b2;
-  --color-well: #f6f8fb;
+  --color-mute: #64748b;
+  --color-sky: #0f5cb8;
+  --color-gold: #1d6fd1;
+  --color-well: #ffffff;
   --color-seller-ink: #b45309;
   --color-buyer-ink: #1d4ed8;
   --color-diagram-node: #ffffff;
   --color-diagram-track: #e2e8f0;
   --color-diagram-dash: #cbd5e1;
-  --color-diagram-lit: #0891b2;
+  --color-diagram-lit: #1d6fd1;
   --color-diagram-label: #334155;
   --color-diagram-dim: #94a3b8;
   --color-diagram-axis: #64748b;
   --color-diagram-cargo-edge: #0f172a;
-  --color-amber-100: #92400e;
-  --color-amber-200: #b45309;
-  --color-amber-300: #b45309;
-  --color-cyan-100: #155e75;
-  --color-cyan-200: #0e7490;
+  --color-amber-100: #0b4f8a;
+  --color-amber-200: #0f5cb8;
+  --color-amber-300: #0f5cb8;
+  --color-cyan-100: #0b4f8a;
+  --color-cyan-200: #0f5cb8;
   --color-emerald-300: #047857;
   --color-red-100: #b91c1c;
   --color-red-200: #b91c1c;
@@ -66,6 +68,36 @@
   --color-rose-200: #be123c;
   --color-pink-300: #be185d;
 }
+:root[data-ui="light"] .card { border-color: #e2e8f0; box-shadow: 0 1px 2px rgba(15,23,42,.05); }
+:root[data-ui="light"] .field { border-color: #cbd5e1; }
+:root[data-ui="light"] .field:focus { border-color: #1d6fd1; box-shadow: 0 0 0 3px rgba(29,111,209,.15); }
+:root[data-ui="light"] .btn { background: #ffffff; border-color: #cbd5e1; color: #334155; }
+:root[data-ui="light"] .btn:hover { background: #f1f5f9; border-color: #94a3b8; }
+:root[data-ui="light"] .btn-on, :root[data-ui="light"] .btn-on:hover { background: #eef6ff; border-color: #1d6fd1; color: #0b4f8a; }
+:root[data-ui="light"] input[type=range] { accent-color: #0f5cb8; }
+
+/* Thanh tiêu đề navy như V1 – đổi biến màu trong phạm vi header */
+:root[data-ui="light"] .app-header {
+  background: #0a2540;
+  border-color: #0a2540;
+  --color-fg: #ffffff;
+  --color-mute: #bfdbfe;
+  --color-gold: #ffffff;
+  --color-amber-200: #ffffff;
+  --color-amber-300: #fbbf24;
+  --color-panel2: rgba(255,255,255,.08);
+  --color-line: rgba(255,255,255,.22);
+}
+:root[data-ui="light"] .app-header .btn { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.25); color: #fff; }
+:root[data-ui="light"] .app-header .btn:hover { background: rgba(255,255,255,.18); }
+:root[data-ui="light"] .app-header .chip-est { background: transparent; color: #fde68a; border: 1px solid rgba(252,211,77,.45); }
+:root[data-ui="light"] .app-header .bg-white\/10 { background: #fbbf24; color: #0a2540; }
+
+/* Nút chính */
+.btn-primary { background: linear-gradient(90deg, #fbbf24, #f97316); color: #0f172a; box-shadow: 0 0 24px rgba(251,191,36,.35); }
+.btn-primary:hover { filter: brightness(1.1); }
+:root[data-ui="light"] .btn-primary { background: #0f5cb8; color: #fff; box-shadow: 0 4px 12px rgba(30,58,138,.25); }
+:root[data-ui="light"] .btn-primary:hover { background: #0b4f8a; filter: none; }
 
 html, body, #root { height: 100%; margin: 0; }
 body { font-family: var(--font-sans); background: var(--color-ink); color: var(--color-fg); }

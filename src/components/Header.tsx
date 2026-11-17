@@ -21,7 +21,7 @@ export default function Header() {
   const setUi = useDataStore((s) => s.setUiTheme);
   const count: Partial<Record<Page, number>> = { rates: nRates, tariffs: nTariffs, schedules: nSched, saved: nSaved };
   return (
-    <header className="flex h-12 shrink-0 items-center gap-3 border-b border-line bg-panel px-3">
+    <header className="app-header flex h-12 shrink-0 items-center gap-3 border-b border-line bg-panel px-3">
       <div className="flex shrink-0 items-center gap-2">
         <svg width="24" height="24" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" style={{ fill: 'var(--color-panel2)' }} stroke="#22d3ee" strokeWidth="1.5" /><path d="M6 20c5-9 15-9 20 0" fill="none" stroke="#fbbf24" strokeWidth="2.2" strokeLinecap="round" /><circle cx="6" cy="20" r="2.4" fill="#38bdf8" /><circle cx="26" cy="20" r="2.4" fill="#fb923c" /></svg>
         <span className="text-[15px] font-bold tracking-tight text-fg">Port<span className="text-amber-300">Rank</span></span>

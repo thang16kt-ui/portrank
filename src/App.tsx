@@ -58,7 +58,7 @@ function Planner() {
         </div>
       </main>
       {!sheetOpen && (
-        <button className="fixed right-3 bottom-3 z-40 hidden rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-2.5 text-[13px] font-bold text-slate-900 shadow-xl max-[899px]:block" onClick={() => set({ sheetOpen: true })}>
+        <button className="fixed right-3 bottom-3 z-40 hidden rounded-full btn-primary px-4 py-2.5 text-[13px] font-bold shadow-xl max-[899px]:block" onClick={() => set({ sheetOpen: true })}>
           ✎ Nhập thông tin
         </button>
       )}
