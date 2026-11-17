@@ -1,46 +1,39 @@
 import { useAppStore, type Page } from '../store/useAppStore';
+import { useDataStore } from '../store/useDataStore';
 
-const NAV: { id: Page; label: string }[] = [
-  { id: 'plan', label: 'Lập kế hoạch' },
-  { id: 'prices', label: 'Theo dõi giá' },
-  { id: 'saved', label: 'Báo giá đã lưu' },
+const NAV: { page: Page; label: string }[] = [
+  { page: 'plan', label: 'Lập kế hoạch' },
+  { page: 'rates', label: 'Bảng giá của tôi' },
+  { page: 'tariffs', label: 'Biểu thuế' },
+  { page: 'schedules', label: 'Lịch tàu' },
+  { page: 'ports', label: 'Danh mục cảng' },
+  { page: 'saved', label: 'Đã lưu' },
 ];
 
 export default function Header() {
   const page = useAppStore((s) => s.page);
   const setPage = useAppStore((s) => s.setPage);
-  const savedCount = useAppStore((s) => s.saved.length);
+  const nSaved = useAppStore((s) => s.saved.length);
+  const nRates = useDataStore((s) => s.rates.length);
+  const nTariffs = useDataStore((s) => s.tariffs.length);
+  const nSched = useDataStore((s) => s.schedules.length);
+  const count: Partial<Record<Page, number>> = { rates: nRates, tariffs: nTariffs, schedules: nSched, saved: nSaved };
   return (
-    <header className="flex h-14 shrink-0 items-center gap-4 border-b border-slate-200 bg-brand-900 px-4 text-white">
-      <div className="flex items-center gap-2">
-        <svg viewBox="0 0 32 32" className="h-8 w-8" aria-hidden>
-          <circle cx="16" cy="16" r="15" fill="#1d6fd1" />
-          <path d="M6 19h20l-3.5 6h-13z" fill="#fff" />
-          <rect x="9" y="13" width="4" height="5" fill="#f59e0b" />
-          <rect x="14" y="13" width="4" height="5" fill="#ef4444" />
-          <rect x="19" y="13" width="4" height="5" fill="#22c55e" />
-          <rect x="14" y="8" width="4" height="4.5" fill="#f59e0b" />
-        </svg>
-        <div className="leading-tight">
-          <div className="text-[17px] font-bold tracking-tight">PortRank</div>
-          <div className="hidden text-[10px] text-blue-200 sm:block">Global Freight Planner</div>
-        </div>
+    <header className="flex h-12 shrink-0 items-center gap-3 border-b border-line bg-panel px-3">
+      <div className="flex shrink-0 items-center gap-2">
+        <svg width="24" height="24" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#0b1322" stroke="#22d3ee" strokeWidth="1.5" /><path d="M6 20c5-9 15-9 20 0" fill="none" stroke="#fbbf24" strokeWidth="2.2" strokeLinecap="round" /><circle cx="6" cy="20" r="2.4" fill="#38bdf8" /><circle cx="26" cy="20" r="2.4" fill="#fb923c" /></svg>
+        <span className="text-[15px] font-bold tracking-tight text-fg">Port<span className="text-amber-300">Rank</span></span>
+        <span className="hidden text-[11px] text-mute lg:inline">Tối ưu chi phí vận chuyển cửa đến cửa</span>
       </div>
-      <nav className="ml-2 flex gap-1 overflow-x-auto">
+      <nav className="flex min-w-0 flex-1 gap-0.5 overflow-x-auto">
         {NAV.map((n) => (
-          <button
-            key={n.id}
-            onClick={() => setPage(n.id)}
-            className={`rounded-md px-3 py-1.5 text-sm whitespace-nowrap transition ${page === n.id ? 'bg-white/15 font-semibold' : 'text-blue-100 hover:bg-white/10'}`}
-          >
+          <button key={n.page} onClick={() => setPage(n.page)} className={`rounded-md px-2.5 py-1.5 text-[12.5px] font-medium whitespace-nowrap transition ${page === n.page ? 'bg-gold/15 text-amber-200' : 'text-mute hover:bg-white/5 hover:text-fg'}`}>
             {n.label}
-            {n.id === 'saved' && savedCount > 0 && <span className="ml-1.5 rounded-full bg-amber-400 px-1.5 text-[11px] font-bold text-brand-900">{savedCount}</span>}
+            {count[n.page] ? <span className="ml-1 rounded-full bg-white/10 px-1.5 text-[10px]">{count[n.page]}</span> : null}
           </button>
         ))}
       </nav>
-      <div className="ml-auto hidden items-center gap-2 text-[11px] text-amber-200 md:flex">
-        <span className="rounded border border-amber-300/40 px-2 py-0.5">Giá = mô hình ước tính / dữ liệu mô phỏng</span>
-      </div>
+      <span className="chip chip-est hidden shrink-0 md:inline-flex" title="Mọi con số giá là ước tính trừ khi bạn đã nhập bảng giá thật">Giá: ước tính</span>
     </header>
   );
 }

@@ -1,33 +1,35 @@
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
+import { INCOTERMS, termsForMode } from '../config/incoterms';
 import { CARGO_LABEL, CONTAINER_LABEL } from '../config/pricing';
-import { PRIORITY_LABEL } from '../config/weights';
-import { VN_QUICK, getPort } from '../data/ports';
-import { findRoute } from '../lib/routing';
-import { routeOptionsOf } from '../lib/results';
-import { useAppStore, usePlayback } from '../store/useAppStore';
-import type { CargoType, ContainerType, Priority } from '../types';
-import PortCombobox from './PortCombobox';
+import { CRITERIA_LABEL, PRIORITY_LABEL, type Weights } from '../config/weights';
+import { CARRIERS } from '../data/carriers';
+import { COUNTRIES } from '../data/countries';
+import { roadAvailability } from '../data/landBlocks';
+import { runPlan } from '../lib/actions';
+import { suggestIncoterm } from '../lib/incoterm';
+import { useAppStore } from '../store/useAppStore';
+import type { CargoType, ContainerType, Incoterm, Priority, TransportMode } from '../types';
+import AddressInput from './AddressInput';
 
-function Field({ label, children, hint }: { label: string; children: ReactNode; hint?: string }) {
+const SELLER_C = '#38bdf8', BUYER_C = '#fb923c';
+
+function Block({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
   return (
-    <div>
-      <div className="mb-1 text-xs font-semibold text-slate-600">{label}</div>
-      {children}
-      {hint && <div className="mt-1 text-[11px] text-slate-400">{hint}</div>}
-    </div>
+    <section className="card px-3 py-2.5">
+      <h2 className="mb-2 flex items-center gap-2 text-[13px] font-semibold text-fg">
+        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gold/20 text-[11px] text-amber-200">{n}</span>
+        {title}
+      </h2>
+      <div className="space-y-2">{children}</div>
+    </section>
   );
 }
 
-function Segmented<T extends string>({ value, options, onChange, cols }: { value: T; options: { v: T; label: string }[]; onChange: (v: T) => void; cols?: number }) {
+function Seg<T extends string>({ value, options, onChange }: { value: T; options: { v: T; label: string }[]; onChange: (v: T) => void }) {
   return (
-    <div className="grid gap-1 rounded-lg bg-slate-100 p-1" style={{ gridTemplateColumns: `repeat(${cols ?? options.length}, minmax(0,1fr))` }}>
+    <div className="flex overflow-hidden rounded-lg border border-line">
       {options.map((o) => (
-        <button
-          type="button"
-          key={o.v}
-          onClick={() => onChange(o.v)}
-          className={`rounded-md px-2 py-1.5 text-xs transition ${value === o.v ? 'bg-white font-semibold text-brand-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
-        >
+        <button key={o.v} onClick={() => onChange(o.v)} className={`flex-1 px-2 py-1.5 text-xs font-medium transition ${value === o.v ? 'bg-gold/20 text-amber-200' : 'bg-[#0a1120] text-mute hover:text-fg'}`}>
           {o.label}
         </button>
       ))}
@@ -35,166 +37,234 @@ function Segmented<T extends string>({ value, options, onChange, cols }: { value
   );
 }
 
-const input = 'w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-blue-100';
-
 export default function Sidebar() {
-  const form = useAppStore((s) => s.form);
+  const f = useAppStore((s) => s.form);
   const setForm = useAppStore((s) => s.setForm);
-  const setPort = useAppStore((s) => s.setPort);
-  const swap = useAppStore((s) => s.swapPorts);
-  const pickTarget = useAppStore((s) => s.pickTarget);
-  const setPickTarget = useAppStore((s) => s.setPickTarget);
+  const setMode = useAppStore((s) => s.setMode);
+  const setTerm = useAppStore((s) => s.setTerm);
   const setPriority = useAppStore((s) => s.setPriority);
-  const compute = useAppStore((s) => s.compute);
-  const showToast = useAppStore((s) => s.showToast);
-  const setSidebarOpen = useAppStore((s) => s.setSidebarOpen);
-  const viewMode = useAppStore((s) => s.viewMode);
-  const setViewMode = useAppStore((s) => s.setViewMode);
-  const [error, setError] = useState<string | null>(null);
+  const weights = useAppStore((s) => s.weights);
+  const setWeight = useAppStore((s) => s.setWeight);
+  const planning = useAppStore((s) => s.planning);
+  const plan = useAppStore((s) => s.plan);
+  const notice = useAppStore((s) => s.notice);
+  const planError = useAppStore((s) => s.planError);
+  const [more, setMore] = useState(false);
+  const [carrierOpen, setCarrierOpen] = useState(false);
+  const [suggest, setSuggest] = useState(false);
 
-  const run = () => {
-    const pol = getPort(form.pol), pod = getPort(form.pod);
-    if (!pol || !pod) return setError('Vui lòng chọn cảng đi và cảng đến.');
-    if (pol.code === pod.code) return setError('Cảng đi và cảng đến phải khác nhau.');
-    setError(null);
-    try {
-      const t = performance.now();
-      const route = findRoute(pol, pod, routeOptionsOf(form));
-      compute(route);
-      usePlayback.getState().setProgress(0);
-      usePlayback.getState().setPlaying(true);
-      if (window.innerWidth < 900) setSidebarOpen(false);
-      route.warnings.forEach((w) => showToast(w));
-      console.info(`[PortRank] tuyến ${pol.code}→${pod.code}: ${Math.round(route.distanceNm)} hải lý, ${(performance.now() - t).toFixed(0)} ms (${route.engine})`);
-    } catch (e) {
-      setError((e as Error).message);
-    }
+  const sellerC = f.role === 'seller' ? f.mine?.country : f.partner?.country;
+  const buyerC = f.role === 'seller' ? f.partner?.country : f.mine?.country;
+  const road = roadAvailability(sellerC, buyerC);
+  const terms = termsForMode(f.mode);
+  const containerised = f.shipMode === 'LCL' || f.cargo !== 'oog';
+  const seaOnlyWarn = f.mode === 'sea' && INCOTERMS[f.term].group === 'sea' && containerised;
+  const sellerPlace = f.role === 'seller' ? f.mine : f.partner, buyerPlace = f.role === 'seller' ? f.partner : f.mine;
+  const needAddr =
+    (f.term === 'EXW' && sellerPlace?.kind === 'country') || (['DAP', 'DPU', 'DDP'].includes(f.term) && buyerPlace?.kind === 'country');
+
+  const pickMode = (m: TransportMode) => {
+    if (m === f.mode) return;
+    setMode(m);
+    if (plan) runPlan();
   };
+  const pickTerm = (t: Incoterm) => setTerm(t);
+  const toggleCarrier = (id: string) => setForm({ carriers: f.carriers.includes(id) ? f.carriers.filter((c) => c !== id) : [...f.carriers, id] });
 
   return (
     <div className="flex h-full flex-col">
-      <div className="scroll-thin flex-1 space-y-4 overflow-y-auto p-4">
-        <Field label="Loại hàng">
-          <select className={input} value={form.cargo} onChange={(e) => setForm({ cargo: e.target.value as CargoType })}>
-            {(Object.keys(CARGO_LABEL) as CargoType[]).map((k) => (
-              <option key={k} value={k}>{CARGO_LABEL[k]}</option>
-            ))}
-          </select>
-        </Field>
+    <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto p-2.5">
+      <Block n={1} title="Tuyến">
+        <div className="flex items-center gap-2">
+          <label className="lbl !mb-0 shrink-0">Tôi là</label>
+          <div className="flex-1"><Seg value={f.role} onChange={(role) => setForm({ role })} options={[{ v: 'buyer', label: 'Người mua (nhập)' }, { v: 'seller', label: 'Người bán (xuất)' }]} /></div>
+        </div>
+        <AddressInput label="Bên tôi" value={f.mine} onChange={(mine) => setForm({ mine })} color={f.role === 'seller' ? SELLER_C : BUYER_C} placeholder="VD: Bình Dương, Việt Nam – hoặc Việt Nam" />
+        <AddressInput label="Bên đối tác" value={f.partner} onChange={(partner) => setForm({ partner })} color={f.role === 'seller' ? BUYER_C : SELLER_C} placeholder="VD: Munich, Đức – hoặc Đức" />
+        <div className={f.mode === 'sea' ? '' : 'opacity-40'}>
+          <label className="lbl">Hãng tàu {f.mode !== 'sea' && '(chỉ với Đường biển)'}</label>
+          <button disabled={f.mode !== 'sea'} onClick={() => setCarrierOpen(!carrierOpen)} className="field flex items-center justify-between text-left">
+            <span className="truncate">{f.carriers.length ? f.carriers.map((id) => CARRIERS.find((c) => c.id === id)?.name).join(', ') : 'Tất cả hãng'}</span>
+            <span className="text-mute">{carrierOpen ? '▴' : '▾'}</span>
+          </button>
+          {carrierOpen && f.mode === 'sea' && (
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              <button className={`btn !px-2 !py-0.5 !text-[11px] ${!f.carriers.length ? 'btn-on' : ''}`} onClick={() => setForm({ carriers: [] })}>Tất cả hãng</button>
+              {CARRIERS.map((c) => (
+                <button key={c.id} title={`${c.scac} · ${c.alliance} (${c.allianceAsOf}, chưa xác minh)`} className={`btn !px-2 !py-0.5 !text-[11px] ${f.carriers.includes(c.id) ? 'btn-on' : ''}`} onClick={() => toggleCarrier(c.id)}>
+                  {c.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </Block>
 
-        <Field label="Hình thức">
-          <Segmented value={form.mode} onChange={(mode) => setForm({ mode })} options={[{ v: 'FCL', label: 'FCL – nguyên container' }, { v: 'LCL', label: 'LCL – hàng lẻ' }]} />
-        </Field>
-
-        {form.mode === 'FCL' ? (
-          <div className="grid grid-cols-[1fr_88px] gap-2">
-            <Field label="Loại container">
-              <select className={input} value={form.container} onChange={(e) => setForm({ container: e.target.value as ContainerType })}>
-                {(Object.keys(CONTAINER_LABEL) as ContainerType[]).map((k) => (
-                  <option key={k} value={k} disabled={form.cargo === 'reefer' ? k !== '40RF' : false}>{CONTAINER_LABEL[k]}</option>
-                ))}
+      <Block n={2} title="Hàng hóa">
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="lbl">Loại hàng</label>
+            <select className="field" value={f.cargo} onChange={(e) => setForm({ cargo: e.target.value as CargoType })}>
+              {(Object.keys(CARGO_LABEL) as CargoType[]).map((k) => <option key={k} value={k}>{CARGO_LABEL[k]}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="lbl">Hình thức</label>
+            <Seg value={f.shipMode} onChange={(shipMode) => setForm({ shipMode })} options={[{ v: 'FCL', label: 'FCL' }, { v: 'LCL', label: 'LCL' }]} />
+          </div>
+        </div>
+        {f.shipMode === 'FCL' ? (
+          <div className="grid grid-cols-[1fr_84px] gap-2">
+            <div>
+              <label className="lbl">Container</label>
+              <select className="field" value={f.container} onChange={(e) => setForm({ container: e.target.value as ContainerType })}>
+                {(Object.keys(CONTAINER_LABEL) as ContainerType[]).map((k) => <option key={k} value={k}>{CONTAINER_LABEL[k]}</option>)}
               </select>
-            </Field>
-            <Field label="Số lượng">
-              <input type="number" min={1} max={500} className={input} value={form.quantity} onChange={(e) => setForm({ quantity: Math.max(1, +e.target.value || 1) })} />
-            </Field>
+            </div>
+            <div>
+              <label className="lbl">Số lượng</label>
+              <input type="number" min={1} max={200} className="field" value={f.quantity} onChange={(e) => setForm({ quantity: Math.max(1, +e.target.value || 1) })} />
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-2">
-            <Field label="Số khối (CBM)">
-              <input type="number" min={0.1} step={0.1} className={input} value={form.cbm} onChange={(e) => setForm({ cbm: Math.max(0, +e.target.value || 0) })} />
-            </Field>
-            <Field label="Trọng lượng (kg)">
-              <input type="number" min={1} step={10} className={input} value={form.weightKg} onChange={(e) => setForm({ weightKg: Math.max(0, +e.target.value || 0) })} />
-            </Field>
+            <div>
+              <label className="lbl">Thể tích (CBM)</label>
+              <input type="number" min={0.1} step={0.1} className="field" value={f.cbm} onChange={(e) => setForm({ cbm: Math.max(0.1, +e.target.value || 0.1) })} />
+            </div>
+            <div>
+              <label className="lbl">Khối lượng (kg)</label>
+              <input type="number" min={1} className="field" value={f.weightKg} onChange={(e) => setForm({ weightKg: Math.max(1, +e.target.value || 1) })} />
+            </div>
           </div>
         )}
-        <label className="flex items-center gap-2 text-xs text-slate-600">
-          <input type="checkbox" checked={form.woodPallet} onChange={(e) => setForm({ woodPallet: e.target.checked })} />
-          Có dùng pallet / bao bì gỗ
-        </label>
-
-        <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-          <PortCombobox label="Cảng đi (POL)" accent="pol" value={form.pol} onChange={(c) => setPort('pol', c)} active={pickTarget === 'pol'} onFocusPick={() => setPickTarget('pol')} />
-          <QuickVN onPick={(c) => setPort('pol', c)} />
-          <div className="flex justify-center">
-            <button type="button" onClick={swap} title="Đảo chiều đi/đến" className="rounded-full border border-slate-300 bg-white px-3 py-0.5 text-sm hover:bg-slate-100">⇅ Đảo chiều</button>
+        <div className="grid grid-cols-[110px_1fr] gap-2">
+          <div>
+            <label className="lbl">Mã HS (≥ 6 số)</label>
+            <input className="field" inputMode="numeric" placeholder="940360" value={f.hs} onChange={(e) => setForm({ hs: e.target.value.replace(/[^0-9.]/g, '').slice(0, 12) })} />
           </div>
-          <PortCombobox label="Cảng đến (POD)" accent="pod" value={form.pod} onChange={(c) => setPort('pod', c)} active={pickTarget === 'pod'} onFocusPick={() => setPickTarget('pod')} />
-          <QuickVN onPick={(c) => setPort('pod', c)} />
-          <div className="pt-1">
-            <div className="mb-1 text-[11px] font-semibold text-slate-500">Hoặc chọn trên bản đồ – đang chọn:</div>
-            <Segmented value={pickTarget} onChange={setPickTarget} options={[{ v: 'pol', label: '● Điểm đi' }, { v: 'pod', label: '● Điểm đến' }]} />
+          <div>
+            <label className="lbl">Mô tả hàng</label>
+            <input className="field" placeholder="VD: đồ gỗ nội thất" value={f.hsDesc} onChange={(e) => setForm({ hsDesc: e.target.value })} />
           </div>
         </div>
-
-        <Field label="Ngày hàng sẵn sàng">
-          <input type="date" className={input} value={form.readyDate} onChange={(e) => setForm({ readyDate: e.target.value })} />
-        </Field>
-
-        <div className="grid grid-cols-2 gap-2">
-          <Field label="Bạn là">
-            <Segmented value={form.role} onChange={(role) => setForm({ role })} cols={1} options={[{ v: 'seller', label: 'Người bán (XK)' }, { v: 'buyer', label: 'Người mua (NK)' }]} />
-          </Field>
-          <Field label="Ai book tàu">
-            <Segmented value={form.booker} onChange={(booker) => setForm({ booker })} cols={1} options={[{ v: 'me', label: 'Tôi tự book' }, { v: 'other', label: 'Bên kia book' }]} />
-          </Field>
+        <div className="grid grid-cols-[1fr_92px] gap-2">
+          <div>
+            <label className="lbl">Giá trị hàng (USD)</label>
+            <input type="number" min={0} step={100} className="field" placeholder="0" value={f.goodsValue || ''} onChange={(e) => setForm({ goodsValue: Math.max(0, +e.target.value || 0) })} />
+          </div>
+          <div>
+            <label className="lbl">Giá báo theo</label>
+            <select className="field" value={f.valueTerm} onChange={(e) => setForm({ valueTerm: e.target.value as Incoterm })}>
+              {termsForMode('sea').map((t) => <option key={t}>{t}</option>)}
+            </select>
+          </div>
         </div>
+      </Block>
 
-        <Field label="Ưu tiên">
-          <Segmented value={form.priority} onChange={(p) => setPriority(p as Priority)} cols={2} options={(Object.keys(PRIORITY_LABEL) as Priority[]).map((k) => ({ v: k, label: PRIORITY_LABEL[k] }))} />
-        </Field>
-
-        <Field label="Tùy chọn tuyến">
-          <div className="space-y-1.5 text-sm">
-            <label className="flex items-center gap-2">
-              <input type="checkbox" checked={form.avoidRedSea} onChange={(e) => setForm({ avoidRedSea: e.target.checked })} />
-              Tránh Biển Đỏ <span className="text-xs text-slate-400">(đi vòng Mũi Hảo Vọng)</span>
-            </label>
-            <label className="flex items-center gap-2">
-              <input type="checkbox" checked={form.avoidPanama} onChange={(e) => setForm({ avoidPanama: e.target.checked })} />
-              Tránh kênh Panama
-            </label>
+      <Block n={3} title="Điều kiện giao hàng">
+        <div>
+          <label className="lbl">Phương thức vận tải</label>
+          <div className="grid grid-cols-2 gap-2">
+            <button onClick={() => pickMode('sea')} className={`btn !py-2 !text-[13px] ${f.mode === 'sea' ? 'btn-on' : ''}`}>🚢 Đường biển</button>
+            <button onClick={() => road.ok && pickMode('road')} disabled={!road.ok} title={road.reason} className={`btn !py-2 !text-[13px] ${f.mode === 'road' ? 'btn-on' : ''}`}>🚚 Đường bộ</button>
           </div>
-        </Field>
-
-        <Field label="Chế độ hiển thị" hint={viewMode === 'network' ? 'Vẽ mọi tuyến từ các cảng quanh A tới các cảng quanh B, kèm thời gian & chi phí trên đường.' : 'Chỉ vẽ một tuyến A → B (như V1).'}>
-          <Segmented value={viewMode} onChange={setViewMode} options={[{ v: 'network', label: '🗺️ Mạng tuyến đa cảng' }, { v: 'single', label: '➖ Một tuyến A → B' }]} />
-        </Field>
-
-        <Field label={`Bán kính tìm cảng quanh A và B: ${form.radiusKm} km`}>
-          <input type="range" min={0} max={800} step={50} className="w-full" value={form.radiusKm} onChange={(e) => setForm({ radiusKm: +e.target.value })} />
-        </Field>
-
-        <details className="text-xs text-slate-500">
-          <summary className="cursor-pointer select-none">Nâng cao</summary>
-          <div className="mt-2">
-            <Field label="Engine tìm tuyến">
-              <Segmented value={form.engine} onChange={(engine) => setForm({ engine })} options={[{ v: 'searoute', label: 'searoute-js (marnet)' }, { v: 'graph', label: 'Đồ thị dự phòng' }]} />
-            </Field>
+          {!road.ok && f.mine && f.partner && <p className="mt-1 text-[10.5px] text-mute">Đường bộ không dùng được: {road.reason}.</p>}
+        </div>
+        <div>
+          <div className="mb-1 flex items-center justify-between">
+            <label className="lbl !mb-0">Điều kiện (Incoterms® 2020)</label>
+            <button className="text-[11px] text-sky hover:underline" onClick={() => setSuggest(!suggest)}>✨ Gợi ý cho tôi</button>
           </div>
-        </details>
-      </div>
+          <div className="flex flex-wrap gap-1.5">
+            {terms.map((t) => (
+              <button key={t} onClick={() => pickTerm(t)} title={INCOTERMS[t].nameVi} className={`btn w-[50px] !gap-0.5 !px-0 !py-1.5 !text-[12.5px] !font-semibold ${f.term === t ? 'btn-on' : ''}`}>
+                {t}{f.mode === 'sea' && INCOTERMS[t].group === 'sea' && <span className="text-[10px] opacity-70" title="Chỉ dùng cho đường biển và thủy nội địa">⚓</span>}
+              </button>
+            ))}
+          </div>
+          {suggest && (
+            <div className="mt-2 rounded-lg border border-line bg-[#0a1120] p-2 text-[11.5px]">
+              <div className="mb-1.5 text-mute">Ai sẽ book vận tải chặng chính?</div>
+              <div className="flex gap-1.5">
+                {[true, false].map((iBook) => {
+                  const sg = suggestIncoterm(f.role, iBook, f.cargo, f.mode);
+                  return (
+                    <button key={String(iBook)} className="btn flex-1 !flex-col !items-start !whitespace-normal !text-left" onClick={() => { setTerm(sg.term); setSuggest(false); useAppStore.getState().showToast(`Gợi ý: ${sg.term} – ${INCOTERMS[sg.term].nameVi}`); }} title={sg.reason}>
+                      <span className="text-mute">{iBook ? 'Tôi book' : 'Bên kia book'}</span>
+                      <b className="text-amber-200">→ {sg.term}</b>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          {notice && <p className="mt-1.5 rounded bg-sky/10 px-2 py-1 text-[11px] text-cyan-200">ℹ️ {notice}</p>}
+          {seaOnlyWarn && <p className="mt-1.5 rounded bg-gold/10 px-2 py-1 text-[11px] text-amber-200">⚠️ ICC khuyến nghị dùng FCA / CPT / CIP cho hàng container.</p>}
+          {needAddr && <p className="mt-1.5 rounded bg-gold/10 px-2 py-1 text-[11px] text-amber-200">⚠️ Nhập địa chỉ cụ thể để tính đủ chi phí nội địa cho điều kiện này.</p>}
+        </div>
+      </Block>
 
-      <div className="border-t border-slate-200 bg-white p-4">
-        {error && <div className="mb-2 rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">{error}</div>}
-        <button type="button" onClick={run} className="w-full rounded-xl bg-brand-600 py-3 text-sm font-semibold text-white shadow-md shadow-blue-900/20 transition hover:bg-brand-700 active:scale-[.99]">
-          🚢 Tính &amp; mô phỏng hành trình
+      <section className="card">
+        <button className="flex w-full items-center justify-between px-3 py-2 text-[12.5px] font-medium text-mute hover:text-fg" onClick={() => setMore(!more)}>
+          <span>Tùy chọn thêm</span>
+          <span>{more ? '▴' : '▾'}</span>
         </button>
-      </div>
+        {more && (
+          <div className="space-y-2.5 border-t border-line p-3">
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="lbl">Ngày hàng sẵn sàng</label>
+                <input type="date" className="field" value={f.readyDate} onChange={(e) => setForm({ readyDate: e.target.value })} />
+              </div>
+              <div>
+                <label className="lbl">Xuất xứ hàng hóa</label>
+                <select className="field" value={f.origin} onChange={(e) => setForm({ origin: e.target.value })}>
+                  <option value="">= nước người bán</option>
+                  {COUNTRIES.map((c) => <option key={c.iso2} value={c.iso2}>{c.name}</option>)}
+                </select>
+              </div>
+            </div>
+            <label className="flex items-center gap-2 text-xs text-fg">
+              <input type="checkbox" checked={f.hasCo} onChange={(e) => setForm({ hasCo: e.target.checked })} /> Có C/O hợp lệ (áp thuế ưu đãi FTA nếu có trong biểu thuế)
+            </label>
+            <div>
+              <label className="lbl">Ưu tiên</label>
+              <Seg value={f.priority} onChange={(p) => setPriority(p as Priority)} options={(Object.keys(PRIORITY_LABEL) as Priority[]).map((v) => ({ v, label: PRIORITY_LABEL[v] }))} />
+              <div className="mt-2 space-y-1">
+                {(Object.keys(weights) as (keyof Weights)[]).map((k) => (
+                  <div key={k} className="flex items-center gap-2 text-[11px] text-mute">
+                    <span className="w-20 shrink-0">{CRITERIA_LABEL[k]}</span>
+                    <input type="range" min={0} max={100} value={weights[k]} onChange={(e) => setWeight(k, +e.target.value)} className="h-1 flex-1" />
+                    <span className="w-7 text-right text-fg">{weights[k]}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="lbl">Bán kính tìm cảng (chỉ với nhánh Địa chỉ): {f.radiusKm} km</label>
+              <input type="range" min={100} max={1000} step={50} value={f.radiusKm} onChange={(e) => setForm({ radiusKm: +e.target.value })} className="w-full" />
+            </div>
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-fg">
+              <label className="flex items-center gap-2"><input type="checkbox" checked={f.avoidRedSea} onChange={(e) => setForm({ avoidRedSea: e.target.checked })} /> Tránh Biển Đỏ</label>
+              <label className="flex items-center gap-2"><input type="checkbox" checked={f.avoidPanama} onChange={(e) => setForm({ avoidPanama: e.target.checked })} /> Tránh kênh Panama</label>
+              <label className="flex items-center gap-2"><input type="checkbox" checked={f.woodPallet} onChange={(e) => setForm({ woodPallet: e.target.checked })} /> Có pallet / bao bì gỗ</label>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {planError && <p className="rounded-lg bg-red-500/10 px-3 py-2 text-xs text-red-200">{planError}</p>}
     </div>
-  );
-}
-
-function QuickVN({ onPick }: { onPick: (code: string) => void }) {
-  return (
-    <div className="flex items-center gap-1 text-[11px]">
-      <span className="text-slate-500">🇻🇳 VN ·</span>
-      {VN_QUICK.map((q) => (
-        <button type="button" key={q.code} onClick={() => onPick(q.code)} className="rounded border border-slate-200 bg-white px-2 py-0.5 hover:border-brand-500 hover:text-brand-700">
-          {q.label}
-        </button>
-      ))}
+    <div className="shrink-0 border-t border-line bg-panel p-2.5">
+      <button
+        onClick={() => runPlan()}
+        disabled={!!planning}
+        className="w-full rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-3 text-sm font-bold text-slate-900 shadow-[0_0_24px_rgba(251,191,36,.35)] transition hover:brightness-110 disabled:opacity-60"
+      >
+        {planning ? `Đang tính… ${planning.total > 1 ? `${planning.done}/${planning.total}` : ''}` : '🔎 Tìm tuyến tối ưu'}
+      </button>
+    </div>
     </div>
   );
 }

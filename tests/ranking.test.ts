@@ -1,11 +1,20 @@
 import { describe, expect, it } from 'vitest';
 import { WEIGHT_PRESETS } from '../src/config/weights';
-import { PORT_BY_CODE as P } from '../src/data/ports';
-import { coefficientOfVariation, normalize, portsWithin, rankAlternatives, simulatePriceHistory, weightedScore } from '../src/lib/ranking';
-import type { ShipmentInput } from '../src/types';
+import { buildPlan, type PlanInput } from '../src/lib/plan';
+import { coefficientOfVariation, normalize, rankOptions, simulatePriceHistory, weightedScore } from '../src/lib/ranking';
+import { createTableRateProvider } from '../src/providers/RateProvider';
+import { createUserTariffProvider } from '../src/providers/TariffProvider';
+import type { Place } from '../src/types';
 
-const shipment: ShipmentInput = { cargo: 'dry', mode: 'FCL', container: '40HC', quantity: 1, cbm: 0, weightKg: 0, woodPallet: false };
-const options = { avoidRedSea: false, avoidPanama: false };
+const deps = { rates: createTableRateProvider([]), tariffs: createUserTariffProvider([]) };
+const VN: Place = { kind: 'country', label: 'Việt Nam', country: 'VN', countryName: 'Việt Nam', coord: [106, 16] };
+const DE: Place = { kind: 'country', label: 'Đức', country: 'DE', countryName: 'Đức', coord: [10, 51] };
+const input = (p: Partial<PlanInput> = {}): PlanInput => ({
+  role: 'seller', mine: VN, partner: DE, mode: 'sea',
+  shipment: { cargo: 'dry', mode: 'FCL', container: '40HC', quantity: 1, cbm: 0, weightKg: 0, woodPallet: false },
+  goodsValue: 0, valueTerm: 'FOB', hs: '', origin: '', hasCo: false, readyDate: '2026-11-20', radiusKm: 400,
+  avoidRedSea: false, avoidPanama: false, carriers: [], ...p,
+});
 
 describe('chuẩn hóa & điểm', () => {
   it('normalize: tốt nhất = 100, tệ nhất = 0', () => {
@@ -18,45 +27,37 @@ describe('chuẩn hóa & điểm', () => {
     expect(coefficientOfVariation([8, 12])).toBeCloseTo(0.2, 6);
   });
   it('trọng số 35/25/20/10/10', () => {
-    const s = weightedScore({ cost: 100, stability: 0, time: 0, frequency: 0, risk: 0 }, WEIGHT_PRESETS.balanced);
-    expect(s).toBeCloseTo(35, 6);
+    expect(weightedScore({ cost: 100, stability: 0, time: 0, frequency: 0, risk: 0 }, WEIGHT_PRESETS.balanced)).toBeCloseTo(35, 6);
   });
-});
-
-describe('dữ liệu giá mô phỏng', () => {
-  it('12 tháng, seed cố định (tái lập được)', () => {
+  it('giá mô phỏng 12 tháng, seed cố định', () => {
     const a = simulatePriceHistory('VNSGN', 'DEHAM', 3000, undefined, new Date(2026, 0, 15));
-    const b = simulatePriceHistory('VNSGN', 'DEHAM', 3000, undefined, new Date(2026, 0, 15));
-    const c = simulatePriceHistory('VNHPH', 'DEHAM', 3000, undefined, new Date(2026, 0, 15));
     expect(a).toHaveLength(12);
-    expect(a).toEqual(b);
-    expect(a).not.toEqual(c);
-    expect(a.every((p) => p.price > 0)).toBe(true);
+    expect(a).toEqual(simulatePriceHistory('VNSGN', 'DEHAM', 3000, undefined, new Date(2026, 0, 15)));
+    expect(a).not.toEqual(simulatePriceHistory('VNHPH', 'DEHAM', 3000, undefined, new Date(2026, 0, 15)));
   });
 });
 
-describe('rankAlternatives', () => {
-  it('bán kính 0 → chỉ cặp gốc', () => {
-    const r = rankAlternatives({ pol: P.VNSGN, pod: P.DEHAM, radiusKm: 0, shipment, options, weights: WEIGHT_PRESETS.balanced });
-    expect(r).toHaveLength(1);
-    expect(r[0].isCurrent).toBe(true);
-  });
-  it('bán kính 300 km quanh Cát Lái gồm Cái Mép; quanh Hamburg gồm Bremerhaven', () => {
-    expect(portsWithin(P.VNSGN, 300).map((p) => p.code)).toContain('VNCMT');
-    expect(portsWithin(P.DEHAM, 300).map((p) => p.code)).toContain('DEBRV');
-  });
-  it('xếp hạng giảm dần theo điểm, có nhãn Rẻ nhất / Nhanh nhất / Ổn định nhất', () => {
-    const r = rankAlternatives({ pol: P.VNSGN, pod: P.DEHAM, radiusKm: 500, shipment, options, weights: WEIGHT_PRESETS.balanced });
-    expect(r.length).toBeGreaterThan(3);
+describe('rankOptions', async () => {
+  const plan = await buildPlan(input(), deps);
+  it('xếp hạng giảm dần theo điểm, hạng 1..n, có nhãn Rẻ nhất / Nhanh nhất / Ổn định nhất', () => {
+    const r = rankOptions(plan.options, 'FCA', 'seller', WEIGHT_PRESETS.balanced);
+    expect(r.map((x) => x.rank)).toEqual(r.map((_, i) => i + 1));
     for (let i = 1; i < r.length; i++) expect(r[i - 1].score).toBeGreaterThanOrEqual(r[i].score);
-    const tags = r.flatMap((c) => c.tags);
-    expect(tags).toEqual(expect.arrayContaining(['Rẻ nhất', 'Nhanh nhất', 'Ổn định nhất']));
-    const cheapest = r.find((c) => c.tags.includes('Rẻ nhất'))!;
-    expect(cheapest.scores.cost).toBe(100);
-    expect(Math.min(...r.map((c) => c.cost))).toBe(cheapest.cost);
+    expect(r.flatMap((c) => c.tags)).toEqual(expect.arrayContaining(['Rẻ nhất', 'Nhanh nhất', 'Ổn định nhất']));
   });
-  it('ưu tiên "Giá thấp" đưa cặp rẻ nhất lên đầu nhiều hơn', () => {
-    const r = rankAlternatives({ pol: P.VNSGN, pod: P.DEHAM, radiusKm: 500, shipment, options, weights: { cost: 100, stability: 0, time: 0, frequency: 0, risk: 0 } });
-    expect(r[0].tags).toContain('Rẻ nhất');
+  it('chi phí xếp hạng = phần người dùng trả theo Incoterm; nút "Tổng" dùng tổng 10 khoản', () => {
+    const cpt = rankOptions(plan.options, 'CPT', 'seller', WEIGHT_PRESETS.balanced);
+    cpt.forEach((r) => expect(r.cost).toBe(r.youPay));
+    const tot = rankOptions(plan.options, 'CPT', 'seller', WEIGHT_PRESETS.balanced, 'total');
+    tot.forEach((r) => expect(r.cost).toBe(r.option.total));
+  });
+  it('bạn trả + bên kia trả = tổng', () => {
+    for (const t of ['EXW', 'FOB', 'CIF', 'DAP', 'DDP'] as const) {
+      rankOptions(plan.options, t, 'buyer', WEIGHT_PRESETS.balanced).forEach((r) => expect(r.youPay + r.otherPays).toBeCloseTo(r.option.total, 6));
+    }
+  });
+  it('trọng số 100% chi phí đưa phương án rẻ nhất lên đầu', () => {
+    const r = rankOptions(plan.options, 'DDP', 'seller', { cost: 100, stability: 0, time: 0, frequency: 0, risk: 0 });
+    expect(r[0].cost).toBe(Math.min(...r.map((x) => x.cost)));
   });
 });

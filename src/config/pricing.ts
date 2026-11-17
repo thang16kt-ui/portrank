@@ -1,4 +1,4 @@
-import type { CargoType, ContainerType } from '../types';
+import type { CargoType, ContainerType, RegionId } from '../types';
 
 /**
  * MÔ HÌNH CƯỚC ƯỚC TÍNH – KHÔNG PHẢI GIÁ THỊ TRƯỜNG.
@@ -37,6 +37,37 @@ export const PRICING = {
 
   docsPerShipment: 85,
 
+  /* ───── Cửa đến cửa (10 khoản) ───── */
+  /** Khoản 1 & 10: bốc / dỡ hàng tại kho, USD / container */
+  warehouseHandling: { '20': 60, '40': 90, lclPerCbm: 6, lclMin: 30 },
+  /** Khoản 2 & 9: vận tải nội địa – USD/km cho 1 container 40′, theo khu vực. Quãng đường = Haversine × roadFactor */
+  inland: {
+    roadFactor: 1.3,
+    perKm40: { SEA: 1.3, NEA: 1.6, SA: 1.2, ME: 1.5, EU: 2.0, MED: 1.8, AF: 2.0, NA: 2.4, LATAM: 1.8, OC: 2.2 } as Record<RegionId, number>,
+    factor20: 0.85,
+    minPerTrip: 120,
+    /** LCL: tính theo tỷ lệ chỗ trên xe, có hệ số gom hàng */
+    lclShareMarkup: 1.6,
+    lclMin: 60,
+    kmPerDay: 400,
+  },
+  /** Khoản 3 & 8: thông quan, USD / lô */
+  customs: { exportPerShipment: 80, importPerShipment: 120 },
+  /** Khoản 6: bảo hiểm = rate × 110% × trị giá CIF */
+  insurance: { rate: 0.002, uplift: 1.1 },
+
+  /* ───── Đường bộ ───── */
+  road: {
+    /** Cước xe chặng chính, USD/km cho 1 container 40′ (hoặc 1 xe) theo khu vực */
+    perKm40: { SEA: 1.5, NEA: 1.7, SA: 1.4, ME: 1.7, EU: 2.1, MED: 1.9, AF: 2.3, NA: 2.5, LATAM: 2.0, OC: 2.3 } as Record<RegionId, number>,
+    /** Phí cửa khẩu mỗi phía, USD / container */
+    gateFeePerCont: 150,
+    kmPerDay: 500,
+    borderDays: 1,
+    /** Giả định quãng gom hàng kho → bãi giao hàng và bãi đến → kho (km) */
+    yardKm: 30,
+  },
+
   /** Khoảng giá ± */
   rangePct: 0.12,
 };
@@ -49,8 +80,8 @@ export const CONTAINER_LABEL: Record<ContainerType, string> = {
 };
 
 export const CARGO_LABEL: Record<CargoType, string> = {
-  dry: 'Hàng khô thông thường',
-  reefer: 'Hàng lạnh (Reefer)',
+  dry: 'Hàng khô',
+  reefer: 'Hàng lạnh',
   dg: 'Hàng nguy hiểm (DG)',
-  oog: 'Hàng quá khổ (Flat rack / Open top)',
+  oog: 'Hàng quá khổ',
 };

@@ -1,90 +1,104 @@
-import type { Booker, CargoType, CostLine, CostSegment, Incoterm, Party, Port, Role } from '../types';
+import { COST_ITEMS, GROUP_C, INCOTERMS, type ItemNo } from '../config/incoterms';
+import type { CargoType, Incoterm, Role, TransportMode } from '../types';
 
-export const SEGMENTS = ['Kho người bán', 'Cảng đi', 'Trên tàu', 'Cảng đến', 'Kho người mua'] as const;
-
-export interface IncotermSpec {
-  code: Incoterm;
-  name: string;
-  /** Ai trả phí ở từng chặng 0..4 */
-  payer: [Party, Party, Party, Party, Party];
-  /**
-   * Điểm chuyển rủi ro, đo theo vị trí trên thanh 0..5
-   * (0 = tại kho người bán, 1 = giao cho người vận tải tại cảng đi, 1.5 = hàng lên tàu, 4 = tại kho người mua…)
-   */
-  riskAt: number;
-  riskLabel: string;
-  /** Địa điểm chỉ định */
-  place: 'pol' | 'pod' | 'seller' | 'buyer';
-  seaOnly: boolean;
-  note: string;
+export interface SplitOptions {
+  /** Nhóm C: tính phí cảng đến (khoản 7) cho người bán – mặc định người mua trả */
+  destChargesBySeller?: boolean;
 }
 
-const S: Party = 'seller', B: Party = 'buyer';
+/** Tỷ lệ (0..1) người bán trả cho khoản n theo điều kiện `term` */
+export function sellerShare(term: Incoterm, n: ItemNo, opts: SplitOptions = {}): number {
+  if (n === 7 && opts.destChargesBySeller && GROUP_C.includes(term)) return 1;
+  return INCOTERMS[term].sellerPays[n] ?? 0;
+}
 
-export const INCOTERMS: Record<Incoterm, IncotermSpec> = {
-  EXW: { code: 'EXW', name: 'Giao tại xưởng', payer: [B, B, B, B, B], riskAt: 0, riskLabel: 'Tại kho người bán', place: 'seller', seaOnly: false, note: 'Người mua lo mọi thứ, kể cả thông quan xuất khẩu.' },
-  FCA: { code: 'FCA', name: 'Giao cho người chuyên chở', payer: [S, S, B, B, B], riskAt: 1, riskLabel: 'Giao cho người vận tải tại cảng đi', place: 'pol', seaOnly: false, note: 'Khuyến nghị cho hàng container. Người bán thông quan xuất khẩu và giao hàng tại bãi/CFS cảng đi.' },
-  FOB: { code: 'FOB', name: 'Giao lên tàu', payer: [S, S, B, B, B], riskAt: 1.5, riskLabel: 'Hàng đã xếp lên tàu tại cảng đi', place: 'pol', seaOnly: true, note: 'Chỉ dùng cho vận tải biển / thủy nội địa, phù hợp hàng rời hoặc hàng quá khổ.' },
-  CFR: { code: 'CFR', name: 'Tiền hàng và cước', payer: [S, S, S, B, B], riskAt: 1.5, riskLabel: 'Hàng đã xếp lên tàu tại cảng đi', place: 'pod', seaOnly: true, note: 'Người bán trả cước tới cảng đến nhưng rủi ro chuyển khi hàng lên tàu.' },
-  CIF: { code: 'CIF', name: 'Tiền hàng, bảo hiểm và cước', payer: [S, S, S, B, B], riskAt: 1.5, riskLabel: 'Hàng đã xếp lên tàu tại cảng đi', place: 'pod', seaOnly: true, note: 'Như CFR + người bán mua bảo hiểm tối thiểu (ICC C).' },
-  CPT: { code: 'CPT', name: 'Cước phí trả tới', payer: [S, S, S, B, B], riskAt: 1, riskLabel: 'Giao cho người vận tải đầu tiên', place: 'pod', seaOnly: false, note: 'Người bán trả cước tới nơi đến, rủi ro chuyển khi giao cho người vận tải đầu tiên.' },
-  CIP: { code: 'CIP', name: 'Cước phí và bảo hiểm trả tới', payer: [S, S, S, B, B], riskAt: 1, riskLabel: 'Giao cho người vận tải đầu tiên', place: 'pod', seaOnly: false, note: 'Như CPT + người bán mua bảo hiểm mức cao (ICC A) theo Incoterms 2020.' },
-  DAP: { code: 'DAP', name: 'Giao tại nơi đến', payer: [S, S, S, S, B], riskAt: 4, riskLabel: 'Tại nơi đến, chưa dỡ hàng', place: 'buyer', seaOnly: false, note: 'Người bán chịu mọi chi phí/rủi ro tới nơi đến; người mua dỡ hàng và nộp thuế nhập khẩu.' },
-  DPU: { code: 'DPU', name: 'Giao tại nơi đến đã dỡ', payer: [S, S, S, S, B], riskAt: 4.5, riskLabel: 'Tại nơi đến, đã dỡ hàng', place: 'buyer', seaOnly: false, note: 'Như DAP nhưng người bán dỡ hàng.' },
-  DDP: { code: 'DDP', name: 'Giao đã nộp thuế', payer: [S, S, S, S, S], riskAt: 5, riskLabel: 'Tại kho người mua, đã thông quan', place: 'buyer', seaOnly: false, note: 'Người bán lo cả thuế nhập khẩu – cần có đại diện tại nước nhập.' },
-};
+export interface ItemAmount {
+  n: ItemNo;
+  amount: number | null;
+}
+
+export interface Split {
+  seller: number;
+  buyer: number;
+  /** Phần của người dùng (theo vai trò) và của bên kia */
+  you: number;
+  other: number;
+  perItem: { n: ItemNo; amount: number; sellerShare: number; seller: number; buyer: number }[];
+}
+
+/** Chia 10 khoản chi phí giữa người bán / người mua. Khoản chưa tính (null) coi như 0. */
+export function splitItems(items: ItemAmount[], term: Incoterm, role: Role, opts: SplitOptions = {}): Split {
+  let seller = 0, buyer = 0;
+  const perItem = items.map((it) => {
+    const amount = it.amount ?? 0;
+    const sh = sellerShare(term, it.n, opts);
+    seller += amount * sh;
+    buyer += amount * (1 - sh);
+    return { n: it.n, amount, sellerShare: sh, seller: amount * sh, buyer: amount * (1 - sh) };
+  });
+  return { seller, buyer, you: role === 'seller' ? seller : buyer, other: role === 'seller' ? buyer : seller, perItem };
+}
+
+export interface PlaceNames {
+  /** Nơi của người bán (địa chỉ hoặc nước) */
+  origin: string;
+  /** Cảng đi / bãi giao hàng */
+  portO: string;
+  /** Cảng đến / bãi đến */
+  portD: string;
+  /** Nơi của người mua */
+  dest: string;
+}
+
+/** Địa điểm ghi kèm điều kiện, vd "CIP Cái Mép", "FCA Hamburg" */
+export function namedPlace(term: Incoterm, names: PlaceNames): string {
+  const k = INCOTERMS[term].place;
+  return k === 'origin' ? names.origin : k === 'pol' ? names.portO : k === 'pod' ? names.portD : names.dest;
+}
+
+/** Câu "Rủi ro chuyển giao khi nào" – chèn tên địa điểm thật và đổi từ theo phương thức */
+export function riskTransferText(term: Incoterm, mode: TransportMode, names?: Partial<PlaceNames>): string {
+  const sea = mode === 'sea';
+  const paren = (s?: string) => (s ? ` (${s})` : '');
+  let t = INCOTERMS[term].riskTransfer
+    .replace('{carrier}', sea ? 'hãng vận tải (hãng tàu)' : 'nhà xe')
+    .replace('{origin}', paren(names?.origin))
+    .replace('{dest}', paren(names?.dest))
+    .replace('{portO}', sea ? `cảng đi${names?.portO ? ' ' + names.portO : ''}` : `bãi giao hàng / cửa khẩu${paren(names?.portO)}`)
+    .replace('{portD}', sea ? `cảng đến${names?.portD ? ' ' + names.portD : ''}` : `nơi đến${paren(names?.portD)}`);
+  if (!sea) t = t.replace(/trên tàu/g, 'trên xe').replace(/hãng tàu/g, 'nhà xe');
+  return t;
+}
+
+/** Kiểm tra dữ liệu: vị trí cắt chi phí khớp với ma trận phân chia (dùng trong unit test) */
+export function costCutMatchesMatrix(term: Incoterm): boolean {
+  const def = INCOTERMS[term];
+  return COST_ITEMS.filter((c) => c.span).every((c) => {
+    const [a, b] = c.span!;
+    const sh = def.sellerPays[c.n] ?? 0;
+    if (sh === 1) return b <= def.costAt;
+    if (sh === 0) return a >= def.costAt;
+    return a < def.costAt && def.costAt < b;
+  });
+}
 
 export interface IncotermSuggestion {
-  primary: Incoterm;
-  alternatives: Incoterm[];
-  placeLabel: string;
+  term: Incoterm;
   reason: string;
+  alternatives: Incoterm[];
 }
 
-/**
- * Gợi ý Incoterm 2020 theo vai trò, bên book tàu và loại hàng.
- * Hàng container → ưu tiên FCA/CPT/CIP (khuyến nghị ICC). FOB/CFR/CIF chỉ cho hàng quá khổ/hàng rời.
- */
-export function suggestIncoterm(role: Role, booker: Booker, cargo: CargoType, pol: Port, pod: Port): IncotermSuggestion {
-  const seaTerms = cargo === 'oog';
-  const sellerBooks = (role === 'seller' && booker === 'me') || (role === 'buyer' && booker === 'other');
+/** Gợi ý theo vai trò, loại hàng, phương thức và việc ai muốn tự book vận tải chặng chính */
+export function suggestIncoterm(role: Role, iBook: boolean, cargo: CargoType, mode: TransportMode): IncotermSuggestion {
+  const sellerBooks = (role === 'seller') === iBook;
+  const bulkLike = mode === 'sea' && cargo === 'oog';
+  const who = role === 'seller' ? 'Bạn là người bán' : 'Bạn là người mua';
   if (sellerBooks) {
-    if (role === 'seller') {
-      const primary: Incoterm = seaTerms ? 'CFR' : 'CPT';
-      return {
-        primary,
-        alternatives: seaTerms ? ['CIF', 'DAP'] : ['CIP', 'DAP'],
-        placeLabel: `${primary} ${pod.name}`,
-        reason: `Bạn là người bán và tự book tàu → bạn kiểm soát cước tới ${pod.name}. ${seaTerms ? 'Hàng quá khổ/không đóng container kín nên có thể dùng nhóm điều kiện đường biển (CFR/CIF).' : 'Hàng container nên dùng CPT/CIP thay cho CFR/CIF (rủi ro chuyển khi giao cho người vận tải, không phải khi lên tàu).'} Chọn DAP nếu giao tận kho người mua.`,
-      };
-    }
-    const primary: Incoterm = seaTerms ? 'CIF' : 'CIP';
-    return {
-      primary,
-      alternatives: seaTerms ? ['CFR', 'DAP', 'DDP'] : ['CPT', 'DAP', 'DDP'],
-      placeLabel: `${primary} ${pod.name}`,
-      reason: `Bạn là người mua, người bán book tàu → người bán trả cước và bảo hiểm tới ${pod.name}. ${seaTerms ? 'Hàng quá khổ có thể dùng CIF.' : 'CIP buộc người bán mua bảo hiểm mức ICC (A).'} Chọn DAP/DDP nếu muốn nhận hàng tại kho.`,
-    };
+    if (bulkLike) return { term: 'CIF', alternatives: ['CFR', 'DAP'], reason: `${who}, người bán book tàu, hàng quá khổ không đóng container → CIF (có bảo hiểm) hoặc CFR.` };
+    return { term: 'CIP', alternatives: ['CPT', 'DAP'], reason: `${who}, người bán book vận tải chặng chính, hàng ${mode === 'sea' ? 'container' : 'đi đường bộ'} → CIP (người bán mua bảo hiểm mức cao nhất). Muốn người bán giao tận nơi thì chọn DAP.` };
   }
-  const primary: Incoterm = seaTerms ? 'FOB' : 'FCA';
-  return {
-    primary,
-    alternatives: seaTerms ? ['FCA', 'EXW'] : ['FOB', 'EXW'],
-    placeLabel: `${primary} ${pol.name}`,
-    reason:
-      role === 'seller'
-        ? `Bạn là người bán, người mua book tàu → bạn giao hàng cho hãng tàu do người mua chỉ định tại ${pol.name}. ${seaTerms ? 'Hàng quá khổ xếp trực tiếp lên tàu nên dùng FOB.' : 'Hàng container nên dùng FCA thay FOB.'}`
-        : `Bạn là người mua và tự book tàu → nhận hàng tại ${pol.name}. ${seaTerms ? 'Hàng quá khổ có thể dùng FOB.' : 'FCA giúp người bán vẫn thông quan xuất khẩu, rủi ro chuyển khi giao cho hãng tàu.'}`,
-  };
+  if (bulkLike) return { term: 'FOB', alternatives: ['FAS', 'FCA'], reason: `${who}, người mua book tàu, hàng quá khổ xếp thẳng lên tàu → FOB.` };
+  return { term: 'FCA', alternatives: ['EXW', 'FOB'], reason: `${who}, người mua tự book vận tải chặng chính → FCA (ICC khuyến nghị thay FOB cho hàng container; người bán vẫn làm thủ tục xuất).` };
 }
 
-/** Bên chịu phí của 1 dòng chi phí theo Incoterm */
-export const payerOf = (inc: Incoterm, segment: CostSegment): Party => INCOTERMS[inc].payer[segment];
-
-export function splitCosts(inc: Incoterm, lines: CostLine[]) {
-  let seller = 0, buyer = 0;
-  for (const l of lines) (payerOf(inc, l.segment) === 'seller' ? (seller += l.amount) : (buyer += l.amount));
-  return { seller, buyer };
-}
-
-export const PARTY_LABEL: Record<Party, string> = { seller: 'Người bán', buyer: 'Người mua' };
+export const PARTY_LABEL = { seller: 'Người bán', buyer: 'Người mua' } as const;

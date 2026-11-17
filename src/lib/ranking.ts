@@ -1,10 +1,7 @@
 import { PASSAGE_RISK, type Weights } from '../config/weights';
-import { PORTS } from '../data/ports';
-import type { Port, RouteOptions, RouteResult, ShipmentInput } from '../types';
-import { haversineKm } from './geo';
-import { estimateQuote } from './pricing';
-import { findRoute } from './routing';
-import { transitDays } from './transit';
+import type { Incoterm, Port, Role, RouteResult } from '../types';
+import { splitItems, type SplitOptions } from './incoterm';
+import type { PlanOption } from './plan';
 
 /* ───────────── PRNG có seed cố định → dữ liệu giá mô phỏng tái lập được ───────────── */
 
@@ -75,36 +72,6 @@ export function weightedScore(scores: Record<keyof Weights, number>, w: Weights)
   return (scores.cost * w.cost + scores.stability * w.stability + scores.time * w.time + scores.frequency * w.frequency + scores.risk * w.risk) / total;
 }
 
-export function portsWithin(center: Port, radiusKm: number): Port[] {
-  return PORTS.filter((p) => p.code === center.code || haversineKm(p.coord, center.coord) <= radiusKm);
-}
-
-export interface AltCandidate {
-  pol: Port;
-  pod: Port;
-  route: RouteResult;
-  cost: number;
-  days: number;
-  cv: number;
-  frequency: number; // chuyến/tuần (mô phỏng)
-  risk: number; // 0..1
-  history: PricePoint[];
-  scores: Record<keyof Weights, number>;
-  score: number;
-  tags: string[];
-  isCurrent: boolean;
-}
-
-export interface RankingInput {
-  pol: Port;
-  pod: Port;
-  radiusKm: number;
-  shipment: ShipmentInput;
-  options: RouteOptions;
-  weights: Weights;
-  /** Giới hạn số cặp tính toán */
-  maxPairs?: number;
-}
 
 /** Tần suất tàu (mô phỏng): dịch vụ chung ≈ min của hai đầu, giảm dần theo khoảng cách khu vực */
 export function pairFrequency(pol: Port, pod: Port): number {
@@ -118,50 +85,47 @@ export function routeRisk(route: RouteResult, pol: Port, pod: Port): number {
   return Math.min(1, passage + (pol.congestion + pod.congestion) * 0.25);
 }
 
-export function rankAlternatives(input: RankingInput): AltCandidate[] {
-  const { pol, pod, radiusKm, shipment, options, weights } = input;
-  const pols = portsWithin(pol, radiusKm);
-  const pods = portsWithin(pod, radiusKm);
-  const pairs: [Port, Port][] = [];
-  for (const a of pols) for (const b of pods) if (a.code !== b.code) pairs.push([a, b]);
-  // ưu tiên cặp gần cặp gốc nhất nếu quá nhiều
-  pairs.sort((x, y) => haversineKm(x[0].coord, pol.coord) + haversineKm(x[1].coord, pod.coord) - (haversineKm(y[0].coord, pol.coord) + haversineKm(y[1].coord, pod.coord)));
-  const limited = pairs.slice(0, input.maxPairs ?? 40);
+export type CostBasis = 'mine' | 'total';
 
-  const raw = limited.map(([a, b]) => {
-    const route = findRoute(a, b, options);
-    const quote = estimateQuote({ pol: a, pod: b, route, shipment });
-    const history = simulatePriceHistory(a.code, b.code, quote.total, route);
-    return {
-      pol: a,
-      pod: b,
-      route,
-      cost: quote.total,
-      days: transitDays(route, shipment.cargo),
-      cv: coefficientOfVariation(history.map((h) => h.price)),
-      frequency: pairFrequency(a, b),
-      risk: routeRisk(route, a, b),
-      history,
-      isCurrent: a.code === pol.code && b.code === pod.code,
-    };
-  });
-  const nCost = normalize(raw.map((r) => r.cost));
-  const nStab = normalize(raw.map((r) => r.cv));
-  const nTime = normalize(raw.map((r) => r.days));
-  const nFreq = normalize(raw.map((r) => r.frequency), false);
-  const nRisk = normalize(raw.map((r) => r.risk));
-  const out: AltCandidate[] = raw.map((r, i) => {
+export interface RankedOption {
+  option: PlanOption;
+  rank: number;
+  /** Chi phí dùng để xếp hạng (phần người dùng trả theo Incoterm, hoặc tổng) */
+  cost: number;
+  youPay: number;
+  otherPays: number;
+  scores: Record<keyof Weights, number>;
+  score: number;
+  tags: string[];
+}
+
+/**
+ * Xếp hạng các phương án. Chuẩn hoá mỗi tiêu chí về 0–100 rồi tính điểm theo trọng số.
+ * Chi phí xếp hạng = phần NGƯỜI DÙNG phải trả theo Incoterm đang chọn (hoặc tổng nếu basis = 'total').
+ */
+export function rankOptions(options: PlanOption[], term: Incoterm, role: Role, weights: Weights, basis: CostBasis = 'mine', split: SplitOptions = {}): RankedOption[] {
+  if (!options.length) return [];
+  const parts = options.map((o) => splitItems(o.items, term, role, split));
+  let costs = options.map((o, i) => (basis === 'mine' ? parts[i].you : o.total));
+  // Phần người dùng trả gần như giống nhau ở mọi phương án (vd. người bán + FOB) → dùng tổng chi phí để phân biệt
+  const meanTotal = options.reduce((s, o) => s + o.total, 0) / options.length;
+  if (basis === 'mine' && Math.max(...costs) - Math.min(...costs) < 0.005 * meanTotal) costs = options.map((o) => o.total);
+  const nCost = normalize(costs);
+  const nStab = normalize(options.map((o) => o.cv));
+  const nTime = normalize(options.map((o) => o.days.total));
+  const nFreq = normalize(options.map((o) => o.frequency), false);
+  const nRisk = normalize(options.map((o) => o.risk));
+  const out: RankedOption[] = options.map((option, i) => {
     const scores = { cost: nCost[i], stability: nStab[i], time: nTime[i], frequency: nFreq[i], risk: nRisk[i] };
-    return { ...r, scores, score: weightedScore(scores, weights), tags: [] };
+    return { option, rank: 0, cost: costs[i], youPay: parts[i].you, otherPays: parts[i].other, scores, score: weightedScore(scores, weights), tags: [] };
   });
-  if (out.length) {
-    const tag = (arr: AltCandidate[], pick: (c: AltCandidate) => number, label: string) => {
-      const best = arr.reduce((m, c) => (pick(c) < pick(m) ? c : m));
-      best.tags.push(label);
-    };
-    tag(out, (c) => c.cost, 'Rẻ nhất');
-    tag(out, (c) => c.days, 'Nhanh nhất');
-    tag(out, (c) => c.cv, 'Ổn định nhất');
+  if (out.length > 1) {
+    const tag = (pick: (c: RankedOption) => number, label: string) => out.reduce((m, c) => (pick(c) < pick(m) ? c : m)).tags.push(label);
+    tag((c) => c.cost, 'Rẻ nhất');
+    tag((c) => c.option.days.total, 'Nhanh nhất');
+    tag((c) => c.option.cv, 'Ổn định nhất');
   }
-  return out.sort((a, b) => b.score - a.score);
+  out.sort((a, b) => b.score - a.score || a.cost - b.cost);
+  out.forEach((r, i) => (r.rank = i + 1));
+  return out;
 }
