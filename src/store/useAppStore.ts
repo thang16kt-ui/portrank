@@ -4,7 +4,7 @@ import type { Booker, CargoType, ContainerType, Incoterm, Priority, Role, RouteR
 
 export type Page = 'plan' | 'prices' | 'saved';
 export type PickTarget = 'pol' | 'pod';
-export type ResultTab = 'overview' | 'cost' | 'rules' | 'incoterm' | 'alts';
+export type ResultTab = 'overview' | 'cost' | 'tax' | 'rules' | 'incoterm' | 'alts';
 
 export interface FormState {
   cargo: CargoType;
@@ -14,6 +14,14 @@ export interface FormState {
   cbm: number;
   weightKg: number;
   woodPallet: boolean;
+  /** Mặt hàng trong danh mục (src/data/tariff/products.csv); rỗng = tự nhập mã HS */
+  productSku: string;
+  /** Mã HS / mã quốc gia nhập tay khi không chọn mặt hàng */
+  hsCode: string;
+  /** Trị giá hàng FOB (USD) để tính thuế */
+  goodsValue: number;
+  /** Nước xuất xứ (ISO); rỗng = theo nước của cảng đi */
+  origin: string;
   pol: string | null;
   pod: string | null;
   readyDate: string;
@@ -113,6 +121,10 @@ export const DEFAULT_FORM: FormState = {
   cbm: 5,
   weightKg: 1500,
   woodPallet: true,
+  productSku: 'AT-CT01',
+  hsCode: '',
+  goodsValue: 50000,
+  origin: '',
   pol: 'VNSGN',
   pod: 'DEHAM',
   readyDate: today(),

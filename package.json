@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "gen:ship": "node scripts/gen-ship-glb.mjs"
+    "gen:ship": "node scripts/gen-ship-glb.mjs",
+    "tariffs:update": "tsx scripts/update-tariffs.ts",
+    "tariffs:check": "tsx scripts/update-tariffs.ts --check"
   },
   "dependencies": {
     "@deck.gl/core": "~9.4.1",

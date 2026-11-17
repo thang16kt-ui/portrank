@@ -1,7 +1,9 @@
 import { useState, type ReactNode } from 'react';
 import { CARGO_LABEL, CONTAINER_LABEL } from '../config/pricing';
 import { PRIORITY_LABEL } from '../config/weights';
-import { VN_QUICK, getPort } from '../data/ports';
+import { PORTS, VN_QUICK, getPort } from '../data/ports';
+import { HS6_DESC, PRODUCTS, getProduct } from '../data/tariff';
+import { fmtCode } from '../lib/tariff';
 import { findRoute } from '../lib/routing';
 import { routeOptionsOf } from '../lib/results';
 import { useAppStore, usePlayback } from '../store/useAppStore';
@@ -112,6 +114,8 @@ export default function Sidebar() {
           Có dùng pallet / bao bì gỗ
         </label>
 
+        <GoodsFields />
+
         <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
           <PortCombobox label="Cảng đi (POL)" accent="pol" value={form.pol} onChange={(c) => setPort('pol', c)} active={pickTarget === 'pol'} onFocusPick={() => setPickTarget('pol')} />
           <QuickVN onPick={(c) => setPort('pol', c)} />
@@ -189,6 +193,42 @@ function QuickVN({ onPick }: { onPick: (code: string) => void }) {
           {q.label}
         </button>
       ))}
+    </div>
+  );
+}
+
+const COUNTRIES = [...new Map(PORTS.map((p) => [p.country, p.countryName])).entries()].sort((a, b) => a[1].localeCompare(b[1], 'vi'));
+
+function GoodsFields() {
+  const form = useAppStore((s) => s.form);
+  const setForm = useAppStore((s) => s.setForm);
+  const product = getProduct(form.productSku);
+  const polCountry = getPort(form.pol)?.countryName;
+  return (
+    <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+      <div className="text-xs font-bold tracking-wide text-slate-500 uppercase">Hàng hoá &amp; thuế nhập khẩu</div>
+      <Field label="Mặt hàng" hint={product ? `HS ${fmtCode(product.hs6)} · ${HS6_DESC[product.hs6] ?? ''}` : 'Nhập mã HS 6 số hoặc mã quốc gia 8–10 số của nước nhập khẩu.'}>
+        <select className={input} value={form.productSku} onChange={(e) => setForm({ productSku: e.target.value })}>
+          {PRODUCTS.map((p) => (
+            <option key={p.sku} value={p.sku}>{p.name}</option>
+          ))}
+          <option value="">Khác – tự nhập mã HS…</option>
+        </select>
+      </Field>
+      {!product && <input className={input} inputMode="numeric" placeholder="vd. 6109.10 hoặc 6109.10.00.12" value={form.hsCode} onChange={(e) => setForm({ hsCode: e.target.value })} />}
+      <div className="grid grid-cols-2 gap-2">
+        <Field label="Trị giá FOB (USD)">
+          <input type="number" min={0} step={1000} className={input} value={form.goodsValue} onChange={(e) => setForm({ goodsValue: Math.max(0, +e.target.value || 0) })} />
+        </Field>
+        <Field label="Xuất xứ hàng">
+          <select className={input} value={form.origin} onChange={(e) => setForm({ origin: e.target.value })}>
+            <option value="">Theo cảng đi{polCountry ? ` (${polCountry})` : ''}</option>
+            {COUNTRIES.map(([c, n]) => (
+              <option key={c} value={c}>{n}</option>
+            ))}
+          </select>
+        </Field>
+      </div>
     </div>
   );
 }

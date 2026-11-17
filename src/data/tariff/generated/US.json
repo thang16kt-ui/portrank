@@ -1,0 +1,4822 @@
+{
+ "country": "US",
+ "source": "USITC – Harmonized Tariff Schedule",
+ "sourceUrl": "https://hts.usitc.gov/",
+ "release": "2026HTSRev23",
+ "fetchedAt": "2026-11-17T15:45:21.539Z",
+ "lines": [
+  {
+   "code": "61091000",
+   "description": "Of cotton",
+   "measures": [
+    {
+     "kind": "mfn",
+     "label": "Thuế NK MFN (cột 1 – General)",
+     "rate": "16.5%",
+     "pct": 16.5,
+     "specific": false,
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Australia FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AU"
+     ],
+     "agreement": "US–Australia FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Bahrain FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "BH"
+     ],
+     "agreement": "US–Bahrain FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Chile FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CL"
+     ],
+     "agreement": "US–Chile FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Colombia TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CO"
+     ],
+     "agreement": "US–Colombia TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Israel FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IL"
+     ],
+     "agreement": "US–Israel FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Jordan FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "JO"
+     ],
+     "agreement": "US–Jordan FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi KORUS FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KR"
+     ],
+     "agreement": "KORUS FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Morocco FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MA"
+     ],
+     "agreement": "US–Morocco FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Oman FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "OM"
+     ],
+     "agreement": "US–Oman FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi CAFTA-DR",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CR",
+      "DO",
+      "GT",
+      "HN",
+      "NI",
+      "SV"
+     ],
+     "agreement": "CAFTA-DR",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Panama TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PA"
+     ],
+     "agreement": "US–Panama TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Peru TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PE"
+     ],
+     "agreement": "US–Peru TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi USMCA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CA",
+      "MX"
+     ],
+     "agreement": "USMCA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Singapore FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SG"
+     ],
+     "agreement": "US–Singapore FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "mfn",
+     "label": "Thuế cột 2 (không hưởng MFN)",
+     "rate": "90%",
+     "pct": 90,
+     "specific": false,
+     "origins": [
+      "CU",
+      "KP",
+      "RU",
+      "BY"
+     ],
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    }
+   ],
+   "children": [
+    {
+     "code": "6109100004",
+     "description": "Of cotton › Men's or boys' › T-shirts, all white, short hemmed sleeves, hemmed bottom, crew or round neckline, or V-neck with a mitered seam at the center of the V, without pockets, trim or embroidery"
+    },
+    {
+     "code": "6109100007",
+     "description": "Of cotton › Men's or boys' › Singlets, all white, without pockets, trim or embroidery"
+    },
+    {
+     "code": "6109100011",
+     "description": "Of cotton › Men's or boys' › Thermal undershirts"
+    },
+    {
+     "code": "6109100012",
+     "description": "Of cotton › Men's or boys' › Other T-shirts › Men's"
+    },
+    {
+     "code": "6109100014",
+     "description": "Of cotton › Men's or boys' › Other T-shirts › Boys'"
+    },
+    {
+     "code": "6109100018",
+     "description": "Of cotton › Men's or boys' › Tank tops and other singlets › Men's"
+    },
+    {
+     "code": "6109100023",
+     "description": "Of cotton › Men's or boys' › Tank tops and other singlets › Boys'"
+    },
+    {
+     "code": "6109100027",
+     "description": "Of cotton › Men's or boys' › Other"
+    },
+    {
+     "code": "6109100037",
+     "description": "Of cotton › Women's or girls' › Underwear"
+    },
+    {
+     "code": "6109100040",
+     "description": "Of cotton › Women's or girls' › Other › T-shirts › Women's"
+    },
+    {
+     "code": "6109100045",
+     "description": "Of cotton › Women's or girls' › Other › T-shirts › Girls'"
+    },
+    {
+     "code": "6109100060",
+     "description": "Of cotton › Women's or girls' › Other › Tank tops › Women's"
+    },
+    {
+     "code": "6109100065",
+     "description": "Of cotton › Women's or girls' › Other › Tank tops › Girls'"
+    },
+    {
+     "code": "6109100070",
+     "description": "Of cotton › Women's or girls' › Other › Other"
+    }
+   ]
+  },
+  {
+   "code": "09011100",
+   "description": "Coffee, not roasted › Not decaffeinated",
+   "measures": [
+    {
+     "kind": "mfn",
+     "label": "Thuế NK MFN (cột 1 – General)",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "mfn",
+     "label": "Thuế cột 2 (không hưởng MFN)",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CU",
+      "KP",
+      "RU",
+      "BY"
+     ],
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    }
+   ],
+   "children": [
+    {
+     "code": "0901110015",
+     "description": "Coffee, not roasted › Not decaffeinated › Arabica › Certified organic"
+    },
+    {
+     "code": "0901110025",
+     "description": "Coffee, not roasted › Not decaffeinated › Arabica › Other"
+    },
+    {
+     "code": "0901110035",
+     "description": "Coffee, not roasted › Not decaffeinated › Robusta › Certified organic"
+    },
+    {
+     "code": "0901110040",
+     "description": "Coffee, not roasted › Not decaffeinated › Robusta › Other"
+    },
+    {
+     "code": "0901110050",
+     "description": "Coffee, not roasted › Not decaffeinated › Other › Certified organic"
+    },
+    {
+     "code": "0901110065",
+     "description": "Coffee, not roasted › Not decaffeinated › Other › Other"
+    }
+   ]
+  },
+  {
+   "code": "9403504000",
+   "description": "Wooden furniture of a kind used in the bedroom › Bent-wood furniture",
+   "measures": [
+    {
+     "kind": "mfn",
+     "label": "Thuế NK MFN (cột 1 – General)",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "mfn",
+     "label": "Thuế cột 2 (không hưởng MFN)",
+     "rate": "42.5%",
+     "pct": 42.5,
+     "specific": false,
+     "origins": [
+      "CU",
+      "KP",
+      "RU",
+      "BY"
+     ],
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    }
+   ],
+   "children": []
+  },
+  {
+   "code": "9403506000",
+   "description": "Wooden furniture of a kind used in the bedroom › Other › Designed for motor vehicle use",
+   "measures": [
+    {
+     "kind": "mfn",
+     "label": "Thuế NK MFN (cột 1 – General)",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "mfn",
+     "label": "Thuế cột 2 (không hưởng MFN)",
+     "rate": "25%",
+     "pct": 25,
+     "specific": false,
+     "origins": [
+      "CU",
+      "KP",
+      "RU",
+      "BY"
+     ],
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    }
+   ],
+   "children": []
+  },
+  {
+   "code": "94035090",
+   "description": "Wooden furniture of a kind used in the bedroom › Other › Other",
+   "measures": [
+    {
+     "kind": "mfn",
+     "label": "Thuế NK MFN (cột 1 – General)",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "mfn",
+     "label": "Thuế cột 2 (không hưởng MFN)",
+     "rate": "40%",
+     "pct": 40,
+     "specific": false,
+     "origins": [
+      "CU",
+      "KP",
+      "RU",
+      "BY"
+     ],
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    }
+   ],
+   "children": [
+    {
+     "code": "9403509041",
+     "description": "Wooden furniture of a kind used in the bedroom › Other › Other › Beds › Cribs"
+    },
+    {
+     "code": "9403509042",
+     "description": "Wooden furniture of a kind used in the bedroom › Other › Other › Beds › Toddler beds, bassinets, and cradles"
+    },
+    {
+     "code": "9403509045",
+     "description": "Wooden furniture of a kind used in the bedroom › Other › Other › Beds › Other"
+    },
+    {
+     "code": "9403509080",
+     "description": "Wooden furniture of a kind used in the bedroom › Other › Other › Other"
+    }
+   ]
+  },
+  {
+   "code": "64041120",
+   "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Having uppers of which over 50 percent of the external surface area (including any leather accessories or reinforcements such as those mentioned in note 4(a) to this chapter) is leather",
+   "measures": [
+    {
+     "kind": "mfn",
+     "label": "Thuế NK MFN (cột 1 – General)",
+     "rate": "10.5%",
+     "pct": 10.5,
+     "specific": false,
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Australia FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AU"
+     ],
+     "agreement": "US–Australia FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Bahrain FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "BH"
+     ],
+     "agreement": "US–Bahrain FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Chile FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CL"
+     ],
+     "agreement": "US–Chile FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Colombia TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CO"
+     ],
+     "agreement": "US–Colombia TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Israel FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IL"
+     ],
+     "agreement": "US–Israel FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Jordan FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "JO"
+     ],
+     "agreement": "US–Jordan FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi KORUS FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KR"
+     ],
+     "agreement": "KORUS FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Morocco FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MA"
+     ],
+     "agreement": "US–Morocco FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Oman FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "OM"
+     ],
+     "agreement": "US–Oman FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi CAFTA-DR",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CR",
+      "DO",
+      "GT",
+      "HN",
+      "NI",
+      "SV"
+     ],
+     "agreement": "CAFTA-DR",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Panama TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PA"
+     ],
+     "agreement": "US–Panama TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Peru TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PE"
+     ],
+     "agreement": "US–Peru TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi USMCA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CA",
+      "MX"
+     ],
+     "agreement": "USMCA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Singapore FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SG"
+     ],
+     "agreement": "US–Singapore FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "mfn",
+     "label": "Thuế cột 2 (không hưởng MFN)",
+     "rate": "35%",
+     "pct": 35,
+     "specific": false,
+     "origins": [
+      "CU",
+      "KP",
+      "RU",
+      "BY"
+     ],
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    }
+   ],
+   "children": [
+    {
+     "code": "6404112030",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Having uppers of which over 50 percent of the external surface area (including any leather accessories or reinforcements such as those mentioned in note 4(a) to this chapter) is leather › For men"
+    },
+    {
+     "code": "6404112060",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Having uppers of which over 50 percent of the external surface area (including any leather accessories or reinforcements such as those mentioned in note 4(a) to this chapter) is leather › For women"
+    },
+    {
+     "code": "6404112071",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Having uppers of which over 50 percent of the external surface area (including any leather accessories or reinforcements such as those mentioned in note 4(a) to this chapter) is leather › Other"
+    }
+   ]
+  },
+  {
+   "code": "64041141",
+   "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued not over $3/pair › Having soles (or mid-soles, if any) of rubber or plastics which are affixed to the upper exclusively with an adhesive (any mid-soles also being affixed exclusively to one another and to the sole with an adhesive); the foregoing except footwear having a foxing or a foxing-like band applied or molded at the sole and overlapping the upper and except footwear with soles which overlap the upper other than at the toe or heel › With uppers of vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter",
+   "measures": [
+    {
+     "kind": "mfn",
+     "label": "Thuế NK MFN (cột 1 – General)",
+     "rate": "7.5%",
+     "pct": 7.5,
+     "specific": false,
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Australia FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AU"
+     ],
+     "agreement": "US–Australia FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Bahrain FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "BH"
+     ],
+     "agreement": "US–Bahrain FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Chile FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CL"
+     ],
+     "agreement": "US–Chile FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Colombia TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CO"
+     ],
+     "agreement": "US–Colombia TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Israel FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IL"
+     ],
+     "agreement": "US–Israel FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Jordan FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "JO"
+     ],
+     "agreement": "US–Jordan FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi KORUS FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KR"
+     ],
+     "agreement": "KORUS FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Morocco FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MA"
+     ],
+     "agreement": "US–Morocco FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Oman FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "OM"
+     ],
+     "agreement": "US–Oman FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi CAFTA-DR",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CR",
+      "DO",
+      "GT",
+      "HN",
+      "NI",
+      "SV"
+     ],
+     "agreement": "CAFTA-DR",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Panama TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PA"
+     ],
+     "agreement": "US–Panama TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Peru TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PE"
+     ],
+     "agreement": "US–Peru TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi USMCA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CA",
+      "MX"
+     ],
+     "agreement": "USMCA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Singapore FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SG"
+     ],
+     "agreement": "US–Singapore FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "mfn",
+     "label": "Thuế cột 2 (không hưởng MFN)",
+     "rate": "35%",
+     "pct": 35,
+     "specific": false,
+     "origins": [
+      "CU",
+      "KP",
+      "RU",
+      "BY"
+     ],
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    }
+   ],
+   "children": [
+    {
+     "code": "6404114130",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued not over $3/pair › Having soles (or mid-soles, if any) of rubber or plastics which are affixed to the upper exclusively with an adhesive (any mid-soles also being affixed exclusively to one another and to the sole with an adhesive); the foregoing except footwear having a foxing or a foxing-like band applied or molded at the sole and overlapping the upper and except footwear with soles which overlap the upper other than at the toe or heel › With uppers of vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter › For men"
+    },
+    {
+     "code": "6404114160",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued not over $3/pair › Having soles (or mid-soles, if any) of rubber or plastics which are affixed to the upper exclusively with an adhesive (any mid-soles also being affixed exclusively to one another and to the sole with an adhesive); the foregoing except footwear having a foxing or a foxing-like band applied or molded at the sole and overlapping the upper and except footwear with soles which overlap the upper other than at the toe or heel › With uppers of vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter › For women"
+    },
+    {
+     "code": "6404114190",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued not over $3/pair › Having soles (or mid-soles, if any) of rubber or plastics which are affixed to the upper exclusively with an adhesive (any mid-soles also being affixed exclusively to one another and to the sole with an adhesive); the foregoing except footwear having a foxing or a foxing-like band applied or molded at the sole and overlapping the upper and except footwear with soles which overlap the upper other than at the toe or heel › With uppers of vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter › Other"
+    }
+   ]
+  },
+  {
+   "code": "6404114900",
+   "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued not over $3/pair › Having soles (or mid-soles, if any) of rubber or plastics which are affixed to the upper exclusively with an adhesive (any mid-soles also being affixed exclusively to one another and to the sole with an adhesive); the foregoing except footwear having a foxing or a foxing-like band applied or molded at the sole and overlapping the upper and except footwear with soles which overlap the upper other than at the toe or heel › Other",
+   "measures": [
+    {
+     "kind": "mfn",
+     "label": "Thuế NK MFN (cột 1 – General)",
+     "rate": "37.5%",
+     "pct": 37.5,
+     "specific": false,
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Australia FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AU"
+     ],
+     "agreement": "US–Australia FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Bahrain FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "BH"
+     ],
+     "agreement": "US–Bahrain FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Chile FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CL"
+     ],
+     "agreement": "US–Chile FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Colombia TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CO"
+     ],
+     "agreement": "US–Colombia TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Israel FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IL"
+     ],
+     "agreement": "US–Israel FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Jordan FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "JO"
+     ],
+     "agreement": "US–Jordan FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi KORUS FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KR"
+     ],
+     "agreement": "KORUS FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Morocco FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MA"
+     ],
+     "agreement": "US–Morocco FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Oman FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "OM"
+     ],
+     "agreement": "US–Oman FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi CAFTA-DR",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CR",
+      "DO",
+      "GT",
+      "HN",
+      "NI",
+      "SV"
+     ],
+     "agreement": "CAFTA-DR",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Panama TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PA"
+     ],
+     "agreement": "US–Panama TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Peru TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PE"
+     ],
+     "agreement": "US–Peru TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi USMCA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CA",
+      "MX"
+     ],
+     "agreement": "USMCA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Singapore FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SG"
+     ],
+     "agreement": "US–Singapore FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "mfn",
+     "label": "Thuế cột 2 (không hưởng MFN)",
+     "rate": "66%",
+     "pct": 66,
+     "specific": false,
+     "origins": [
+      "CU",
+      "KP",
+      "RU",
+      "BY"
+     ],
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    }
+   ],
+   "children": []
+  },
+  {
+   "code": "64041151",
+   "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued not over $3/pair › Other › With uppers of vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter",
+   "measures": [
+    {
+     "kind": "mfn",
+     "label": "Thuế NK MFN (cột 1 – General)",
+     "rate": "7.5%",
+     "pct": 7.5,
+     "specific": false,
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Australia FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AU"
+     ],
+     "agreement": "US–Australia FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Bahrain FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "BH"
+     ],
+     "agreement": "US–Bahrain FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Chile FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CL"
+     ],
+     "agreement": "US–Chile FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Colombia TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CO"
+     ],
+     "agreement": "US–Colombia TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Israel FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IL"
+     ],
+     "agreement": "US–Israel FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Jordan FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "JO"
+     ],
+     "agreement": "US–Jordan FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi KORUS FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KR"
+     ],
+     "agreement": "KORUS FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Morocco FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MA"
+     ],
+     "agreement": "US–Morocco FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Oman FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "OM"
+     ],
+     "agreement": "US–Oman FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi CAFTA-DR",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CR",
+      "DO",
+      "GT",
+      "HN",
+      "NI",
+      "SV"
+     ],
+     "agreement": "CAFTA-DR",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Panama TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PA"
+     ],
+     "agreement": "US–Panama TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Peru TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PE"
+     ],
+     "agreement": "US–Peru TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi USMCA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CA",
+      "MX"
+     ],
+     "agreement": "USMCA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Singapore FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SG"
+     ],
+     "agreement": "US–Singapore FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "mfn",
+     "label": "Thuế cột 2 (không hưởng MFN)",
+     "rate": "35%",
+     "pct": 35,
+     "specific": false,
+     "origins": [
+      "CU",
+      "KP",
+      "RU",
+      "BY"
+     ],
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    }
+   ],
+   "children": [
+    {
+     "code": "6404115130",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued not over $3/pair › Other › With uppers of vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter › For men"
+    },
+    {
+     "code": "6404115160",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued not over $3/pair › Other › With uppers of vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter › For women"
+    },
+    {
+     "code": "6404115190",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued not over $3/pair › Other › With uppers of vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter › Other"
+    }
+   ]
+  },
+  {
+   "code": "6404115900",
+   "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued not over $3/pair › Other › Other",
+   "measures": [
+    {
+     "kind": "mfn",
+     "label": "Thuế NK MFN (cột 1 – General)",
+     "rate": "48%",
+     "pct": 48,
+     "specific": false,
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Australia FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AU"
+     ],
+     "agreement": "US–Australia FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Bahrain FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "BH"
+     ],
+     "agreement": "US–Bahrain FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Chile FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CL"
+     ],
+     "agreement": "US–Chile FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Colombia TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CO"
+     ],
+     "agreement": "US–Colombia TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Israel FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IL"
+     ],
+     "agreement": "US–Israel FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Jordan FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "JO"
+     ],
+     "agreement": "US–Jordan FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi KORUS FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KR"
+     ],
+     "agreement": "KORUS FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Morocco FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MA"
+     ],
+     "agreement": "US–Morocco FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Oman FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "OM"
+     ],
+     "agreement": "US–Oman FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi CAFTA-DR",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CR",
+      "DO",
+      "GT",
+      "HN",
+      "NI",
+      "SV"
+     ],
+     "agreement": "CAFTA-DR",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Panama TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PA"
+     ],
+     "agreement": "US–Panama TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Peru TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PE"
+     ],
+     "agreement": "US–Peru TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi USMCA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CA",
+      "MX"
+     ],
+     "agreement": "USMCA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Singapore FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SG"
+     ],
+     "agreement": "US–Singapore FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "mfn",
+     "label": "Thuế cột 2 (không hưởng MFN)",
+     "rate": "84%",
+     "pct": 84,
+     "specific": false,
+     "origins": [
+      "CU",
+      "KP",
+      "RU",
+      "BY"
+     ],
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    }
+   ],
+   "children": []
+  },
+  {
+   "code": "64041161",
+   "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $3 but not over $6.50/pair › Having soles (or mid-soles, if any) of rubber or plastics which are affixed to the upper exclusively with an adhesive (any mid-soles also being affixed exclusively to one another and to the sole with an adhesive); the foregoing except footwear having a foxing or a foxing-like band applied or molded at the sole and overlapping the upper and except footwear with soles which overlap the upper other than at the toe or heel › With uppers of vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter",
+   "measures": [
+    {
+     "kind": "mfn",
+     "label": "Thuế NK MFN (cột 1 – General)",
+     "rate": "7.5%",
+     "pct": 7.5,
+     "specific": false,
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Australia FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AU"
+     ],
+     "agreement": "US–Australia FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Bahrain FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "BH"
+     ],
+     "agreement": "US–Bahrain FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Chile FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CL"
+     ],
+     "agreement": "US–Chile FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Colombia TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CO"
+     ],
+     "agreement": "US–Colombia TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Israel FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IL"
+     ],
+     "agreement": "US–Israel FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Jordan FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "JO"
+     ],
+     "agreement": "US–Jordan FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi KORUS FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KR"
+     ],
+     "agreement": "KORUS FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Morocco FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MA"
+     ],
+     "agreement": "US–Morocco FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Oman FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "OM"
+     ],
+     "agreement": "US–Oman FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi CAFTA-DR",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CR",
+      "DO",
+      "GT",
+      "HN",
+      "NI",
+      "SV"
+     ],
+     "agreement": "CAFTA-DR",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Panama TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PA"
+     ],
+     "agreement": "US–Panama TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Peru TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PE"
+     ],
+     "agreement": "US–Peru TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi USMCA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CA",
+      "MX"
+     ],
+     "agreement": "USMCA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Singapore FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SG"
+     ],
+     "agreement": "US–Singapore FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "mfn",
+     "label": "Thuế cột 2 (không hưởng MFN)",
+     "rate": "35%",
+     "pct": 35,
+     "specific": false,
+     "origins": [
+      "CU",
+      "KP",
+      "RU",
+      "BY"
+     ],
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    }
+   ],
+   "children": [
+    {
+     "code": "6404116130",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $3 but not over $6.50/pair › Having soles (or mid-soles, if any) of rubber or plastics which are affixed to the upper exclusively with an adhesive (any mid-soles also being affixed exclusively to one another and to the sole with an adhesive); the foregoing except footwear having a foxing or a foxing-like band applied or molded at the sole and overlapping the upper and except footwear with soles which overlap the upper other than at the toe or heel › With uppers of vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter › For men"
+    },
+    {
+     "code": "6404116160",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $3 but not over $6.50/pair › Having soles (or mid-soles, if any) of rubber or plastics which are affixed to the upper exclusively with an adhesive (any mid-soles also being affixed exclusively to one another and to the sole with an adhesive); the foregoing except footwear having a foxing or a foxing-like band applied or molded at the sole and overlapping the upper and except footwear with soles which overlap the upper other than at the toe or heel › With uppers of vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter › For women"
+    },
+    {
+     "code": "6404116190",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $3 but not over $6.50/pair › Having soles (or mid-soles, if any) of rubber or plastics which are affixed to the upper exclusively with an adhesive (any mid-soles also being affixed exclusively to one another and to the sole with an adhesive); the foregoing except footwear having a foxing or a foxing-like band applied or molded at the sole and overlapping the upper and except footwear with soles which overlap the upper other than at the toe or heel › With uppers of vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter › Other"
+    }
+   ]
+  },
+  {
+   "code": "64041169",
+   "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $3 but not over $6.50/pair › Having soles (or mid-soles, if any) of rubber or plastics which are affixed to the upper exclusively with an adhesive (any mid-soles also being affixed exclusively to one another and to the sole with an adhesive); the foregoing except footwear having a foxing or a foxing-like band applied or molded at the sole and overlapping the upper and except footwear with soles which overlap the upper other than at the toe or heel › Other",
+   "measures": [
+    {
+     "kind": "mfn",
+     "label": "Thuế NK MFN (cột 1 – General)",
+     "rate": "37.5%",
+     "pct": 37.5,
+     "specific": false,
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Australia FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AU"
+     ],
+     "agreement": "US–Australia FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Bahrain FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "BH"
+     ],
+     "agreement": "US–Bahrain FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Chile FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CL"
+     ],
+     "agreement": "US–Chile FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Colombia TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CO"
+     ],
+     "agreement": "US–Colombia TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Israel FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IL"
+     ],
+     "agreement": "US–Israel FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Jordan FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "JO"
+     ],
+     "agreement": "US–Jordan FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi KORUS FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KR"
+     ],
+     "agreement": "KORUS FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Morocco FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MA"
+     ],
+     "agreement": "US–Morocco FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Oman FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "OM"
+     ],
+     "agreement": "US–Oman FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi CAFTA-DR",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CR",
+      "DO",
+      "GT",
+      "HN",
+      "NI",
+      "SV"
+     ],
+     "agreement": "CAFTA-DR",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Panama TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PA"
+     ],
+     "agreement": "US–Panama TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Peru TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PE"
+     ],
+     "agreement": "US–Peru TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi USMCA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CA",
+      "MX"
+     ],
+     "agreement": "USMCA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Singapore FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SG"
+     ],
+     "agreement": "US–Singapore FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "mfn",
+     "label": "Thuế cột 2 (không hưởng MFN)",
+     "rate": "66%",
+     "pct": 66,
+     "specific": false,
+     "origins": [
+      "CU",
+      "KP",
+      "RU",
+      "BY"
+     ],
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    }
+   ],
+   "children": [
+    {
+     "code": "6404116930",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $3 but not over $6.50/pair › Having soles (or mid-soles, if any) of rubber or plastics which are affixed to the upper exclusively with an adhesive (any mid-soles also being affixed exclusively to one another and to the sole with an adhesive); the foregoing except footwear having a foxing or a foxing-like band applied or molded at the sole and overlapping the upper and except footwear with soles which overlap the upper other than at the toe or heel › Other › For men"
+    },
+    {
+     "code": "6404116960",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $3 but not over $6.50/pair › Having soles (or mid-soles, if any) of rubber or plastics which are affixed to the upper exclusively with an adhesive (any mid-soles also being affixed exclusively to one another and to the sole with an adhesive); the foregoing except footwear having a foxing or a foxing-like band applied or molded at the sole and overlapping the upper and except footwear with soles which overlap the upper other than at the toe or heel › Other › For women"
+    },
+    {
+     "code": "6404116990",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $3 but not over $6.50/pair › Having soles (or mid-soles, if any) of rubber or plastics which are affixed to the upper exclusively with an adhesive (any mid-soles also being affixed exclusively to one another and to the sole with an adhesive); the foregoing except footwear having a foxing or a foxing-like band applied or molded at the sole and overlapping the upper and except footwear with soles which overlap the upper other than at the toe or heel › Other › Other"
+    }
+   ]
+  },
+  {
+   "code": "64041171",
+   "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $3 but not over $6.50/pair › Other › With uppers of vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter",
+   "measures": [
+    {
+     "kind": "mfn",
+     "label": "Thuế NK MFN (cột 1 – General)",
+     "rate": "7.5%",
+     "pct": 7.5,
+     "specific": false,
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Australia FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AU"
+     ],
+     "agreement": "US–Australia FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Bahrain FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "BH"
+     ],
+     "agreement": "US–Bahrain FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Chile FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CL"
+     ],
+     "agreement": "US–Chile FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Colombia TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CO"
+     ],
+     "agreement": "US–Colombia TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Israel FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IL"
+     ],
+     "agreement": "US–Israel FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Jordan FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "JO"
+     ],
+     "agreement": "US–Jordan FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi KORUS FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KR"
+     ],
+     "agreement": "KORUS FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Morocco FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MA"
+     ],
+     "agreement": "US–Morocco FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Oman FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "OM"
+     ],
+     "agreement": "US–Oman FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi CAFTA-DR",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CR",
+      "DO",
+      "GT",
+      "HN",
+      "NI",
+      "SV"
+     ],
+     "agreement": "CAFTA-DR",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Panama TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PA"
+     ],
+     "agreement": "US–Panama TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Peru TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PE"
+     ],
+     "agreement": "US–Peru TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi USMCA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CA",
+      "MX"
+     ],
+     "agreement": "USMCA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Singapore FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SG"
+     ],
+     "agreement": "US–Singapore FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "mfn",
+     "label": "Thuế cột 2 (không hưởng MFN)",
+     "rate": "35%",
+     "pct": 35,
+     "specific": false,
+     "origins": [
+      "CU",
+      "KP",
+      "RU",
+      "BY"
+     ],
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    }
+   ],
+   "children": [
+    {
+     "code": "6404117130",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $3 but not over $6.50/pair › Other › With uppers of vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter › For men"
+    },
+    {
+     "code": "6404117160",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $3 but not over $6.50/pair › Other › With uppers of vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter › For women"
+    },
+    {
+     "code": "6404117190",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $3 but not over $6.50/pair › Other › With uppers of vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter › Other"
+    }
+   ]
+  },
+  {
+   "code": "64041175",
+   "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $3 but not over $6.50/pair › Other › With uppers of textile materials other than vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter",
+   "measures": [
+    {
+     "kind": "mfn",
+     "label": "Thuế NK MFN (cột 1 – General)",
+     "rate": "12.5%",
+     "pct": 12.5,
+     "specific": false,
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Australia FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AU"
+     ],
+     "agreement": "US–Australia FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Bahrain FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "BH"
+     ],
+     "agreement": "US–Bahrain FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Chile FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CL"
+     ],
+     "agreement": "US–Chile FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Colombia TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CO"
+     ],
+     "agreement": "US–Colombia TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Israel FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IL"
+     ],
+     "agreement": "US–Israel FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Jordan FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "JO"
+     ],
+     "agreement": "US–Jordan FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi KORUS FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KR"
+     ],
+     "agreement": "KORUS FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Morocco FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MA"
+     ],
+     "agreement": "US–Morocco FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Oman FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "OM"
+     ],
+     "agreement": "US–Oman FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi CAFTA-DR",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CR",
+      "DO",
+      "GT",
+      "HN",
+      "NI",
+      "SV"
+     ],
+     "agreement": "CAFTA-DR",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Panama TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PA"
+     ],
+     "agreement": "US–Panama TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Peru TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PE"
+     ],
+     "agreement": "US–Peru TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi USMCA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CA",
+      "MX"
+     ],
+     "agreement": "USMCA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Singapore FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SG"
+     ],
+     "agreement": "US–Singapore FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "mfn",
+     "label": "Thuế cột 2 (không hưởng MFN)",
+     "rate": "35%",
+     "pct": 35,
+     "specific": false,
+     "origins": [
+      "CU",
+      "KP",
+      "RU",
+      "BY"
+     ],
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    }
+   ],
+   "children": [
+    {
+     "code": "6404117530",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $3 but not over $6.50/pair › Other › With uppers of textile materials other than vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter › For men"
+    },
+    {
+     "code": "6404117560",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $3 but not over $6.50/pair › Other › With uppers of textile materials other than vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter › For women"
+    },
+    {
+     "code": "6404117590",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $3 but not over $6.50/pair › Other › With uppers of textile materials other than vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter › Other"
+    }
+   ]
+  },
+  {
+   "code": "64041179",
+   "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $3 but not over $6.50/pair › Other › Other",
+   "measures": [
+    {
+     "kind": "mfn",
+     "label": "Thuế NK MFN (cột 1 – General)",
+     "rate": "90¢/pr. + 37.5%",
+     "pct": 37.5,
+     "specific": true,
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Australia FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AU"
+     ],
+     "agreement": "US–Australia FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Bahrain FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "BH"
+     ],
+     "agreement": "US–Bahrain FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Chile FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CL"
+     ],
+     "agreement": "US–Chile FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Colombia TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CO"
+     ],
+     "agreement": "US–Colombia TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Israel FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IL"
+     ],
+     "agreement": "US–Israel FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Jordan FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "JO"
+     ],
+     "agreement": "US–Jordan FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi KORUS FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KR"
+     ],
+     "agreement": "KORUS FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Morocco FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MA"
+     ],
+     "agreement": "US–Morocco FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Oman FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "OM"
+     ],
+     "agreement": "US–Oman FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi CAFTA-DR",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CR",
+      "DO",
+      "GT",
+      "HN",
+      "NI",
+      "SV"
+     ],
+     "agreement": "CAFTA-DR",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Panama TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PA"
+     ],
+     "agreement": "US–Panama TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Peru TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PE"
+     ],
+     "agreement": "US–Peru TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi USMCA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CA",
+      "MX"
+     ],
+     "agreement": "USMCA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Singapore FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SG"
+     ],
+     "agreement": "US–Singapore FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "mfn",
+     "label": "Thuế cột 2 (không hưởng MFN)",
+     "rate": "$1.58/pr. + 66%",
+     "pct": 66,
+     "specific": true,
+     "origins": [
+      "CU",
+      "KP",
+      "RU",
+      "BY"
+     ],
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    }
+   ],
+   "children": [
+    {
+     "code": "6404117930",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $3 but not over $6.50/pair › Other › Other › For men"
+    },
+    {
+     "code": "6404117960",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $3 but not over $6.50/pair › Other › Other › For women"
+    },
+    {
+     "code": "6404117990",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $3 but not over $6.50/pair › Other › Other › Other"
+    }
+   ]
+  },
+  {
+   "code": "64041181",
+   "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $6.50 but not over $12/pair › With uppers of vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter",
+   "measures": [
+    {
+     "kind": "mfn",
+     "label": "Thuế NK MFN (cột 1 – General)",
+     "rate": "7.5%",
+     "pct": 7.5,
+     "specific": false,
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Australia FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AU"
+     ],
+     "agreement": "US–Australia FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Bahrain FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "BH"
+     ],
+     "agreement": "US–Bahrain FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Chile FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CL"
+     ],
+     "agreement": "US–Chile FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Colombia TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CO"
+     ],
+     "agreement": "US–Colombia TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Israel FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IL"
+     ],
+     "agreement": "US–Israel FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Jordan FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "JO"
+     ],
+     "agreement": "US–Jordan FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi KORUS FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KR"
+     ],
+     "agreement": "KORUS FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Morocco FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MA"
+     ],
+     "agreement": "US–Morocco FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Oman FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "OM"
+     ],
+     "agreement": "US–Oman FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi CAFTA-DR",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CR",
+      "DO",
+      "GT",
+      "HN",
+      "NI",
+      "SV"
+     ],
+     "agreement": "CAFTA-DR",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Panama TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PA"
+     ],
+     "agreement": "US–Panama TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Peru TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PE"
+     ],
+     "agreement": "US–Peru TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi USMCA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CA",
+      "MX"
+     ],
+     "agreement": "USMCA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Singapore FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SG"
+     ],
+     "agreement": "US–Singapore FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "mfn",
+     "label": "Thuế cột 2 (không hưởng MFN)",
+     "rate": "35%",
+     "pct": 35,
+     "specific": false,
+     "origins": [
+      "CU",
+      "KP",
+      "RU",
+      "BY"
+     ],
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    }
+   ],
+   "children": [
+    {
+     "code": "6404118130",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $6.50 but not over $12/pair › With uppers of vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter › For men"
+    },
+    {
+     "code": "6404118160",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $6.50 but not over $12/pair › With uppers of vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter › For women"
+    },
+    {
+     "code": "6404118190",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $6.50 but not over $12/pair › With uppers of vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter › Other"
+    }
+   ]
+  },
+  {
+   "code": "64041185",
+   "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $6.50 but not over $12/pair › With uppers of textile material other than vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter",
+   "measures": [
+    {
+     "kind": "mfn",
+     "label": "Thuế NK MFN (cột 1 – General)",
+     "rate": "12.5%",
+     "pct": 12.5,
+     "specific": false,
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Australia FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AU"
+     ],
+     "agreement": "US–Australia FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Bahrain FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "BH"
+     ],
+     "agreement": "US–Bahrain FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Chile FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CL"
+     ],
+     "agreement": "US–Chile FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Colombia TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CO"
+     ],
+     "agreement": "US–Colombia TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Israel FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IL"
+     ],
+     "agreement": "US–Israel FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Jordan FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "JO"
+     ],
+     "agreement": "US–Jordan FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi KORUS FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KR"
+     ],
+     "agreement": "KORUS FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Morocco FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MA"
+     ],
+     "agreement": "US–Morocco FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Oman FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "OM"
+     ],
+     "agreement": "US–Oman FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi CAFTA-DR",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CR",
+      "DO",
+      "GT",
+      "HN",
+      "NI",
+      "SV"
+     ],
+     "agreement": "CAFTA-DR",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Panama TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PA"
+     ],
+     "agreement": "US–Panama TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Peru TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PE"
+     ],
+     "agreement": "US–Peru TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi USMCA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CA",
+      "MX"
+     ],
+     "agreement": "USMCA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Singapore FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SG"
+     ],
+     "agreement": "US–Singapore FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "mfn",
+     "label": "Thuế cột 2 (không hưởng MFN)",
+     "rate": "35%",
+     "pct": 35,
+     "specific": false,
+     "origins": [
+      "CU",
+      "KP",
+      "RU",
+      "BY"
+     ],
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    }
+   ],
+   "children": [
+    {
+     "code": "6404118530",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $6.50 but not over $12/pair › With uppers of textile material other than vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter › For men"
+    },
+    {
+     "code": "6404118560",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $6.50 but not over $12/pair › With uppers of textile material other than vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter › For women"
+    },
+    {
+     "code": "6404118590",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $6.50 but not over $12/pair › With uppers of textile material other than vegetable fibers and having outer soles with textile materials having the greatest surface area in contact with the ground, but not taken into account under the terms of additional U.S. note 5 to this chapter › Other"
+    }
+   ]
+  },
+  {
+   "code": "64041189",
+   "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $6.50 but not over $12/pair › Other",
+   "measures": [
+    {
+     "kind": "mfn",
+     "label": "Thuế NK MFN (cột 1 – General)",
+     "rate": "90¢/pr. + 20%",
+     "pct": 20,
+     "specific": true,
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Australia FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AU"
+     ],
+     "agreement": "US–Australia FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Bahrain FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "BH"
+     ],
+     "agreement": "US–Bahrain FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Chile FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CL"
+     ],
+     "agreement": "US–Chile FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Colombia TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CO"
+     ],
+     "agreement": "US–Colombia TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Israel FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IL"
+     ],
+     "agreement": "US–Israel FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Jordan FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "JO"
+     ],
+     "agreement": "US–Jordan FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi KORUS FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KR"
+     ],
+     "agreement": "KORUS FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Morocco FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MA"
+     ],
+     "agreement": "US–Morocco FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Oman FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "OM"
+     ],
+     "agreement": "US–Oman FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi CAFTA-DR",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CR",
+      "DO",
+      "GT",
+      "HN",
+      "NI",
+      "SV"
+     ],
+     "agreement": "CAFTA-DR",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Panama TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PA"
+     ],
+     "agreement": "US–Panama TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Peru TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PE"
+     ],
+     "agreement": "US–Peru TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi USMCA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CA",
+      "MX"
+     ],
+     "agreement": "USMCA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Singapore FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SG"
+     ],
+     "agreement": "US–Singapore FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "mfn",
+     "label": "Thuế cột 2 (không hưởng MFN)",
+     "rate": "$1.58/pr. + 35%",
+     "pct": 35,
+     "specific": true,
+     "origins": [
+      "CU",
+      "KP",
+      "RU",
+      "BY"
+     ],
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    }
+   ],
+   "children": [
+    {
+     "code": "6404118930",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $6.50 but not over $12/pair › Other › For men"
+    },
+    {
+     "code": "6404118960",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $6.50 but not over $12/pair › Other › For women"
+    },
+    {
+     "code": "6404118990",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $6.50 but not over $12/pair › Other › Other"
+    }
+   ]
+  },
+  {
+   "code": "64041190",
+   "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $12/pair",
+   "measures": [
+    {
+     "kind": "mfn",
+     "label": "Thuế NK MFN (cột 1 – General)",
+     "rate": "20%",
+     "pct": 20,
+     "specific": false,
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Australia FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "AU"
+     ],
+     "agreement": "US–Australia FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Bahrain FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "BH"
+     ],
+     "agreement": "US–Bahrain FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Chile FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CL"
+     ],
+     "agreement": "US–Chile FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Colombia TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CO"
+     ],
+     "agreement": "US–Colombia TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Israel FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "IL"
+     ],
+     "agreement": "US–Israel FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Jordan FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "JO"
+     ],
+     "agreement": "US–Jordan FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi KORUS FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "KR"
+     ],
+     "agreement": "KORUS FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Morocco FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "MA"
+     ],
+     "agreement": "US–Morocco FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Oman FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "OM"
+     ],
+     "agreement": "US–Oman FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi CAFTA-DR",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CR",
+      "DO",
+      "GT",
+      "HN",
+      "NI",
+      "SV"
+     ],
+     "agreement": "CAFTA-DR",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Panama TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PA"
+     ],
+     "agreement": "US–Panama TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Peru TPA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "PE"
+     ],
+     "agreement": "US–Peru TPA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi USMCA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "CA",
+      "MX"
+     ],
+     "agreement": "USMCA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "preferential",
+     "label": "Ưu đãi US–Singapore FTA",
+     "rate": "Free",
+     "pct": 0,
+     "specific": false,
+     "origins": [
+      "SG"
+     ],
+     "agreement": "US–Singapore FTA",
+     "proof": "Chứng từ xuất xứ theo hiệp định; khai mã SPI trên tờ khai CBP",
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    },
+    {
+     "kind": "mfn",
+     "label": "Thuế cột 2 (không hưởng MFN)",
+     "rate": "35%",
+     "pct": 35,
+     "specific": false,
+     "origins": [
+      "CU",
+      "KP",
+      "RU",
+      "BY"
+     ],
+     "confidence": "official",
+     "source": "USITC HTS 2026HTSRev23"
+    }
+   ],
+   "children": [
+    {
+     "code": "6404119010",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $12/pair › For men › Ski boots, cross country ski footwear and snowboard boots"
+    },
+    {
+     "code": "6404119020",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $12/pair › For men › Other"
+    },
+    {
+     "code": "6404119040",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $12/pair › For women › Ski boots, cross country ski footwear and snowboard boots"
+    },
+    {
+     "code": "6404119050",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $12/pair › For women › Other"
+    },
+    {
+     "code": "6404119070",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $12/pair › Other › Ski boots, cross country ski footwear and snowboard boots"
+    },
+    {
+     "code": "6404119080",
+     "description": "Footwear with outer soles of rubber or plastics › Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like › Other › Valued over $12/pair › Other › Other"
+    }
+   ]
+  }
+ ],
+ "originMeasures": [
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.01 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 25%",
+   "pct": 25,
+   "specific": false,
+   "origins": [
+    "MX"
+   ],
+   "note": "Except for products described in headings 9903.01.02, 9903.01.03, 9903.01.04 and 9903.01.05 articles the product of Mexico, as provided for in U.S. note 2(a) to this subchapter",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.05 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 10%",
+   "pct": 10,
+   "specific": false,
+   "origins": [
+    "MX"
+   ],
+   "note": "Potash that is a product of Mexico, as provided for in U.S. note 2(c) to this subchapter",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.10 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 35%",
+   "pct": 35,
+   "specific": false,
+   "origins": [
+    "CA"
+   ],
+   "note": "Except for products described in headings 9903.01.11, 9903.01.12, 9903.01.13, 9903.01.14 or 9903.01.15, articles the product of Canada, as provided for in U.S. note 2(j) to this subchapter",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.15 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading +10%",
+   "pct": 10,
+   "specific": false,
+   "origins": [
+    "CA"
+   ],
+   "note": "Potash that is a product of Canada, as provided for in U.S. note 2(I) to this subchapter",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.16 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 40%",
+   "pct": 40,
+   "specific": false,
+   "origins": [
+    "CA"
+   ],
+   "note": "Except for products described in 9903.01.11, 9903.01.12, and 9903.01.14, articles the product of Canada as provided for in subdivision (m) to note 2 to this subchapter and determined by CBP to have been transshipped to evade applicable duties",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.20 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 10%",
+   "pct": 10,
+   "specific": false,
+   "origins": [
+    "CN",
+    "HK"
+   ],
+   "note": "Except for products described in headings 9903.01.21, 9903.01.22, or 9903.01.23 articles the product of China and Hong Kong, as provided for in U.S. note 2(s) to this subchapter",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.24 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 10%",
+   "pct": 10,
+   "specific": false,
+   "origins": [
+    "CN",
+    "HK"
+   ],
+   "note": "Except for products described in headings 9903.01.21, 9903.01.22, 9903.01.23, articles the product of China and Hong Kong, as provided for in U.S. note 2(u) to this subchapter",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.25 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 10%",
+   "pct": 10,
+   "specific": false,
+   "note": "Articles the product of any country, except for products described in headings 9903.01.26–9903.01.33, 9903.02.02–9903.02.91, 9903.96.01, and 9903.96.02, and except as provided for in headings 9903.01.34 and 9903.02.01, as provided for in subdivision (v) of U.S. note 2 to this subchapter",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.45 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 14%",
+   "pct": 14,
+   "specific": false,
+   "origins": [
+    "NG"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on April 9, 2025, except for products described in headings 9903.01.28-9903.01.33, and except as provided for in heading 9903.01.34, articles the product of Nigeria, as pro…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.46 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 15%",
+   "pct": 15,
+   "specific": false,
+   "origins": [
+    "NO"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on April 9, 2025, except for products described in headings 9903.01.28-9903.01.33, and except as provided for in heading 9903.01.34, articles the product of Norway or Venez…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.48 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 17%",
+   "pct": 17,
+   "specific": false,
+   "origins": [
+    "PH",
+    "IL"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on April 9, 2025, except for products described in headings 9903.01.28-9903.01.33, and except as provided for in heading 9903.01.34, articles the product of Israel, Malawi,…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.50 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 20%",
+   "pct": 20,
+   "specific": false,
+   "origins": [
+    "AT",
+    "BE",
+    "BG",
+    "HR",
+    "CY",
+    "CZ",
+    "DK",
+    "EE",
+    "FI",
+    "FR",
+    "DE",
+    "GR",
+    "HU",
+    "IE",
+    "IT",
+    "LV",
+    "LT",
+    "LU",
+    "MT",
+    "NL",
+    "PL",
+    "PT",
+    "RO",
+    "SK",
+    "SI",
+    "ES",
+    "SE"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on April 9, 2025, except for products described in headings 9903.01.28-9903.01.33, and except as provided for in heading 9903.01.34, articles the product of the European Un…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.53 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 24%",
+   "pct": 24,
+   "specific": false,
+   "origins": [
+    "JP",
+    "MY",
+    "BN"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on April 9, 2025, except for products described in headings 9903.01.28-9903.01.33, and except as provided for in heading 9903.01.34, articles the product of Brunei, Japan, …",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.54 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 25%",
+   "pct": 25,
+   "specific": false,
+   "origins": [
+    "KR"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on April 9, 2025, except for products described in headings 9903.01.28-9903.01.33, and except as provided for in heading 9903.01.34, articles the product of South Korea, as…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.55 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 26%",
+   "pct": 26,
+   "specific": false,
+   "origins": [
+    "IN"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on April 9, 2025, except for products described in headings 9903.01.28-9903.01.33, and except as provided for in heading 9903.01.34, articles the product of India, as provi…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.58 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 29%",
+   "pct": 29,
+   "specific": false,
+   "origins": [
+    "PK"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on April 9, 2025, except for products described in headings 9903.01.28-9903.01.33, and except as provided for in heading 9903.01.34, articles the product of Pakistan, as pr…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.59 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 30%",
+   "pct": 30,
+   "specific": false,
+   "origins": [
+    "ZA"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on April 9, 2025, except for products described in headings 9903.01.28-9903.01.33, and except as provided for in heading 9903.01.34, articles the product of Algeria, Nauru,…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.60 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 31%",
+   "pct": 31,
+   "specific": false,
+   "origins": [
+    "CH"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on April 9, 2025, except for products described in headings 9903.01.28-9903.01.33, and except as provided for in heading 9903.01.34, articles the product of Libya, Moldova,…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.61 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 32%",
+   "pct": 32,
+   "specific": false,
+   "origins": [
+    "ID",
+    "TW"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on April 9, 2025, except for products described in headings 9903.01.28-9903.01.33, and except as provided for in heading 9903.01.34, articles the product of Angola, Fiji, I…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.63 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 34%",
+   "pct": 34,
+   "specific": false,
+   "origins": [
+    "CN",
+    "HK"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on April 10, 2025, except for products described in headings 9903.01.28–9903.01.33, except as provided for in heading 9903.01.34, and except as provided for in U.S. note 2(…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.65 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 36%",
+   "pct": 36,
+   "specific": false,
+   "origins": [
+    "TH"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on April 9, 2025, except for products described in headings 9903.01.28-9903.01.33, and except as provided for in heading 9903.01.34, articles the product of Thailand, as pr…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.66 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 37%",
+   "pct": 37,
+   "specific": false,
+   "origins": [
+    "BD"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on April 9, 2025, except for products described in headings 9903.01.28-9903.01.33, and except as provided for in heading 9903.01.34, articles the product of Bangladesh, Bot…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.71 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 44%",
+   "pct": 44,
+   "specific": false,
+   "origins": [
+    "MM",
+    "LK"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on April 9, 2025, except for products described in headings 9903.01.28-9903.01.33, and except as provided for in heading 9903.01.34, articles the product of Myanmar (Burma)…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.72 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 46%",
+   "pct": 46,
+   "specific": false,
+   "origins": [
+    "VN"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on April 9, 2025, except for products described in headings 9903.01.28-9903.01.33, and except as provided for in heading 9903.01.34, articles the product of Vietnam, as pro…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.74 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 48%",
+   "pct": 48,
+   "specific": false,
+   "origins": [
+    "LA"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on April 9, 2025, except for products described in headings 9903.01.28-9903.01.33, and except as provided for in heading 9903.01.34, articles the product of Laos, as provid…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.75 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 49%",
+   "pct": 49,
+   "specific": false,
+   "origins": [
+    "KH"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on April 9, 2025, except for products described in headings 9903.01.28-9903.01.33, and except as provided for in heading 9903.01.34, articles the product of Cambodia, as pr…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.77 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 40%",
+   "pct": 40,
+   "specific": false,
+   "origins": [
+    "BR"
+   ],
+   "note": "Except for products described in headings 9903.01.78-9903.01.83 and 9903.01.90, articles the product of Brazil that are entered for consumption, or withdrawn from warehouse for consumption, after 12:01 a.m. eastern daylight time 7 days after the date of the executive order, excluding the day the executive order is s…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.01.84 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 25%",
+   "pct": 25,
+   "specific": false,
+   "origins": [
+    "IN"
+   ],
+   "note": "Except for products described in headings 9903.01.85-9903.01.89, articles the product of India that are entered for consumption, or withdrawn from warehouse for consumption, after 12:01 a.m. eastern daylight time on August 27, 2025, as provided for in subdivision (z) of U.S. note 2 to this subchapter [Compiler's not…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.01 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 40%",
+   "pct": 40,
+   "specific": false,
+   "note": "Articles the product of any country determined by U.S. Customs and Border Protection to have been transshipped to evade applicable duties under section 2 of Executive Order [Insert EO number], as amended [Compiler's note: [Insert EO Number] refers to Executive Order 14326, 90 Fed. Reg. 37963.]",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.05 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 20%",
+   "pct": 20,
+   "specific": false,
+   "origins": [
+    "BD"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.09 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 10%",
+   "pct": 10,
+   "specific": false,
+   "origins": [
+    "BR"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.10 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 25%",
+   "pct": 25,
+   "specific": false,
+   "origins": [
+    "BN"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.11 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 19%",
+   "pct": 19,
+   "specific": false,
+   "origins": [
+    "KH"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.17 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 15%",
+   "pct": 15,
+   "specific": false,
+   "origins": [
+    "EC"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.20 – thuế bổ sung chương 99",
+   "rate": "15%",
+   "pct": 15,
+   "specific": false,
+   "origins": [
+    "AT",
+    "BE",
+    "BG",
+    "HR",
+    "CY",
+    "CZ",
+    "DK",
+    "EE",
+    "FI",
+    "FR",
+    "DE",
+    "GR",
+    "HU",
+    "IE",
+    "IT",
+    "LV",
+    "LT",
+    "LU",
+    "MT",
+    "NL",
+    "PL",
+    "PT",
+    "RO",
+    "SK",
+    "SI",
+    "ES",
+    "SE"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.23 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 15%",
+   "pct": 15,
+   "specific": false,
+   "origins": [
+    "GH"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.26 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 25%",
+   "pct": 25,
+   "specific": false,
+   "origins": [
+    "IN"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.27 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 19%",
+   "pct": 19,
+   "specific": false,
+   "origins": [
+    "ID"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.29 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 15%",
+   "pct": 15,
+   "specific": false,
+   "origins": [
+    "IL"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.30 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 15%",
+   "pct": 15,
+   "specific": false,
+   "origins": [
+    "JP"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.33 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 40%",
+   "pct": 40,
+   "specific": false,
+   "origins": [
+    "LA"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.39 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 19%",
+   "pct": 19,
+   "specific": false,
+   "origins": [
+    "MY"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.43 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 40%",
+   "pct": 40,
+   "specific": false,
+   "origins": [
+    "MM"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.46 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 15%",
+   "pct": 15,
+   "specific": false,
+   "origins": [
+    "NZ"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.48 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 15%",
+   "pct": 15,
+   "specific": false,
+   "origins": [
+    "NG"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.50 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 15%",
+   "pct": 15,
+   "specific": false,
+   "origins": [
+    "NO"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.51 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 19%",
+   "pct": 19,
+   "specific": false,
+   "origins": [
+    "PK"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.53 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 19%",
+   "pct": 19,
+   "specific": false,
+   "origins": [
+    "PH"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.55 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 30%",
+   "pct": 30,
+   "specific": false,
+   "origins": [
+    "ZA"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.56 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 15%",
+   "pct": 15,
+   "specific": false,
+   "origins": [
+    "KR"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.57 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 20%",
+   "pct": 20,
+   "specific": false,
+   "origins": [
+    "LK"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.58 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 39%",
+   "pct": 39,
+   "specific": false,
+   "origins": [
+    "CH"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.60 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 20%",
+   "pct": 20,
+   "specific": false,
+   "origins": [
+    "TW"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.61 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 19%",
+   "pct": 19,
+   "specific": false,
+   "origins": [
+    "TH"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.64 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 15%",
+   "pct": 15,
+   "specific": false,
+   "origins": [
+    "TR"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.66 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 10%",
+   "pct": 10,
+   "specific": false,
+   "origins": [
+    "GB"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.69 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 20%",
+   "pct": 20,
+   "specific": false,
+   "origins": [
+    "VN"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.73 – thuế bổ sung chương 99",
+   "rate": "15%",
+   "pct": 15,
+   "specific": false,
+   "origins": [
+    "JP"
+   ],
+   "note": "Except for goods loaded onto a vessel at the port of loading and in transit on the final mode of transit before 12:01 a.m. eastern daylight time on August 7, 2025, and entered for consumption or withdrawn from warehouse for consumption before 12:01 a.m. eastern daylight time on October 5, 2025, except for products d…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.80 – thuế bổ sung chương 99",
+   "rate": "15%",
+   "pct": 15,
+   "specific": false,
+   "origins": [
+    "KR"
+   ],
+   "note": "Except for products described in headings 9903.01.30–9903.01.33, 9903.02.78, and 9903.02.81, and except as provided for in headings 9903.01.34, 9903.02.01, articles the product of South Korea, with an ad valorem (or ad valorem equivalent) rate of duty under column 1-General or column 1-Special less than 15 percent, …",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.02.83 – thuế bổ sung chương 99",
+   "rate": "15%",
+   "pct": 15,
+   "specific": false,
+   "origins": [
+    "CH"
+   ],
+   "note": "Except for products described in headings 9903.01.30–9903.01.33, 9903.02.78, and 9903.02.84–9903.02.86, and except as provided for inheadings 9903.01.34 and 9903.02.01, articles the product of Switzerland, with an ad valorem (or ad valorem equivalent) rate of duty under column 1-General less than 15 percent, as prov…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.88.01 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading plus 25%",
+   "pct": 25,
+   "specific": false,
+   "origins": [
+    "CN"
+   ],
+   "note": "Except as provided in headings 9903.88.05, 9903.88.06, 9903.88.07, 9903.88.08, 9903.88.10, 9903.88.11, 9903.88.14, 9903.88.19, 9903.88.50, 9903.88.52, 9903.88.58, 9903.88.60, 9903.88.62, 9903.88.66, 9903.88.67, 9903.88.68, or 9903.88.69, articles the product of China, as provided for in U.S. note 20(a) to this subch…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.88.02 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 25%",
+   "pct": 25,
+   "specific": false,
+   "origins": [
+    "CN"
+   ],
+   "note": "Except as provided in headings 9903.88.12, 9903.88.17, 9903.88.20, 9903.88.54, 9903.88.59, 9903.88.61, 9903.88.63, 9903.88.66, 9903.88.67, 9903.88.68, 9903.88.69, or 9903.88.70, articles the product of China, as provided for in U.S. note 20(c) to this subchapter and as provided for in the subheadings enumerated in U…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.88.03 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 25%",
+   "pct": 25,
+   "specific": false,
+   "origins": [
+    "CN"
+   ],
+   "note": "Except as provided in headings 9903.88.13, 9903.88.18, 9903.88.33, 9903.88.34, 9903.88.35, 9903.88.36, 9903.88.37, 9903.88.38, 9903.88.40, 9903.88.41, 9903.88.43, 9903.88.45, 9903.88.46, 9903.88.48, 9903.88.56, 9903.88.64, 9903.88.66, 9903.88.67, 9903.88.68, or 9903.88.69, articles the product of China, as provided …",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.88.04 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 25%",
+   "pct": 25,
+   "specific": false,
+   "origins": [
+    "CN"
+   ],
+   "note": "Except as provided in headings 9903.88.33, 9903.88.34, 9903.88.36, 9903.88.37, 9903.88.38, 9903.88.40, 9903.88.46, 9903.88.48, 9903.88.56, 9903.88.64, 9903.88.66, 9903.88.67, or 9903.88.69, articles the product of China, as provided for in U.S. note 20(g) to this subchapter and as provided for in the subheadings enu…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.88.09 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 10%",
+   "pct": 10,
+   "specific": false,
+   "origins": [
+    "CN"
+   ],
+   "note": "Articles the product of China, as provided for in U.S. note 20(l) to this subchapter and as provided for in the subheadings enumerated in U.S. notes 20(f) or 20(g) to this subchapter, if exported to the United States before May 10, 2019 and entered for consumption, or withdrawn from warehouse for consumption, on or …",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.88.15 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 7.5%",
+   "pct": 7.5,
+   "specific": false,
+   "origins": [
+    "CN"
+   ],
+   "note": "Except as provided in headings 9903.88.39, 9903.88.42, 9903.88.44, 9903.88.47, 9903.88.49, 9903.88.51, 9903.88.53, 9903.88.55, 9903.88.57, 9903.88.65, 9903.88.66, 9903.88.67, 9903.88.68, or 9903.88.69, articles the product of China, as provided for in U.S. note 20(r) to this subchapter and as provided for in the sub…",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  },
+  {
+   "kind": "additional",
+   "label": "HTS 9903.88.16 – thuế bổ sung chương 99",
+   "rate": "The duty provided in the applicable subheading + 15%",
+   "pct": 15,
+   "specific": false,
+   "origins": [
+    "CN"
+   ],
+   "note": "Articles the product of China, as provided for in U.S. note 20(t) to this subchapter and as provided for in the subheadings enumerated in U.S. note 20(u) [Compiler's note: provision suspended.]",
+   "confidence": "reference",
+   "source": "USITC HTS 2026HTSRev23"
+  }
+ ]
+}

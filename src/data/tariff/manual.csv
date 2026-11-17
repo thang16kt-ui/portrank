@@ -1,0 +1,13 @@
+# Thuế NHẬP TAY cho các nước chưa có API mở (EU, Việt Nam, Nhật…). App đọc trực tiếp file này.
+# country: ISO 2 chữ hoặc EU. code: mã quốc gia hoặc tiền tố (vd. HS6) áp dụng cho mọi dòng con.
+# kind: mfn | preferential | additional | vat | excise | other. rate: 12% / Free / 2.5 EUR/100 kg. Để trống = chưa có số.
+# origins: các nước xuất xứ cách nhau bởi dấu cách (để trống = mọi xuất xứ).
+# reviewedAt: ngày đã đối chiếu với nguồn chính thức (TARIC / biểu thuế). Để trống = chưa đối chiếu -> app cảnh báo.
+# Ví dụ thuế Việt Nam (nhập vào VN):  VN,61091000,Áo T-shirt cotton,mfn,Thuế NK ưu đãi (MFN),<thuế suất>,,,,,,<ngày>,NĐ 26/2023/NĐ-CP,
+country,code,description,kind,label,rate,origins,agreement,proof,validFrom,validTo,reviewedAt,source,note
+EU,61091000,"T-shirts, singlets and other vests, of cotton",mfn,Thuế NK MFN (CN – conventional duty),12%,,,,,,,TARIC,
+EU,61091000,"T-shirts, singlets and other vests, of cotton",preferential,Ưu đãi EVFTA,,VN,EVFTA,Tự chứng nhận xuất xứ (REX) hoặc C/O EUR.1,,,,TARIC,Thuế giảm dần theo lộ trình EVFTA – tra TARIC với xuất xứ VN rồi điền thuế suất hiện hành
+EU,09011100,"Coffee, not roasted, not decaffeinated",mfn,Thuế NK MFN (CN – conventional duty),0%,,,,,,,TARIC,
+EU,94035000,Wooden furniture of a kind used in the bedroom,mfn,Thuế NK MFN (CN – conventional duty),0%,,,,,,,TARIC,
+EU,64041100,"Sports footwear, outer soles of rubber or plastics, uppers of textile",mfn,Thuế NK MFN (CN – conventional duty),16.9%,,,,,,,TARIC,
+EU,64041100,"Sports footwear, outer soles of rubber or plastics, uppers of textile",preferential,Ưu đãi EVFTA,,VN,EVFTA,Tự chứng nhận xuất xứ (REX) hoặc C/O EUR.1,,,,TARIC,Thuế giảm dần theo lộ trình EVFTA – tra TARIC với xuất xứ VN rồi điền thuế suất hiện hành

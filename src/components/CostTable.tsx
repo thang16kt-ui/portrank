@@ -64,7 +64,7 @@ export default function CostTable({ plan, incoterm }: { plan: PlanResult; incote
         </table>
       </div>
       <p className="text-[11px] text-slate-500">
-        Chưa gồm: vận tải nội địa, thông quan, thuế nhập khẩu, bảo hiểm hàng hóa, phí lưu container (DEM/DET), phụ phí mùa cao điểm (PSS) và phí rủi ro chiến tranh. Nguồn giá: mô hình (<code>RateProvider</code> có thể thay bằng API Freightos/Xeneta/hãng tàu hoặc file CSV).
+        Chưa gồm: vận tải nội địa, thông quan, thuế nhập khẩu (xem tab <b>Thuế NK</b>), bảo hiểm hàng hóa, phí lưu container (DEM/DET), phụ phí mùa cao điểm (PSS) và phí rủi ro chiến tranh. Nguồn giá: mô hình (<code>RateProvider</code> có thể thay bằng API Freightos/Xeneta/hãng tàu hoặc file CSV).
       </p>
     </div>
   );

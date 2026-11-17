@@ -7,6 +7,7 @@ Web app chạy local (giao diện tiếng Việt) để lập kế hoạch vận
 - Ghim cảng đi (xanh) / cảng đến (cam) rơi xuống có hiệu ứng bounce; ghim xám + popup ngắn khi tàu đi qua eo biển / kênh đào.
 - Tính **cước ước tính**, **thời gian vận chuyển**, **checklist điều kiện & chứng từ**, **gợi ý Incoterms® 2020** kèm thanh phân chia trách nhiệm.
 - **Xếp hạng cặp cảng thay thế** trong bán kính R theo chi phí, độ ổn định giá, thời gian, tần suất tàu, rủi ro.
+- **Thuế nhập khẩu theo mặt hàng** (tab *Thuế NK*): MFN, ưu đãi FTA theo xuất xứ, thuế bổ sung, VAT/GST, phí khác – dữ liệu Mỹ & Anh tự động cập nhật từ API chính thức.
 
 > ⚠️ **Mọi con số giá là MÔ HÌNH ƯỚC TÍNH / DỮ LIỆU MÔ PHỎNG**, không phải giá thị trường.
 
@@ -23,9 +24,11 @@ Các lệnh khác:
 
 | Lệnh | Mô tả |
 | --- | --- |
-| `npm test` | Unit test (Vitest) cho `routing`, `pricing`, `incoterm`, `ranking`, `rules` |
+| `npm test` | Unit test (Vitest) cho `routing`, `pricing`, `incoterm`, `ranking`, `rules`, `tariff` |
 | `npm run build` | Kiểm tra type + build production vào `dist/` |
 | `npm run gen:ship` | Sinh lại model tàu `public/models/ship.glb` |
+| `npm run tariffs:update` | Tải lại biểu thuế (Mỹ, Anh, HS 2022) cho danh mục hàng; thêm `-- US` để chỉ tải một nước |
+| `npm run tariffs:check` | Kiểm tra mã trong danh mục hàng với biểu thuế hiện hành, gợi ý mã còn thiếu (không ghi file) |
 | `npx tsx scripts/check-land.ts [searoute\|graph] [ALL\|POL-POD]` | Kiểm tra tuyến không cắt qua đất liền (Natural Earth 1:50m) |
 | `npx tsx scripts/build-marnet-mask.ts` | Tiền xử lý mạng tuyến searoute (nắn cạnh cắt qua đảo/đất liền) |
 
@@ -34,16 +37,17 @@ Các lệnh khác:
 ```
 src/
   components/  Header, Sidebar, PortCombobox, MapView, DeckLayers, MapOverlays, PlaybackBar,
-               ResultPanel, Overview, CostTable, Conditions, IncotermBar, AltRanking
-  config/      pricing.ts (hệ số cước), rules.ts (rule điều kiện dạng dữ liệu), weights.ts (trọng số xếp hạng),
+               ResultPanel, Overview, CostTable, TaxTab, Conditions, IncotermBar, AltRanking
+  config/      pricing.ts (hệ số cước), rules.ts (rule điều kiện dạng dữ liệu), weights.ts (trọng số xếp hạng), taxes.ts (VAT/GST, phí),
                routing.ts (tốc độ tàu, engine, thời lượng hoạt ảnh)
-  data/        ports.ts (~100 cảng), seaNodes.ts (eo biển/kênh đào + đồ thị dự phòng), marnetPatch.json
+  data/        ports.ts (~100 cảng), seaNodes.ts (eo biển/kênh đào + đồ thị dự phòng), marnetPatch.json,
+               tariff/ (danh mục hàng, biểu thuế tự động + nhập tay)
   lib/         routing.ts, geo.ts (densify, bearing, unwrap 180°), pricing.ts (RateProvider), transit.ts,
-               rules.ts, incoterm.ts, ranking.ts, results.ts
+               rules.ts, incoterm.ts, ranking.ts, results.ts, tariff.ts (tra mã & tính thuế)
   store/       useAppStore.ts (Zustand)
   pages/       PriceWatch (Theo dõi giá – Recharts), SavedQuotes (Báo giá đã lưu – localStorage)
 public/models/ship.glb
-scripts/       gen-ship-glb.mjs, build-marnet-mask.ts, check-land.ts, land.ts
+scripts/       gen-ship-glb.mjs, build-marnet-mask.ts, check-land.ts, land.ts, update-tariffs.ts
 tests/         *.test.ts (Vitest)
 ```
 
@@ -76,6 +80,46 @@ tests/         *.test.ts (Vitest)
 - **Xếp hạng:** mọi cặp POL × POD trong bán kính R; chuẩn hoá 0–100; `Score = 35% chi phí + 25% ổn định giá + 20% thời gian
   + 10% tần suất + 10% rủi ro` (đổi theo *Ưu tiên*, có slider). Độ ổn định = CV của **chuỗi giá 12 tháng mô phỏng, seed cố định**.
 
+## Thuế nhập khẩu theo mặt hàng
+
+Tab **Thuế NK** tính các loại thuế áp dụng khi hàng vào nước có cảng đến, theo mặt hàng, xuất xứ và trị giá FOB nhập ở thanh bên:
+
+| Loại | Nội dung | Cách tính |
+| --- | --- | --- |
+| Thuế nhập khẩu (MFN) | Thuế suất thông thường của dòng hàng; biểu riêng cho một số xuất xứ (vd. cột 2 của Mỹ) | % × trị giá hải quan |
+| Ưu đãi FTA | Thuế suất theo hiệp định mà xuất xứ được hưởng (KORUS, USMCA, UKVFTA, CPTPP, EVFTA…). Tự chọn mức thấp nhất, kèm chứng từ C/O cần có | thay cho MFN nếu thấp hơn |
+| Thuế bổ sung | Chống bán phá giá, đối ứng, Section 301… theo xuất xứ. Mục có điều kiện phức tạp (vd. chương 99 của Mỹ) chỉ hiển thị **Cần xác minh**, không cộng vào tổng | % × trị giá hải quan |
+| VAT / GST | Theo dòng hàng (Anh – từ API) hoặc thuế suất tiêu chuẩn của nước nhập (`src/config/taxes.ts`) | % × (CIF + thuế NK + thuế bổ sung + TTĐB) |
+| Phí khác | MPF, HMF (Mỹ) | % × trị giá hải quan |
+
+Trị giá hải quan = **CIF** (FOB + cước & phí đến cảng nhập + bảo hiểm 0,3%) với đa số nước; **FOB** với Mỹ, Canada, Úc, New Zealand, Nam Phi.
+Thuế suất dạng tuyệt đối (¢/kg, €/100 kg…) được hiển thị nhưng chưa cộng vào tổng.
+
+### Dữ liệu & cách cập nhật
+
+```
+src/data/tariff/
+  products.csv      Danh mục hàng: sku, tên, HS6 và mã quốc gia của từng nước (cột VN, EU, US, GB…)
+  manual.csv        Thuế nhập tay cho nước chưa có API (EU, Việt Nam…); cột reviewedAt = ngày đã đối chiếu
+  generated/*.json  Dữ liệu tải tự động – KHÔNG sửa tay
+src/config/taxes.ts VAT/GST tiêu chuẩn theo nước, phí MPF/HMF, nước tính thuế trên FOB, ngưỡng cảnh báo dữ liệu cũ
+```
+
+| Nước | Nguồn | Cập nhật |
+| --- | --- | --- |
+| HS 2022 (6 số) | GitHub [`datasets/harmonized-system`](https://github.com/datasets/harmonized-system) | Tự động – kiểm tra HS6 trong danh mục còn hợp lệ |
+| Mỹ | [USITC HTS REST API](https://hts.usitc.gov/) – MFN, ưu đãi FTA (cột Special), cột 2, thuế bổ sung chương 99 theo nước | Tự động |
+| Anh | [UK Trade Tariff API v2](https://www.trade-tariff.service.gov.uk/) – MFN, ưu đãi theo từng hiệp định, thuế bổ sung, VAT | Tự động |
+| EU, Việt Nam, nước khác | TARIC / biểu thuế quốc gia (không có API mở) | Nhập tay vào `manual.csv` |
+
+1. **Thêm mặt hàng:** thêm một dòng vào `products.csv` (chỉ cần HS6), chạy `npm run tariffs:check` → script liệt kê các mã quốc gia hợp lệ để chọn, điền vào cột US/GB.
+2. **Cập nhật thuế:** `npm run tariffs:update` (nếu mạng cần proxy: `NODE_USE_ENV_PROXY=1 npm run tariffs:update`). Script báo mã nào không còn trong biểu thuế để chọn lại.
+3. **Tự động:** workflow `.github/workflows/update-tariffs.yml` chạy ngày 1 và 15 hằng tháng, mở pull request khi dữ liệu thay đổi
+   (cần bật *Settings → Actions → General → Allow GitHub Actions to create and approve pull requests*).
+4. **Cảnh báo trong app:** dữ liệu tự động cũ hơn 35 ngày, dữ liệu nhập tay chưa đối chiếu (hoặc quá 180 ngày), ưu đãi FTA chưa có thuế suất, mã không có trong biểu thuế.
+
+> ⚠️ Thuế mang tính tham khảo. Thuế bổ sung của Mỹ (Section 232, AD/CVD, chương 99) phụ thuộc điều kiện riêng của từng lô hàng – luôn xác nhận với hải quan / đại lý khai thuê.
+
 ## Model tàu 3D
 
 `public/models/ship.glb` là tàu container low-poly **do script `scripts/gen-ship-glb.mjs` sinh ra bằng code** (thân tàu, cabin,
@@ -88,4 +132,6 @@ Nếu không tải được model, app dùng icon tàu 2D xoay theo hướng di 
 - Bản đồ nền: © OpenFreeMap, © OpenMapTiles, © OpenStreetMap contributors.
 - Mạng tuyến biển: `searoute-js` (MIT) / marnet – Eurostat, Oak Ridge National Labs.
 - Đường bờ biển để kiểm tra (chỉ dùng trong script): Natural Earth qua `world-atlas` (public domain).
+- Danh mục HS 2022: [`datasets/harmonized-system`](https://github.com/datasets/harmonized-system) (UN Comtrade, ODC-PDDL).
+- Biểu thuế Mỹ: USITC Harmonized Tariff Schedule (public domain). Biểu thuế Anh: UK Trade Tariff – HMRC (Open Government Licence v3.0).
 - Danh sách cảng, số tuyến/tuần, chỉ số ùn tắc, chuỗi giá: **dữ liệu tĩnh / mô phỏng** để minh hoạ.
