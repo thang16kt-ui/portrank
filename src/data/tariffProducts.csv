@@ -1,0 +1,7 @@
+# Danh mục hàng để tạo bản chụp biểu thuế (npm run tariffs:update). Cột nước = mã ISO 2 chữ hoặc EU; để trống nếu chưa biết.
+# Thiếu mã → script gợi ý các mã hợp lệ. Mã HS6 theo HS 2022.
+sku,name,hs6,EU,US,GB
+AT-CT01,Áo thun nam cotton,610910,61091000,6109100012,6109100010
+CF-RB01,Cà phê nhân Robusta chưa rang,090111,09011100,0901110040,0901110000
+GO-PN01,Giường gỗ phòng ngủ,940350,94035000,9403509045,9403500000
+GI-TT01,Giày thể thao nam mũ vải đế cao su (trên 12 USD/đôi),640411,64041100,6404119020,6404110000

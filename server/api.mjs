@@ -4,6 +4,8 @@
  *
  *   GET /api/config                 → các tính năng đang bật (không lộ key)
  *   GET /api/hts/search?keyword=…   → chuyển tiếp tới USITC HTS REST (https://hts.usitc.gov/reststop/search)
+ *   GET /api/hts/exportList?from=…&to=…
+ *                                   → https://hts.usitc.gov/reststop/exportList (đủ dòng tiêu đề trung gian, dùng cho Chương 99)
  *   GET /api/schedules?pol=&pod=&from=&to=&carrier=
  *                                   → gọi DCSA Commercial Schedules 1.0 `GET {base}/v1/point-to-point-routes`
  *                                     của từng hãng đã cấu hình, trả về JSON gốc theo chuẩn DCSA
@@ -16,6 +18,8 @@
  */
 
 const HTS_BASE = 'https://hts.usitc.gov/reststop/search';
+const HTS_EXPORT = 'https://hts.usitc.gov/reststop/exportList';
+const HTS_CODE = /^[0-9.]{4,13}$/;
 const LOCODE = /^[A-Z]{2}[A-Z2-9]{3}$/;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const TIMEOUT_MS = 15000;
@@ -62,6 +66,23 @@ async function handleHts(url) {
   const body = await res.json();
   htsCache.set(keyword, { at: Date.now(), body });
   return json(200, body, { 'Cache-Control': 'public, max-age=3600' });
+}
+
+async function cachedJson(key, upstream) {
+  const hit = htsCache.get(key);
+  if (hit && Date.now() - hit.at < 12 * 3600e3) return json(200, hit.body, { 'Cache-Control': 'public, max-age=3600' });
+  const res = await fetchWithTimeout(upstream, { headers: { Accept: 'application/json' } });
+  if (!res.ok) return json(502, { error: `HTS trả về HTTP ${res.status}` });
+  const body = await res.json();
+  htsCache.set(key, { at: Date.now(), body });
+  return json(200, body, { 'Cache-Control': 'public, max-age=3600' });
+}
+
+async function handleHtsExport(url) {
+  const from = url.searchParams.get('from') ?? '', to = url.searchParams.get('to') ?? '';
+  if (!HTS_CODE.test(from) || !HTS_CODE.test(to)) return json(400, { error: 'from/to phải là mã HTS, vd 9403.60 và 9403.60.99.99' });
+  const q = new URLSearchParams({ from, to, format: 'JSON', styles: 'false' });
+  return cachedJson(`export:${from}:${to}`, `${HTS_EXPORT}?${q}`);
 }
 
 /** Gọi một hãng: theo chuẩn DCSA, trang sau chỉ gửi ?cursor=… (không kèm tham số khác) */
@@ -124,6 +145,7 @@ export async function handleApi(method, rawUrl, env = process.env) {
       return json(200, { server: true, hts: true, dcsa: dcsaCarriers(env).map((c) => ({ id: c.id, configured: c.ok })) });
     }
     if (url.pathname === '/api/hts/search') return await handleHts(url);
+    if (url.pathname === '/api/hts/exportList') return await handleHtsExport(url);
     if (url.pathname === '/api/schedules') return await handleSchedules(url, env);
     return json(404, { error: 'Không có API này' });
   } catch (e) {

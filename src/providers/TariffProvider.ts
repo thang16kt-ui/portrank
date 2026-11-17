@@ -21,6 +21,10 @@ export interface TariffEntry {
   vatPct: number | null;
   /** Thuế khác (TTĐB, BVMT…) % trên (trị giá + thuế NK) */
   otherPct: number;
+  /** Phí tính trên trị giá hải quan, không chịu VAT (vd. MPF + HMF của Mỹ). Chỉ nguồn tự động điền */
+  feePct?: number;
+  /** Tên các khoản phí trong feePct, để hiển thị */
+  feeLabel?: string;
   /** Link hoặc số hiệu văn bản nguồn */
   source: string;
   effectiveDate: string;
@@ -74,7 +78,7 @@ export function createUserTariffProvider(entries: TariffEntry[]): TariffProvider
  */
 export const OFFICIAL_TARIFF_SOURCES: { id: string; label: string; url: string; enabled: boolean; note: string }[] = [
   { id: 'uk-tariff', label: 'UK Trade Tariff API', url: 'https://www.trade-tariff.service.gov.uk/', enabled: true, note: 'Tự động cho nước nhập = Anh: thuế MFN, ưu đãi theo xuất xứ, VAT (src/lib/tariffSources.ts)' },
-  { id: 'us-hts', label: 'US HTS (USITC)', url: 'https://hts.usitc.gov/', enabled: true, note: 'Tự động cho nước nhập = Mỹ qua trung gian /api/hts: cột General / Special. Chưa gồm thuế bổ sung Chương 99' },
+  { id: 'us-hts', label: 'US HTS (USITC)', url: 'https://hts.usitc.gov/', enabled: true, note: 'Tự động cho nước nhập = Mỹ qua trung gian /api/hts: cột General / Special, phí MPF/HMF; thuế bổ sung Chương 99 theo xuất xứ hiện “cần xác minh”, không cộng vào tổng' },
   { id: 'taric', label: 'EU TARIC', url: 'https://ec.europa.eu/taxation_customs/dds2/taric/taric_consultation.jsp', enabled: false, note: 'Không có API công khai (trang HTML tải bằng JavaScript) – tra tay rồi nhập vào bảng' },
   { id: 'vn', label: 'Biểu thuế Việt Nam', url: 'https://www.customs.gov.vn/', enabled: false, note: 'Không có API công khai – tra tay' },
   { id: 'wto', label: 'WTO Tariff & Trade Data', url: 'https://ttd.wto.org/', enabled: false, note: 'API cần đăng ký key, dữ liệu cập nhật chậm – chưa làm' },

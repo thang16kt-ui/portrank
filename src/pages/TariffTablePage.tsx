@@ -4,6 +4,7 @@ import { tariffLookupLink } from '../data/customsBasis';
 import { runPlan } from '../lib/actions';
 import { daysSince, downloadText, fmtDateVi, toCsv, todayIso } from '../lib/csv';
 import { TARIFF_STALE_DAYS } from '../lib/duty';
+import { TARIFF_SNAPSHOT } from '../lib/tariffSources';
 import { OFFICIAL_TARIFF_SOURCES, TARIFF_CSV_HEADER, parseTariffRows, type TariffEntry } from '../providers/TariffProvider';
 import { useAppStore } from '../store/useAppStore';
 import { useDataStore } from '../store/useDataStore';
@@ -42,7 +43,7 @@ export default function TariffTablePage() {
   return (
     <PageShell
       title="Biểu thuế"
-      intro={<>Thuế nhập khẩu và VAT phụ thuộc mã HS, xuất xứ, hiệp định và thay đổi thường xuyên nên PortRank <b className="text-fg">không cài sẵn thuế suất</b>. Bạn tra ở nguồn chính thức rồi nhập vào đây, kèm <b className="text-fg">nguồn</b> và <b className="text-fg">ngày cập nhật</b>. Mức thuế cập nhật quá {TARIFF_STALE_DAYS} ngày sẽ có cảnh báo vàng.</>}
+      intro={<>Thuế nhập khẩu và VAT phụ thuộc mã HS, xuất xứ, hiệp định và thay đổi thường xuyên nên PortRank <b className="text-fg">không tự đoán thuế suất</b>: chỉ dùng mức bạn nhập, hoặc mức lấy từ nguồn chính thức (trực tuyến, hoặc bản chụp có ghi ngày). Bạn tra ở nguồn chính thức rồi nhập vào đây, kèm <b className="text-fg">nguồn</b> và <b className="text-fg">ngày cập nhật</b>. Mức thuế cập nhật quá {TARIFF_STALE_DAYS} ngày sẽ có cảnh báo vàng.</>}
       actions={
         <>
           <ImportButton onRows={(rows) => { const r = parseTariffRows(rows); setErrors(r.errors); if (r.entries.length) { addTariffs(r.entries); refresh(); } showToast(`Đã nhập ${r.entries.length} mức thuế`); }} />
@@ -120,6 +121,7 @@ export default function TariffTablePage() {
           </tbody>
         </table>
       </section>
+      <SnapshotSection origin={seller?.country ?? 'VN'} onImported={refresh} />
       <section className="card p-3">
         <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-[13px] font-semibold text-fg">Nguồn chính thức (lấy tự động)</h2>
@@ -137,5 +139,49 @@ export default function TariffTablePage() {
         <p className="mt-2 text-[11px] text-mute italic">Số thuế là ước tính để lập kế hoạch; số chính thức do cơ quan hải quan xác định.</p>
       </section>
     </PageShell>
+  );
+}
+
+/** Bản chụp dữ liệu chính thức (npm run tariffs:update): xem nguồn, ngày, và nạp vào bảng để chỉnh / dùng khi offline */
+function SnapshotSection({ origin, onImported }: { origin: string; onImported: () => void }) {
+  const snap = TARIFF_SNAPSHOT;
+  const tariffs = useDataStore((s) => s.tariffs);
+  const showToast = useAppStore((s) => s.showToast);
+  if (!snap.generatedAt) return null;
+  // MFN (mọi xuất xứ) + ưu đãi FTA cho xuất xứ đang chọn; bỏ mức đã có trong bảng
+  const key = (t: TariffEntry) => `${t.importCountry}|${t.hs}|${t.origin}|${t.rateType}`;
+  const have = new Set(tariffs.map(key));
+  const pick = snap.entries.filter((e) => (e.origin === '*' || e.origin === origin) && !have.has(key(e)));
+  const age = daysSince(snap.generatedAt);
+  const load = () => {
+    useDataStore.getState().addTariffs(pick.map((e) => ({ ...e, id: Math.random().toString(36).slice(2, 10), verified: false })));
+    onImported();
+    showToast(`Đã nạp ${pick.length} mức thuế (đánh dấu chưa xác minh)`);
+  };
+  return (
+    <section className="card p-3">
+      <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-[13px] font-semibold text-fg">
+          Bản chụp dữ liệu đã cập nhật · {fmtDateVi(snap.generatedAt)}{' '}
+          {age > TARIFF_STALE_DAYS && <span className="chip chip-warn">⚠ quá {TARIFF_STALE_DAYS} ngày</span>}
+        </h2>
+        <button className="btn btn-on" disabled={!pick.length} onClick={load}>
+          ⬇ Nạp {pick.length} mức thuế (MFN + FTA cho xuất xứ {countryName(origin)})
+        </button>
+      </div>
+      <p className="text-[11px] text-mute">
+        {snap.entries.length} mức thuế cho danh mục hàng trong <code>src/data/tariffProducts.csv</code>, tạo bằng <code>npm run tariffs:update</code> (workflow tự chạy ngày 1 và 15 hằng tháng).
+        App tự dùng bản chụp khi API trực tuyến không phản hồi. Nạp vào bảng thì mức thuế của bảng được ưu tiên hơn tra trực tuyến – nhớ cập nhật định kỳ.
+      </p>
+      <ul className="mt-1 text-[11px] text-mute">
+        {snap.sources.map((s) => (
+          <li key={s.id}>
+            · {s.url ? <a href={s.url} target="_blank" rel="noreferrer">{s.label}</a> : s.label}
+            {s.release && <> ({s.release})</>}: {snap.entries.filter((e) => (s.id === 'us-hts' ? e.id.startsWith('us-') : s.id === 'uk-tariff' ? e.id.startsWith('uk-') : e.id.startsWith('manual-'))).length} mức
+            {s.id === 'manual' && <span className="chip chip-warn ml-1">chưa xác minh</span>}
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

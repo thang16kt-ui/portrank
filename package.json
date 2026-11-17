@@ -10,7 +10,9 @@
     "test": "vitest run",
     "gen:ship": "node scripts/gen-ship-glb.mjs",
     "gen:crane": "node scripts/gen-crane-glb.mjs",
-    "start": "node server/index.mjs"
+    "start": "node server/index.mjs",
+    "tariffs:update": "tsx scripts/update-tariffs.ts",
+    "tariffs:check": "tsx scripts/update-tariffs.ts --check"
   },
   "dependencies": {
     "@deck.gl/core": "~9.4.1",
