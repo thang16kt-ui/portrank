@@ -18,6 +18,8 @@ interface DataState {
   officialTariffs: boolean;
   /** Chủ đề màu bản đồ + màu người dùng chỉnh */
   mapTheme: MapThemeSetting;
+  /** Màu giao diện (bảng nhập, bảng kết quả, các trang): tối hoặc sáng */
+  uiTheme: 'dark' | 'light';
 
   addRates: (e: RateEntry[]) => void;
   removeRate: (id: string) => void;
@@ -36,6 +38,7 @@ interface DataState {
   setMapColor: (k: keyof MapColors, v: string | null) => void;
   setMapGlow: (g: number | null) => void;
   resetMapTheme: () => void;
+  setUiTheme: (t: 'dark' | 'light') => void;
 }
 
 export const useDataStore = create<DataState>()(
@@ -48,6 +51,7 @@ export const useDataStore = create<DataState>()(
       explainerAutoplay: true,
       officialTariffs: true,
       mapTheme: DEFAULT_THEME_SETTING,
+      uiTheme: 'dark',
 
       addRates: (e) => set((s) => ({ rates: [...e, ...s.rates] })),
       removeRate: (id) => set((s) => ({ rates: s.rates.filter((r) => r.id !== id) })),
@@ -84,6 +88,7 @@ export const useDataStore = create<DataState>()(
         }),
       setMapGlow: (glow) => set((s) => ({ mapTheme: { ...s.mapTheme, glow } })),
       resetMapTheme: () => set({ mapTheme: DEFAULT_THEME_SETTING }),
+      setUiTheme: (uiTheme) => set({ uiTheme }),
     }),
     {
       name: 'portrank.data.v2',

@@ -112,7 +112,7 @@ function DutyPanel({ plan, r }: { plan: Plan; r: RankedOption }) {
   const e = d.entry;
   return (
     <div className="space-y-2.5 text-[12px]">
-      <div className="rounded-lg border border-line bg-[#0a1120] p-2.5">
+      <div className="rounded-lg border border-line bg-well p-2.5">
         <div className="text-mute">Nước nhập khẩu: <b className="text-fg">{countryName(imp)}</b> · xuất xứ: <b className="text-fg">{countryName(exp)}</b> · HS: <b className="text-fg">{plan.input.hs || '—'}</b></div>
         <div className="mt-1 text-mute">
           Trị giá tính thuế theo <b className="text-fg">{d.basis.basis}</b>{' '}
@@ -123,7 +123,7 @@ function DutyPanel({ plan, r }: { plan: Plan; r: RankedOption }) {
       </div>
       <OfficialTariffBox plan={plan} />
       {d.status === 'ok' && e ? (
-        <div className="rounded-lg border border-line bg-[#0a1120] p-2.5">
+        <div className="rounded-lg border border-line bg-well p-2.5">
           <table className="tbl">
             <tbody>
               <tr><td>Trị giá tính thuế ({d.basis.basis})</td><td className="text-right">{usd(d.customsValue)}</td></tr>
@@ -228,7 +228,7 @@ function Conditions({ plan, r }: { plan: Plan; r: RankedOption }) {
             <div className="mb-1 text-[10.5px] font-bold tracking-wide text-mute uppercase">{cat}</div>
             <ul className="space-y-1.5">
               {items.map((it, i) => (
-                <li key={i} className="rounded-lg border border-line bg-[#0a1120] px-2.5 py-1.5">
+                <li key={i} className="rounded-lg border border-line bg-well px-2.5 py-1.5">
                   <div className="flex items-start justify-between gap-2"><span className="text-[12px] font-semibold text-fg">{it.title}</span><span className={`chip shrink-0 ${SEV[it.severity].cls}`}>{SEV[it.severity].label}</span></div>
                   <div className="text-[11px] leading-snug text-mute">{it.detail}</div>
                 </li>
@@ -252,10 +252,10 @@ function PriceHistory({ r }: { r: RankedOption }) {
       <div className="h-56">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={o.history} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
-            <CartesianGrid stroke="#1c2b45" strokeDasharray="3 3" />
-            <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#8195b0' }} />
-            <YAxis tick={{ fontSize: 10, fill: '#8195b0' }} width={48} domain={['auto', 'auto']} />
-            <Tooltip contentStyle={{ background: '#0b1322', border: '1px solid #26395a', borderRadius: 8, fontSize: 12 }} formatter={(v) => [usd(Number(v)), 'Cước']} />
+            <CartesianGrid stroke="var(--color-line)" strokeDasharray="3 3" />
+            <XAxis dataKey="month" tick={{ fontSize: 10, fill: 'var(--color-mute)' }} />
+            <YAxis tick={{ fontSize: 10, fill: 'var(--color-mute)' }} width={48} domain={['auto', 'auto']} />
+            <Tooltip contentStyle={{ background: 'var(--color-panel)', border: '1px solid var(--color-line)', borderRadius: 8, fontSize: 12, color: 'var(--color-fg)' }} formatter={(v) => [usd(Number(v)), 'Cước']} />
             <Line type="monotone" dataKey="price" stroke="#fbbf24" strokeWidth={2} dot={{ r: 2 }} />
           </LineChart>
         </ResponsiveContainer>
@@ -404,7 +404,7 @@ function SchedulePanel({ plan, r }: { plan: Plan; r: RankedOption }) {
         const stale = daysSince(e.fetchedAt) > SCHEDULE_STALE_DAYS;
         const on = scheduleId === e.id;
         return (
-          <div key={e.id} className={`rounded-lg border p-2.5 ${on ? 'border-gold bg-gold/5' : 'border-line bg-[#0a1120]'}`}>
+          <div key={e.id} className={`rounded-lg border p-2.5 ${on ? 'border-gold bg-gold/5' : 'border-line bg-well'}`}>
             <div className="flex items-start justify-between gap-2">
               <div>
                 <div className="font-semibold text-fg">{c?.name} · {e.service || 'Dịch vụ ?'} <span className="font-normal text-mute">· {e.vessel} {e.voyage}</span></div>

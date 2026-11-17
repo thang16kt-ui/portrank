@@ -11,7 +11,7 @@ const rankCls = (rank: number) => (rank === 1 ? 'bg-gold text-slate-900 shadow-[
 
 function Big({ label, value, sub, tone }: { label: string; value: React.ReactNode; sub?: React.ReactNode; tone?: string }) {
   return (
-    <div className="rounded-lg border border-line bg-[#0a1120] px-2.5 py-2">
+    <div className="rounded-lg border border-line bg-well px-2.5 py-2">
       <div className="text-[10.5px] font-medium text-mute">{label}</div>
       <div className={`text-[19px] leading-tight font-bold ${tone ?? 'text-fg'}`}>{value}</div>
       {sub && <div className="mt-0.5 text-[10px] leading-snug text-mute">{sub}</div>}
@@ -135,7 +135,7 @@ function Ranking({ ranked }: { ranked: RankedOption[] }) {
               onMouseEnter={() => set({ hoverKey: o.key })}
               onMouseLeave={() => set({ hoverKey: null })}
               onClick={() => select(on ? null : o.key)}
-              className={`block w-full rounded-lg border px-2 py-1.5 text-left transition ${on ? 'border-gold bg-gold/10' : hov ? 'border-sky/60 bg-sky/5' : 'border-line bg-[#0a1120] hover:border-[#35507c]'}`}
+              className={`block w-full rounded-lg border px-2 py-1.5 text-left transition ${on ? 'border-gold bg-gold/10' : hov ? 'border-sky/60 bg-sky/5' : 'border-line bg-well hover:border-line-strong'}`}
             >
               <div className="flex items-center gap-1.5">
                 <span className={`flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-bold ${rankCls(r.rank)}`}>{r.rank}</span>

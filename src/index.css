@@ -14,21 +14,73 @@
   --color-seller: #fbbf24;
   --color-buyer: #3f6ad8;
   --color-road: #a3e635;
+  /* nền ô nhập / ô số liệu bên trong thẻ */
+  --color-well: #0a1120;
+  --color-line-strong: #35507c;
+  /* chữ "Người bán" / "Người mua" trên nền giao diện */
+  --color-seller-ink: #fbbf24;
+  --color-buyer-ink: #8fb0ff;
+  /* sơ đồ Incoterm, biểu đồ */
+  --color-diagram-node: #0b1322;
+  --color-diagram-track: #16233a;
+  --color-diagram-dash: #26395a;
+  --color-diagram-lit: #67e8f9;
+  --color-diagram-label: #b8c9de;
+  --color-diagram-dim: #5d7493;
+  --color-diagram-axis: #8fa5c0;
+  --color-diagram-cargo-edge: #ffffff;
+}
+
+/* ───────── Giao diện SÁNG (nút ☀️ ở góc trên bên phải) ─────────
+   Đổi các biến màu chung; các lớp màu chữ nhạt (amber-200, cyan-100…) dùng trên nền tối được đổi sang tông đậm cho dễ đọc trên nền trắng. */
+:root[data-ui="light"] {
+  color-scheme: light;
+  --color-ink: #eef2f7;
+  --color-panel: #ffffff;
+  --color-panel2: #f1f5f9;
+  --color-line: #dbe3ee;
+  --color-line-strong: #94a3b8;
+  --color-fg: #0f172a;
+  --color-mute: #5b6b82;
+  --color-sky: #0891b2;
+  --color-well: #f6f8fb;
+  --color-seller-ink: #b45309;
+  --color-buyer-ink: #1d4ed8;
+  --color-diagram-node: #ffffff;
+  --color-diagram-track: #e2e8f0;
+  --color-diagram-dash: #cbd5e1;
+  --color-diagram-lit: #0891b2;
+  --color-diagram-label: #334155;
+  --color-diagram-dim: #94a3b8;
+  --color-diagram-axis: #64748b;
+  --color-diagram-cargo-edge: #0f172a;
+  --color-amber-100: #92400e;
+  --color-amber-200: #b45309;
+  --color-amber-300: #b45309;
+  --color-cyan-100: #155e75;
+  --color-cyan-200: #0e7490;
+  --color-emerald-300: #047857;
+  --color-red-100: #b91c1c;
+  --color-red-200: #b91c1c;
+  --color-red-300: #dc2626;
+  --color-rose-200: #be123c;
+  --color-pink-300: #be185d;
 }
 
 html, body, #root { height: 100%; margin: 0; }
-body { font-family: var(--font-sans); background: var(--color-ink); color: var(--color-fg); color-scheme: dark; }
-* { scrollbar-width: thin; scrollbar-color: #26395a transparent; }
+body { font-family: var(--font-sans); background: var(--color-ink); color: var(--color-fg); }
+:root { color-scheme: dark; }
+* { scrollbar-width: thin; scrollbar-color: var(--color-line-strong) transparent; }
 *::-webkit-scrollbar { width: 6px; height: 6px; }
-*::-webkit-scrollbar-thumb { background: #26395a; border-radius: 3px; }
+*::-webkit-scrollbar-thumb { background: var(--color-line-strong); border-radius: 3px; }
 input[type=range] { accent-color: var(--color-gold); }
 input, select, textarea { font-family: inherit; }
-.field { width: 100%; border-radius: 8px; border: 1px solid var(--color-line); background: #0a1120; color: var(--color-fg); padding: 6px 9px; font-size: 13px; outline: none; }
+.field { width: 100%; border-radius: 8px; border: 1px solid var(--color-line); background: var(--color-well); color: var(--color-fg); padding: 6px 9px; font-size: 13px; outline: none; }
 .field:focus { border-color: var(--color-sky); box-shadow: 0 0 0 2px rgba(34,211,238,.18); }
 .lbl { display: block; font-size: 11px; font-weight: 500; color: var(--color-mute); margin-bottom: 3px; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 8px; border: 1px solid var(--color-line); background: var(--color-panel2); color: var(--color-fg); padding: 5px 10px; font-size: 12px; font-weight: 500; cursor: pointer; transition: background .15s, border-color .15s; white-space: nowrap; }
-.btn:hover { border-color: #35507c; background: #15233c; }
-.btn-on, .btn-on:hover { border-color: var(--color-gold); background: linear-gradient(rgba(251,191,36,.16), rgba(251,191,36,.16)), var(--color-panel2); color: #fde68a; }
+.btn:hover { border-color: var(--color-line-strong); background: color-mix(in srgb, var(--color-panel2) 80%, var(--color-sky) 8%); }
+.btn-on, .btn-on:hover { border-color: var(--color-gold); background: linear-gradient(rgba(251,191,36,.16), rgba(251,191,36,.16)), var(--color-panel2); color: var(--color-amber-200, #fde68a); }
 .btn:disabled { opacity: .4; cursor: not-allowed; }
 .chip { display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; padding: 1px 8px; font-size: 10.5px; font-weight: 600; line-height: 1.6; }
 .chip-est { background: rgba(148,163,184,.16); color: #b6c4d8; }
@@ -40,7 +92,7 @@ input, select, textarea { font-family: inherit; }
 table.tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
 table.tbl th { text-align: left; font-weight: 600; color: var(--color-mute); padding: 6px 8px; border-bottom: 1px solid var(--color-line); white-space: nowrap; position: sticky; top: 0; background: var(--color-panel); }
 table.tbl td { padding: 6px 8px; border-bottom: 1px solid rgba(28,43,69,.6); vertical-align: top; }
-a { color: #67e8f9; }
+a { color: var(--color-sky); }
 
 .maplibregl-ctrl-attrib { font-size: 10px; background: rgba(7,11,20,.6) !important; color: #7f93ad; }
 .maplibregl-ctrl-attrib a { color: #9fb3cc; }
@@ -82,3 +134,19 @@ a { color: #67e8f9; }
 @media (prefers-reduced-motion: reduce) {
   .pr-co::before, .pr-co::after { animation: none; opacity: .5; transform: scale(1.8); }
 }
+
+/* chip & điều khiển bản đồ ở giao diện sáng */
+:root[data-ui="light"] .chip-est { background: #eef2f7; color: #475569; }
+:root[data-ui="light"] .chip-real { background: #dcfce7; color: #166534; }
+:root[data-ui="light"] .chip-warn { background: #fef3c7; color: #92400e; }
+:root[data-ui="light"] .chip-bad { background: #fee2e2; color: #b91c1c; }
+:root[data-ui="light"] .chip-sky { background: #cffafe; color: #155e75; }
+:root[data-ui="light"] .maplibregl-ctrl-group { background: #ffffff !important; }
+:root[data-ui="light"] .maplibregl-ctrl-group button span { filter: none; }
+:root[data-ui="light"] .maplibregl-ctrl-attrib { background: rgba(255,255,255,.75) !important; color: #475569; }
+:root[data-ui="light"] .maplibregl-ctrl-attrib a { color: #334155; }
+:root[data-ui="light"] .maplibregl-ctrl-scale { background: rgba(255,255,255,.7); color: #334155; }
+:root[data-ui="light"] .hover\:bg-white\/5:hover { background: rgba(15,23,42,.05); }
+:root[data-ui="light"] .pr-pass-tip, :root[data-ui="light"] .pr-tag { background: rgba(255,255,255,.96); color: #0f172a; }
+:root[data-ui="light"] .bg-white\/10 { background: rgba(15,23,42,.08); }
+:root[data-ui="light"] .toast-pop { box-shadow: 0 6px 20px rgba(15,23,42,.18); }

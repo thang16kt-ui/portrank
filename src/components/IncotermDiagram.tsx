@@ -6,8 +6,9 @@ export const BUYER_COLOR = '#3f6ad8';
 
 /** Hình vẽ đơn giản cho các trạm – thiết kế riêng của PortRank */
 function Glyph({ icon, x, y, lit }: { icon: string; x: number; y: number; lit: boolean }) {
-  const c = lit ? '#e8f1fb' : '#5d7493';
-  const s = { fill: 'none', stroke: c, strokeWidth: 1.6, strokeLinejoin: 'round' as const, strokeLinecap: 'round' as const };
+  // màu lấy từ biến CSS (đổi theo giao diện sáng / tối) – dùng style vì thuộc tính SVG không hiểu var()
+  const c = lit ? 'var(--color-fg)' : 'var(--color-diagram-dim)';
+  const s = { style: { fill: 'none', stroke: c }, strokeWidth: 1.6, strokeLinejoin: 'round' as const, strokeLinecap: 'round' as const };
   const g = (children: React.ReactNode) => <g transform={`translate(${x - 12},${y - 12})`} style={{ transition: 'opacity .3s' }}>{children}</g>;
   switch (icon) {
     case 'factory':
@@ -28,11 +29,11 @@ function Glyph({ icon, x, y, lit }: { icon: string; x: number; y: number; lit: b
 }
 
 function Truck({ x, y, lit }: { x: number; y: number; lit: boolean }) {
-  const c = lit ? '#b8c9de' : '#42566f';
+  const c = lit ? 'var(--color-diagram-label)' : 'var(--color-diagram-dim)';
   return (
-    <g transform={`translate(${x - 8},${y - 6})`} fill="none" stroke={c} strokeWidth={1.3} strokeLinejoin="round">
+    <g transform={`translate(${x - 8},${y - 6})`} style={{ fill: 'none', stroke: c }} strokeWidth={1.3} strokeLinejoin="round">
       <path d="M0 9V2h9v7M9 4h4l3 3v2H9" />
-      <circle cx="4" cy="10" r="1.6" fill={c} stroke="none" /><circle cx="12.5" cy="10" r="1.6" fill={c} stroke="none" />
+      <circle cx="4" cy="10" r="1.6" style={{ fill: c, stroke: 'none' }} /><circle cx="12.5" cy="10" r="1.6" style={{ fill: c, stroke: 'none' }} />
     </g>
   );
 }
@@ -80,29 +81,29 @@ export default function IncotermDiagram({ term, mode, t, compact }: Props) {
   const chainY = 22, barY = 62, barH = 13, gap = 25;
   const riskY = barY + gap, insY = riskY + gap;
   const H = (hasIns ? insY : riskY) + barH + (compact ? 6 : 8);
-  const barBg = '#16233a';
+  const barBg = 'var(--color-diagram-track)';
   const Bar = ({ y, label, cut, fill, showBuyer }: { y: number; label: string; cut: number; fill: number; showBuyer: boolean }) => (
     <g>
-      <text x={L - 8} y={y + barH - 3} textAnchor="end" fontSize={10.5} fill="#8fa5c0" fontWeight={500}>{label}</text>
-      <rect x={X(0)} y={y} width={X(100) - X(0)} height={barH} rx={barH / 2} fill={barBg} />
+      <text x={L - 8} y={y + barH - 3} textAnchor="end" fontSize={10.5} style={{ fill: 'var(--color-diagram-axis)' }} fontWeight={500}>{label}</text>
+      <rect x={X(0)} y={y} width={X(100) - X(0)} height={barH} rx={barH / 2} style={{ fill: barBg }} />
       {showBuyer && cut < 100 && <rect x={X(cut)} y={y} width={X(100) - X(cut)} height={barH} rx={barH / 2} fill={BUYER_COLOR} />}
       {fill > 0 && <rect x={X(0)} y={y} width={Math.max(barH, X(fill) - X(0))} height={barH} rx={barH / 2} fill={SELLER_COLOR} />}
-      {fill > 0 && fill < 100 && showBuyer && <rect x={X(fill) - 1} y={y - 2} width={2} height={barH + 4} fill="#070b14" />}
+      {fill > 0 && fill < 100 && showBuyer && <rect x={X(fill) - 1} y={y - 2} width={2} height={barH + 4} style={{ fill: 'var(--color-panel)' }} />}
     </g>
   );
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="block w-full" role="img" aria-label={`Sơ đồ ${term}: người bán trả chi phí đến ${def.costAt}% chuỗi, rủi ro chuyển tại ${def.riskAt}%`}>
       {/* Chuỗi vận tải */}
-      <line x1={X(0)} y1={chainY} x2={X(100)} y2={chainY} stroke="#26395a" strokeWidth={2} strokeDasharray="3 4" />
-      {anim && <line x1={X(0)} y1={chainY} x2={X(pos)} y2={chainY} stroke="#67e8f9" strokeWidth={2} />}
+      <line x1={X(0)} y1={chainY} x2={X(100)} y2={chainY} style={{ stroke: 'var(--color-diagram-dash)' }} strokeWidth={2} strokeDasharray="3 4" />
+      {anim && <line x1={X(0)} y1={chainY} x2={X(pos)} y2={chainY} style={{ stroke: 'var(--color-diagram-lit)' }} strokeWidth={2} />}
       {[15, 39, 63, 86].map((p, i) => (i === 0 || i === 3 ? <Truck key={p} x={X(p)} y={chainY - 9} lit={!anim || pos >= p} /> : null))}
       {stations.map((s, i) => {
         const lit = !anim || pos >= s.at - 3;
         return (
           <g key={i}>
-            <circle cx={X(s.at)} cy={chainY} r={14} fill="#0b1322" stroke={lit ? '#67e8f9' : '#26395a'} strokeWidth={1.4} />
+            <circle cx={X(s.at)} cy={chainY} r={14} style={{ fill: 'var(--color-diagram-node)', stroke: lit ? 'var(--color-diagram-lit)' : 'var(--color-diagram-dash)' }} strokeWidth={1.4} />
             <Glyph icon={s.icon} x={X(s.at)} y={chainY} lit={lit} />
-            <text x={Math.max(X(0) + 2, Math.min(X(100) - 2, X(s.at)))} y={chainY + 27} textAnchor={i === 0 ? 'start' : i === 4 ? 'end' : 'middle'} dx={i === 0 ? -12 : i === 4 ? 12 : 0} fontSize={9.5} fill={lit ? '#b8c9de' : '#5d7493'}>{s.label}</text>
+            <text x={Math.max(X(0) + 2, Math.min(X(100) - 2, X(s.at)))} y={chainY + 27} textAnchor={i === 0 ? 'start' : i === 4 ? 'end' : 'middle'} dx={i === 0 ? -12 : i === 4 ? 12 : 0} fontSize={9.5} style={{ fill: lit ? 'var(--color-diagram-label)' : 'var(--color-diagram-dim)' }}>{s.label}</text>
           </g>
         );
       })}
@@ -118,8 +119,8 @@ export default function IncotermDiagram({ term, mode, t, compact }: Props) {
       <Flag x={X(Math.max(def.riskAt, 1.5))} y={riskY + 1} show={flagShown} drop={anim} />
       {hasIns && (
         <g style={{ opacity: insShown ? 1 : 0.15, transition: 'opacity .4s' }}>
-          <text x={L - 8} y={insY + barH - 3} textAnchor="end" fontSize={10.5} fill="#8fa5c0" fontWeight={500}>Bảo hiểm</text>
-          <rect x={X(0)} y={insY} width={X(100) - X(0)} height={barH} rx={barH / 2} fill={barBg} />
+          <text x={L - 8} y={insY + barH - 3} textAnchor="end" fontSize={10.5} style={{ fill: 'var(--color-diagram-axis)' }} fontWeight={500}>Bảo hiểm</text>
+          <rect x={X(0)} y={insY} width={X(100) - X(0)} height={barH} rx={barH / 2} style={{ fill: barBg }} />
           <rect x={X(def.riskAt)} y={insY} width={X(def.costAt) - X(def.riskAt)} height={barH} rx={barH / 2} fill={SELLER_COLOR} opacity={0.85} />
           <text x={(X(def.riskAt) + X(def.costAt)) / 2} y={insY + barH - 3.2} textAnchor="middle" fontSize={8.5} fill="#1c1917" fontWeight={700}>{term === 'CIF' ? 'TỐI THIỂU · ICC C' : 'CAO NHẤT · ICC A'}</text>
         </g>

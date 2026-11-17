@@ -61,7 +61,7 @@ export default function MapThemePanel() {
                     <button
                       key={t.id}
                       onClick={() => setMapThemeBase(t.id)}
-                      className={`rounded-lg border p-1 text-left transition ${on ? 'border-gold ring-1 ring-gold/60' : 'border-line hover:border-[#35507c]'}`}
+                      className={`rounded-lg border p-1 text-left transition ${on ? 'border-gold ring-1 ring-gold/60' : 'border-line hover:border-line-strong'}`}
                       title={t.name}
                     >
                       <Swatch t={t} />

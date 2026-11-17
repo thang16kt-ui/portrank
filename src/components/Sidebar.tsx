@@ -29,7 +29,7 @@ function Seg<T extends string>({ value, options, onChange }: { value: T; options
   return (
     <div className="flex overflow-hidden rounded-lg border border-line">
       {options.map((o) => (
-        <button key={o.v} onClick={() => onChange(o.v)} className={`flex-1 px-2 py-1.5 text-xs font-medium transition ${value === o.v ? 'bg-gold/20 text-amber-200' : 'bg-[#0a1120] text-mute hover:text-fg'}`}>
+        <button key={o.v} onClick={() => onChange(o.v)} className={`flex-1 px-2 py-1.5 text-xs font-medium transition ${value === o.v ? 'bg-gold/20 text-amber-200' : 'bg-well text-mute hover:text-fg'}`}>
           {o.label}
         </button>
       ))}
@@ -184,7 +184,7 @@ export default function Sidebar() {
             ))}
           </div>
           {suggest && (
-            <div className="mt-2 rounded-lg border border-line bg-[#0a1120] p-2 text-[11.5px]">
+            <div className="mt-2 rounded-lg border border-line bg-well p-2 text-[11.5px]">
               <div className="mb-1.5 text-mute">Ai sẽ book vận tải chặng chính?</div>
               <div className="flex gap-1.5">
                 {[true, false].map((iBook) => {

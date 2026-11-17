@@ -165,7 +165,7 @@ function ukEntry(code: string, origin: string, preferFta: boolean, parsed: Retur
     entry: {
       id: `uk-${code}-${origin}`,
       importCountry: 'GB', hs: code, origin: usePref ? origin : '*',
-      rateType: usePref ? 'FTA' : 'MFN', fta: usePref ? `Ưu đãi UK – ${pref!.area ?? pref!.areaId}` : '',
+      rateType: usePref ? 'FTA' : 'MFN', fta: usePref ? `UK – ${pref!.area ?? pref!.areaId}` : '',
       dutyPct: chosen.pct, vatPct: vat?.pct ?? null, otherPct: 0,
       source: `${UK_WEB}/${code}`, effectiveDate: chosen.start, updatedAt: todayIso(), verified: true,
     },
@@ -265,7 +265,7 @@ export function usEntry(row: HtsRow, origin: string, preferFta: boolean): { entr
     entry: {
       id: `us-${code}-${origin}`,
       importCountry: 'US', hs: code, origin: usePref ? origin : '*',
-      rateType: usePref ? 'FTA' : 'MFN', fta: usePref ? 'Ưu đãi FTA (cột Special)' : '',
+      rateType: usePref ? 'FTA' : 'MFN', fta: usePref ? 'Mỹ – cột Special' : '',
       dutyPct: usePref ? sp! : mfn!, vatPct: 0, otherPct: 0,
       source: `https://hts.usitc.gov/search?query=${encodeURIComponent(row.htsno)}`, effectiveDate: '', updatedAt: todayIso(), verified: true,
     },

@@ -104,7 +104,7 @@ export default function IncotermExplainer() {
               <button className="btn !px-2 !py-0.5 !text-[11px]" aria-label="Đóng" onClick={() => set({ explainerOpen: false })}>✕</button>
             </div>
           </div>
-          <div className="rounded-lg border border-line bg-[#0a1120] px-2 pt-2 pb-1">
+          <div className="rounded-lg border border-line bg-well px-2 pt-2 pb-1">
             <IncotermDiagram term={term} mode={dMode} t={reduced ? undefined : time} compact />
             <IncotermLegend />
           </div>

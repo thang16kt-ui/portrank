@@ -44,6 +44,8 @@ dữ liệu cảng 3D (vector tiles OpenStreetMap qua OpenFreeMap). Bản đồ 
 
 ## Bố cục
 
+- Nút **☀️ Nền trắng / 🌙 Nền tối** ở góc trên cùng bên phải đổi màu toàn bộ giao diện (bảng nhập, bảng kết quả, sơ đồ Incoterm, các trang); lựa chọn lưu trên trình duyệt. Màu bản đồ chỉnh riêng bằng nút 🎨.
+
 - **Bảng nhập dọc (380 px)**: `1 · Tuyến` (tôi là, bên tôi, bên đối tác, hãng tàu) · `2 · Hàng hóa` (loại hàng, FCL/LCL, container,
   mã HS, giá trị hàng + Incoterm của giá đó) · `3 · Điều kiện giao hàng` – **chỉ hai hàng nút**: Phương thức (🚢 Đường biển / 🚚 Đường bộ)
   và Điều kiện (11 nút, đường bộ còn 7). Mục ít dùng gập trong **Tùy chọn thêm**. Dưới 900 px thành bottom sheet.

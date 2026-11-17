@@ -35,7 +35,7 @@ export default function AllIncotermsModal() {
                   <button
                     key={t}
                     onClick={() => { setTerm(t, { silent: true }); set({ allTermsOpen: false }); }}
-                    className={`rounded-xl border p-2.5 text-left transition hover:border-sky ${t === term ? 'border-gold bg-gold/5' : 'border-line bg-[#0a1120]'}`}
+                    className={`rounded-xl border p-2.5 text-left transition hover:border-sky ${t === term ? 'border-gold bg-gold/5' : 'border-line bg-well'}`}
                   >
                     <div className="mb-1 flex items-baseline gap-2">
                       <span className="text-base font-bold text-amber-300">{t}</span>

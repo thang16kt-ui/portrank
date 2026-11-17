@@ -17,11 +17,13 @@ export default function Header() {
   const nRates = useDataStore((s) => s.rates.length);
   const nTariffs = useDataStore((s) => s.tariffs.length);
   const nSched = useDataStore((s) => s.schedules.length);
+  const ui = useDataStore((s) => s.uiTheme);
+  const setUi = useDataStore((s) => s.setUiTheme);
   const count: Partial<Record<Page, number>> = { rates: nRates, tariffs: nTariffs, schedules: nSched, saved: nSaved };
   return (
     <header className="flex h-12 shrink-0 items-center gap-3 border-b border-line bg-panel px-3">
       <div className="flex shrink-0 items-center gap-2">
-        <svg width="24" height="24" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#0b1322" stroke="#22d3ee" strokeWidth="1.5" /><path d="M6 20c5-9 15-9 20 0" fill="none" stroke="#fbbf24" strokeWidth="2.2" strokeLinecap="round" /><circle cx="6" cy="20" r="2.4" fill="#38bdf8" /><circle cx="26" cy="20" r="2.4" fill="#fb923c" /></svg>
+        <svg width="24" height="24" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" style={{ fill: 'var(--color-panel2)' }} stroke="#22d3ee" strokeWidth="1.5" /><path d="M6 20c5-9 15-9 20 0" fill="none" stroke="#fbbf24" strokeWidth="2.2" strokeLinecap="round" /><circle cx="6" cy="20" r="2.4" fill="#38bdf8" /><circle cx="26" cy="20" r="2.4" fill="#fb923c" /></svg>
         <span className="text-[15px] font-bold tracking-tight text-fg">Port<span className="text-amber-300">Rank</span></span>
         <span className="hidden text-[11px] text-mute lg:inline">Tối ưu chi phí vận chuyển cửa đến cửa</span>
       </div>
@@ -34,6 +36,14 @@ export default function Header() {
         ))}
       </nav>
       <span className="chip chip-est hidden shrink-0 md:inline-flex" title="Mọi con số giá là ước tính trừ khi bạn đã nhập bảng giá thật">Giá: ước tính</span>
+      <button
+        className="btn shrink-0 !px-2.5"
+        onClick={() => setUi(ui === 'light' ? 'dark' : 'light')}
+        title={ui === 'light' ? 'Chuyển giao diện sang nền tối' : 'Chuyển giao diện sang nền trắng'}
+        aria-label={ui === 'light' ? 'Giao diện tối' : 'Giao diện sáng'}
+      >
+        {ui === 'light' ? '🌙' : '☀️'} <span className="max-[899px]:hidden">{ui === 'light' ? 'Nền tối' : 'Nền trắng'}</span>
+      </button>
     </header>
   );
 }

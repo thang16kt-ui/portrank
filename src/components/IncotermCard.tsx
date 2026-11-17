@@ -20,7 +20,7 @@ export function placeNamesOf(plan: Plan | null, o: PlanOption | null): PlaceName
 }
 
 const who = (p: 'seller' | 'buyer') => (
-  <b style={{ color: p === 'seller' ? SELLER_COLOR : '#8fb0ff' }}>{p === 'seller' ? 'Người bán' : 'Người mua'}</b>
+  <b className={p === 'seller' ? 'text-seller-ink' : 'text-buyer-ink'}>{p === 'seller' ? 'Người bán' : 'Người mua'}</b>
 );
 
 /** Vị trí cờ rủi ro trên dải 10 ô (đơn vị: số ô, 0..10) */
@@ -101,7 +101,7 @@ export default function IncotermCard({ plan, option }: { plan: Plan | null; opti
           <button className="btn !px-2 !py-1 !text-[11px]" onClick={() => set({ allTermsOpen: true })} title="So sánh các điều kiện">⊞ So sánh</button>
         </div>
       </div>
-      <div className="mt-1.5 rounded-lg border border-line bg-[#0a1120] px-2 pt-2 pb-1">
+      <div className="mt-1.5 rounded-lg border border-line bg-well px-2 pt-2 pb-1">
         <IncotermDiagram term={term} mode={curMode} />
         <IncotermLegend />
       </div>

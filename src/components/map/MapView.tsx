@@ -49,7 +49,7 @@ const WORLD_LAYERS = ['land-fill', 'borders', 'coast-glow', 'coast', 'hlA-fill',
 const PORT_VIEW_LAYERS = ['p-landuse', 'p-water', 'p-water-glow', 'p-water-edge', 'p-pier', 'p-pier-line', 'p-road', 'p-rail', 'p-building'];
 
 const tooltipStyle = {
-  background: 'rgba(11,19,34,.96)', color: '#e8f1fb', border: '1px solid #26395a', borderRadius: '8px', padding: '6px 10px',
+  background: 'var(--color-panel)', color: 'var(--color-fg)', border: '1px solid var(--color-line)', borderRadius: '8px', padding: '6px 10px', boxShadow: '0 4px 16px rgba(0,0,0,.18)',
   fontSize: '12px', fontFamily: 'Be Vietnam Pro, sans-serif', lineHeight: '1.45',
 };
 

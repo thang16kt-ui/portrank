@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useDataStore } from './store/useDataStore';
 import AllIncotermsModal from './components/AllIncotermsModal';
 import DetailDrawer from './components/DetailDrawer';
 import Header from './components/Header';
@@ -67,6 +68,10 @@ function Planner() {
 
 export default function App() {
   const page = useAppStore((s) => s.page);
+  const ui = useDataStore((s) => s.uiTheme);
+  useEffect(() => {
+    document.documentElement.dataset.ui = ui;
+  }, [ui]);
   return (
     <div className="flex h-full flex-col">
       <Header />

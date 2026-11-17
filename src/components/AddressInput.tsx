@@ -116,7 +116,7 @@ export default function AddressInput({ label, value, onChange, placeholder, colo
 
 function Row({ p, on, onPick }: { p: Place; on: boolean; onPick: (p: Place) => void }) {
   return (
-    <button onMouseDown={(e) => { e.preventDefault(); onPick(p); }} className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-[13px] ${on ? 'bg-sky/15 text-white' : 'text-fg hover:bg-white/5'}`}>
+    <button onMouseDown={(e) => { e.preventDefault(); onPick(p); }} className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-[13px] ${on ? 'bg-sky/15 text-fg font-medium' : 'text-fg hover:bg-white/5'}`}>
       <span>{flag(p.country)}</span>
       <span className="min-w-0 flex-1 truncate">{p.label}</span>
       {p.source === 'photon' && <span className="text-[10px] text-mute">OSM</span>}
