@@ -7,11 +7,52 @@ export interface WorldData {
   countries: FeatureCollection<Polygon | MultiPolygon, { iso2: string; name: string }>;
   /** Khối đất liền gộp (để vẽ đường bờ biển phát sáng) */
   land: FeatureCollection;
+  /** Đường bờ biển dạng line, đã cắt tại kinh tuyến 180° (không vẽ vệt ngang qua bản đồ) */
+  coastLines: FeatureCollection;
+  /** Viền từng nước dạng line (thuộc tính iso2), đã cắt tại kinh tuyến 180° */
+  countryLines: FeatureCollection;
   centroid: Map<string, LngLat>;
   bbox: Map<string, [number, number, number, number]>;
 }
 
 let cache: Promise<WorldData> | null = null;
+
+/**
+ * Chuyển các vòng đa giác thành đường, cắt ở chỗ hai điểm liền nhau lệch kinh độ > 180°
+ * (đa giác vượt kinh tuyến 180° như Fiji, Nga) – nếu không MapLibre nối thẳng hai điểm thành vệt ngang cả bản đồ.
+ */
+export function ringsToLines(rings: number[][][]): number[][][] {
+  const out: number[][][] = [];
+  for (const ring of rings) {
+    let cur: number[][] = [];
+    for (let i = 0; i < ring.length; i++) {
+      const p = ring[i];
+      if (cur.length && Math.abs(p[0] - cur[cur.length - 1][0]) > 180) {
+        if (cur.length > 1) out.push(cur);
+        cur = [];
+      }
+      cur.push(p);
+    }
+    if (cur.length > 1) out.push(cur);
+  }
+  return out;
+}
+
+/**
+ * Vòng đa giác vượt kinh tuyến 180° (Fiji, Nga…): dời kinh độ âm +360° cho liền mạch để lớp tô (fill)
+ * không tạo dải mỏng chạy ngang cả bản đồ. MapLibre vẫn hiển thị đúng nhờ các bản sao thế giới.
+ */
+export function unwrapRing(ring: number[][]): number[][] {
+  let jump = false;
+  for (let i = 1; i < ring.length; i++) if (Math.abs(ring[i][0] - ring[i - 1][0]) > 180) jump = true;
+  return jump ? ring.map(([x, y]) => [x < 0 ? x + 360 : x, y]) : ring;
+}
+function unwrapGeometry<G extends Polygon | MultiPolygon>(g: G): G {
+  if (g.type === 'Polygon') return { ...g, coordinates: g.coordinates.map(unwrapRing) };
+  return { ...g, coordinates: (g as MultiPolygon).coordinates.map((poly) => poly.map(unwrapRing)) } as G;
+}
+
+const polygonRings = (g: Polygon | MultiPolygon): number[][][] => (g.type === 'Polygon' ? g.coordinates : g.coordinates.flat());
 
 function ringArea(r: number[][]) {
   let a = 0;
@@ -42,7 +83,7 @@ export function loadWorld(): Promise<WorldData> {
     const features: Feature<Polygon | MultiPolygon, { iso2: string; name: string }>[] = [];
     for (const f of fc.features) {
       const iso2 = numericToIso2(f.id as string) ?? '';
-      features.push({ ...f, properties: { iso2, name: f.properties.name } });
+      features.push({ ...f, geometry: f.geometry ? unwrapGeometry(f.geometry) : f.geometry, properties: { iso2, name: f.properties.name } });
       if (!iso2) continue;
       const polys = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates;
       let best = polys[0], bestA = -1;
@@ -57,7 +98,17 @@ export function loadWorld(): Promise<WorldData> {
     }
     const landF = feature(t, t.objects.land) as any;
     const land: FeatureCollection = landF.type === 'FeatureCollection' ? landF : { type: 'FeatureCollection', features: [landF] };
-    return { countries: { type: 'FeatureCollection', features }, land, centroid, bbox };
+    const coastLines: FeatureCollection = {
+      type: 'FeatureCollection',
+      features: land.features
+        .filter((f) => f.geometry && (f.geometry.type === 'Polygon' || f.geometry.type === 'MultiPolygon'))
+        .map((f) => ({ type: 'Feature', properties: {}, geometry: { type: 'MultiLineString', coordinates: ringsToLines(polygonRings(f.geometry as Polygon | MultiPolygon)) } })),
+    };
+    const countryLines: FeatureCollection = {
+      type: 'FeatureCollection',
+      features: features.map((f) => ({ type: 'Feature', properties: f.properties, geometry: { type: 'MultiLineString', coordinates: ringsToLines(polygonRings(f.geometry)) } })),
+    };
+    return { countries: { type: 'FeatureCollection', features }, land, coastLines, countryLines, centroid, bbox };
   })();
   return cache;
 }

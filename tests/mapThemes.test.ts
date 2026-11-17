@@ -36,3 +36,17 @@ describe('chủ đề màu bản đồ', () => {
     expect(luminance('#000000')).toBe(0);
   });
 });
+
+import { ringsToLines } from '../src/lib/world';
+describe('đường bờ biển qua kinh tuyến 180°', () => {
+  it('cắt đoạn nối hai điểm lệch kinh độ > 180° (không vẽ vệt ngang bản đồ)', () => {
+    const fiji = [[[177, -17], [180, -17.5], [-180, -17.5], [-179, -16], [177, -17]]];
+    const lines = ringsToLines(fiji);
+    expect(lines).toEqual([[[177, -17], [180, -17.5]], [[-180, -17.5], [-179, -16]], [[177, -17]]].filter((l) => l.length > 1));
+    for (const l of lines) for (let i = 1; i < l.length; i++) expect(Math.abs(l[i][0] - l[i - 1][0])).toBeLessThanOrEqual(180);
+  });
+  it('vòng bình thường giữ nguyên', () => {
+    const r = [[[0, 0], [1, 0], [1, 1], [0, 0]]];
+    expect(ringsToLines(r)).toEqual(r);
+  });
+});

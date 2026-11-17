@@ -37,20 +37,21 @@ function addBaseLayers(map: maplibregl.Map) {
   const empty: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] };
   map.addSource('world', { type: 'geojson', data: empty });
   map.addSource('landmass', { type: 'geojson', data: empty });
+  map.addSource('country-lines', { type: 'geojson', data: empty });
   map.addSource('ports', {
     type: 'geojson',
     data: { type: 'FeatureCollection', features: PORTS.map((p) => ({ type: 'Feature', properties: { code: p.code, name: p.name }, geometry: { type: 'Point', coordinates: p.coord } })) },
   });
   map.addLayer({ id: 'land-fill', type: 'fill', source: 'world', paint: { 'fill-color': '#0c1a2c' } });
-  map.addLayer({ id: 'borders', type: 'line', source: 'world', paint: { 'line-color': '#1f3a5c', 'line-width': 0.5, 'line-opacity': 0.7 } });
+  map.addLayer({ id: 'borders', type: 'line', source: 'country-lines', paint: { 'line-color': '#1f3a5c', 'line-width': 0.5, 'line-opacity': 0.7 } });
   // Viền bờ biển phát sáng: 1 lớp dày mờ + 1 lớp mảnh sáng
   map.addLayer({ id: 'coast-glow', type: 'line', source: 'landmass', paint: { 'line-color': '#22d3ee', 'line-width': 5, 'line-blur': 5, 'line-opacity': 0.4 } });
   map.addLayer({ id: 'coast', type: 'line', source: 'landmass', paint: { 'line-color': '#7fe3f5', 'line-width': 0.7, 'line-opacity': 0.9 } });
   for (const [k, c] of [['hlA', '#38bdf8'], ['hlB', '#fb923c']] as const) {
     const filter: maplibregl.FilterSpecification = ['==', ['get', 'iso2'], '__'];
     map.addLayer({ id: `${k}-fill`, type: 'fill', source: 'world', filter, paint: { 'fill-color': c, 'fill-opacity': 0.1 } });
-    map.addLayer({ id: `${k}-glow`, type: 'line', source: 'world', filter, paint: { 'line-color': c, 'line-width': 7, 'line-blur': 6, 'line-opacity': 0.75 } });
-    map.addLayer({ id: `${k}-line`, type: 'line', source: 'world', filter, paint: { 'line-color': c, 'line-width': 1.4 } });
+    map.addLayer({ id: `${k}-glow`, type: 'line', source: 'country-lines', filter, paint: { 'line-color': c, 'line-width': 7, 'line-blur': 6, 'line-opacity': 0.75 } });
+    map.addLayer({ id: `${k}-line`, type: 'line', source: 'country-lines', filter, paint: { 'line-color': c, 'line-width': 1.4 } });
   }
   map.addLayer({ id: 'ports-glow', type: 'circle', source: 'ports', paint: { 'circle-radius': 5, 'circle-color': '#22d3ee', 'circle-blur': 1, 'circle-opacity': 0.5 } });
   map.addLayer({ id: 'ports-dot', type: 'circle', source: 'ports', paint: { 'circle-radius': 2, 'circle-color': '#a5f3fc' } });
@@ -286,7 +287,8 @@ export default function MapView() {
       loadWorld()
         .then((w) => {
           (map.getSource('world') as maplibregl.GeoJSONSource).setData(w.countries as GeoJSON.FeatureCollection);
-          (map.getSource('landmass') as maplibregl.GeoJSONSource).setData(w.land as GeoJSON.FeatureCollection);
+          (map.getSource('landmass') as maplibregl.GeoJSONSource).setData(w.coastLines as GeoJSON.FeatureCollection);
+          (map.getSource('country-lines') as maplibregl.GeoJSONSource).setData(w.countryLines as GeoJSON.FeatureCollection);
           setWorldReady(true);
         })
         .catch(() => setMapError('Không nạp được dữ liệu bản đồ thế giới.'));
