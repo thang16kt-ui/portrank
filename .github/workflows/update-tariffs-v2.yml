@@ -1,0 +1,47 @@
+name: Cập nhật biểu thuế v2 (theo lịch)
+
+# Lịch (schedule) chỉ chạy từ nhánh mặc định, nên file này nằm trên main nhưng làm việc với nhánh v2:
+# lấy code v2, chạy `npm run tariffs:update` (US HTS, UK Trade Tariff, WITS ~170 nước, HS 2022, VAT/GST),
+# chạy test rồi mở pull request vào v2 khi dữ liệu thay đổi.
+# Cần bật: Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests".
+on:
+  schedule:
+    - cron: '41 4 1,15 * *' # 04:41 UTC ngày 1 và 15 hằng tháng
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Tải biểu thuế
+        # Một nguồn lỗi → script giữ dữ liệu cũ của nguồn đó, vẫn mở PR cho phần còn lại
+        continue-on-error: true
+        run: npm run --silent tariffs:update | tee tariff-report.txt
+      - run: npm test
+      - name: Mở pull request vào v2
+        uses: peter-evans/create-pull-request@v7
+        with:
+          base: v2
+          branch: auto/tariff-update-v2
+          delete-branch: true
+          add-paths: |
+            src/data/tariffSnapshot.json
+            src/data/vatRates.json
+            public/data/hs6.json
+            public/data/wits/*.json
+          commit-message: 'Cập nhật biểu thuế v2 tự động'
+          title: 'Cập nhật biểu thuế v2 (tự động)'
+          body-path: tariff-report.txt
