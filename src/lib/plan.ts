@@ -5,6 +5,7 @@ import type { BorderGate } from '../data/borderGates';
 import { regionOf } from '../data/countries';
 import { roadAvailability } from '../data/landBlocks';
 import type { RateHit, RateProvider } from '../providers/RateProvider';
+import { GoogleRoadProvider, type DrivingRoute, type RoadDirections, type RoadProvider } from '../providers/RoadProvider';
 import type { TariffEntry, TariffProvider, TariffQuery, TariffResolution } from '../providers/TariffProvider';
 import { autoSourceOf, type OfficialTariffResult, type OfficialTariffSource } from './tariffSources';
 import type { Incoterm, LngLat, Place, Port, Role, RouteResult, ShipmentInput, TransportMode } from '../types';
@@ -15,7 +16,6 @@ import { sellerShare } from './incoterm';
 import { contCount, inlandCost, inlandDays, lclWm, roadKm, truckingCost, warehouseHandling } from './inland';
 import { estimateQuote } from './pricing';
 import { coefficientOfVariation, pairFrequency, routeRisk, simulatePriceHistory, type PricePoint } from './ranking';
-import { roadRoutes } from './road';
 import { findRoute } from './routing';
 import { transitDays } from './transit';
 
@@ -41,6 +41,8 @@ export interface PlanInput {
   origin: string;
   hasCo: boolean;
   readyDate: string;
+  /** RFC3339 departure time for traffic prediction; empty = depart now. */
+  roadDepartureTime?: string;
   radiusKm: number;
   avoidRedSea: boolean;
   avoidPanama: boolean;
@@ -85,6 +87,8 @@ export interface PlanOption {
   roadPath?: LngLat[];
   roadKm?: number;
   roadStraight?: boolean;
+  drivingRoute?: DrivingRoute;
+  roadDirections?: Omit<RoadDirections, 'routes'>;
   originInlandKm: number | null;
   destInlandKm: number | null;
   items: CostItem[];
@@ -127,6 +131,7 @@ export interface Plan {
 }
 
 export interface PlanDeps {
+  road?: RoadProvider;
   rates: RateProvider;
   tariffs: TariffProvider;
   /** Nguồn thuế chính thức (UK Trade Tariff, US HTS) – dùng khi biểu thuế của bạn chưa có mức thuế phù hợp */
@@ -331,44 +336,44 @@ async function seaOptions(input: PlanInput, seller: Place, buyer: Place, deps: P
   return { options, originPorts: o.ports, destPorts: d.ports, domestic };
 }
 
-/** Phương án đường bộ: qua các cửa khẩu giữa hai nước */
-function roadOptions(input: PlanInput, seller: Place, buyer: Place, tariff: DutySetup, notes: string[]) {
+/** Road geometry, distance and driving time all come from the same Routes API result. */
+async function roadOptions(input: PlanInput, seller: Place, buyer: Place, deps: PlanDeps, tariff: DutySetup, notes: string[]) {
   const P = PRICING, sh = input.shipment, R = P.road;
   const domestic = seller.country === buyer.country;
-  const routes = roadRoutes(seller.coord, seller.country, buyer.coord, buyer.country);
-  if (seller.kind === 'country' || buyer.kind === 'country') notes.push('Đường bộ: đầu chỉ nhập quốc gia được tính từ tâm nước đó – nhập địa chỉ để có quãng đường chính xác.');
-  if (routes[0].straight) notes.push('Chưa có dữ liệu cửa khẩu giữa hai nước này – vẽ một tuyến thẳng (bổ sung trong src/data/borderGates.ts).');
+  const directions = await (deps.road ?? GoogleRoadProvider).lookup({ origin: seller, destination: buyer, departureTime: input.roadDepartureTime });
+  if (!directions.routes.length) throw new Error('Không tìm được tuyến đường ô tô cho hai địa điểm này.');
+  const { routes, ...roadDirections } = directions;
+  notes.push('Quãng đường và thời gian lái xe: Google Maps, có xét giao thông tại giờ khởi hành. Kết quả có thể khác ứng dụng Google Maps do giờ đi, điểm ghim và lựa chọn tuyến.');
+  notes.push('Đây là tuyến ô tô (DRIVE), chưa xác nhận hạn chế chiều cao, tải trọng hay đường cấm xe tải/container.');
+  notes.push('Thời gian lái xe chưa gồm nghỉ tài xế, bốc dỡ và làm thủ tục. Giá vận chuyển vẫn là ước tính theo đơn giá/km.');
+  if (!domestic) notes.push('Tuyến xuyên biên giới: cửa khẩu, quyền quá cảnh, giờ mở cửa và thời gian chờ cần xác minh trước khi vận chuyển.');
   const perKm = (R.perKm40[regionOf(seller.country)] + R.perKm40[regionOf(buyer.country)]) / 2;
   const cargoF = { dry: 1, reefer: 1.25, dg: 1.3, oog: 1.6 }[sh.cargo];
   const n = contCount(sh);
   const gateFee = sh.mode === 'FCL' ? R.gateFeePerCont * n : Math.max(40, (R.gateFeePerCont * lclWm(sh)) / P.lcl.cbmPer40);
   const options: PlanOption[] = routes.map((rt) => {
+    const km = rt.distanceMeters / 1000;
     const items = blankItems();
-    const yardCost = truckingCost(R.yardKm, P.inland.perKm40[regionOf(seller.country)], sh, 60);
-    const yardCostD = truckingCost(R.yardKm, P.inland.perKm40[regionOf(buyer.country)], sh, 60);
-    if (seller.kind === 'address') {
-      setItem(items, 1, [{ label: 'Bốc hàng lên xe tại kho', amount: warehouseHandling(sh) }]);
-      setItem(items, 2, [{ label: 'Xe gom hàng kho → bãi giao hàng', amount: yardCost, note: `giả định ≈ ${R.yardKm} km` }]);
-    } else { setNull(items, 1); setNull(items, 2); }
+    setItem(items, 1, [{ label: 'Bốc hàng lên xe tại kho', amount: warehouseHandling(sh) }]);
+    setItem(items, 2, [], { note: 'Chặng kho đi đã nằm trong tuyến đường bộ cửa đến cửa ở khoản 5.' });
     setItem(items, 3, domestic ? [] : [{ label: 'Phí thông quan xuất khẩu', amount: P.customs.exportPerShipment }], domestic ? { note: 'Nội địa – không thông quan' } : {});
     setItem(items, 4, domestic ? [] : [{ label: 'Phí cửa khẩu phía xuất (bến bãi, soi chiếu…)', amount: gateFee }]);
-    setItem(items, 5, [{ label: `Cước xe chặng chính`, amount: truckingCost(rt.km, perKm * cargoF, sh), note: `≈ ${r0(rt.km).toLocaleString('vi-VN')} km × ${(perKm * cargoF).toFixed(2)} USD/km` }]);
+    setItem(items, 5, [{ label: 'Cước xe cửa đến cửa', amount: truckingCost(km, perKm * cargoF, sh), note: `${r0(km).toLocaleString('vi-VN')} km (Google Maps) × ${(perKm * cargoF).toFixed(2)} USD/km; đơn giá ước tính` }]);
     setItem(items, 7, domestic ? [] : [{ label: 'Phí cửa khẩu phía nhập', amount: gateFee }]);
-    if (buyer.kind === 'address') {
-      setItem(items, 9, [{ label: 'Xe giao hàng bãi đến → kho', amount: yardCostD, note: `giả định ≈ ${R.yardKm} km` }]);
-      setItem(items, 10, [{ label: 'Dỡ hàng tại kho', amount: warehouseHandling(sh) }]);
-    } else { setNull(items, 9); setNull(items, 10); }
+    setItem(items, 9, [], { note: 'Chặng đến kho đã nằm trong tuyến đường bộ cửa đến cửa ở khoản 5.' });
+    setItem(items, 10, [{ label: 'Dỡ hàng tại kho', amount: warehouseHandling(sh) }]);
     const fin = finalize(items, input, buyer.country, tariff, domestic);
-    const main = rt.km / R.kmPerDay;
-    const border = domestic ? 0 : R.borderDays * Math.max(1, rt.gates.length);
-    const days: PlanDays = { inlandO: 0, wait: 0, main, handling: border, inlandD: 0, total: main + border };
-    const key = `road:${rt.gates.map((g) => g.id).join('+') || 'direct'}`;
+    const main = rt.durationSeconds / 86400;
+    const days: PlanDays = { inlandO: 0, wait: 0, main, handling: 0, inlandD: 0, total: main };
+    const key = `road:${rt.id}`;
     const history = simulatePriceHistory(key, `${seller.country}${buyer.country}`, items[4].amount ?? 0);
-    const title = rt.gates.length ? `Qua ${rt.gates.map((g) => g.name.split(' (')[0]).join(' → ')}` : rt.straight ? 'Tuyến thẳng (chưa có dữ liệu cửa khẩu)' : 'Đường bộ nội địa';
+    const title = rt.description || (domestic ? 'Đường bộ nội địa · Google Maps' : 'Đường bộ · Google Maps');
     return {
-      key, mode: 'road' as const, title, gates: rt.gates, roadPath: rt.path, roadKm: rt.km, roadStraight: rt.straight,
-      originInlandKm: seller.kind === 'address' ? R.yardKm : null, destInlandKm: buyer.kind === 'address' ? R.yardKm : null,
-      ...fin, days, cv: coefficientOfVariation(history.map((h) => h.price)) * 0.5, frequency: 7, risk: Math.min(1, 0.1 + 0.08 * rt.gates.length + (rt.straight ? 0.2 : 0)), history, warnings: [],
+      key, mode: 'road' as const, title, gates: [], roadKm: km, roadStraight: false,
+      drivingRoute: rt, roadDirections,
+      // Google geometry must not leak into the MapLibre sea-map or its animation layers.
+      originInlandKm: 0, destInlandKm: 0,
+      ...fin, days, cv: coefficientOfVariation(history.map((h) => h.price)) * 0.5, frequency: 0, risk: 0, history, warnings: rt.warnings,
     };
   });
   return { options, originPorts: [] as Port[], destPorts: [] as Port[], domestic };
@@ -378,11 +383,15 @@ function roadOptions(input: PlanInput, seller: Place, buyer: Place, tariff: Duty
 export async function buildPlan(input: PlanInput, deps: PlanDeps): Promise<Plan> {
   const seller = sellerOf(input), buyer = buyerOf(input);
   const notes: string[] = [];
-  let mode = input.mode;
-  if (mode === 'road' && !roadAvailability(seller.country, buyer.country).ok) mode = 'sea';
+  const mode = input.mode;
+  if (mode === 'road') {
+    if (seller.kind !== 'address' || buyer.kind !== 'address') throw new Error('Đường bộ cần thành phố hoặc địa chỉ ở cả hai đầu, thay cho tên quốc gia.');
+    const available = roadAvailability(seller.country, buyer.country);
+    if (!available.ok) throw new Error(`Không có kết nối đường bộ: ${available.reason}. Hãy chọn phương thức khác.`);
+  }
   const { setup, source: tariffSource, date } = await lookupTariff({ ...input, mode }, seller, buyer, deps);
   if (!input.customsDate && setup.entry) notes.push(`Ngày tính thuế: giả định = ngày hàng sẵn sàng (${date}). Nhập "Ngày khai hải quan dự kiến" nếu khác.`);
-  const res = mode === 'sea' ? await seaOptions({ ...input, mode }, seller, buyer, deps, setup, notes) : roadOptions({ ...input, mode }, seller, buyer, setup, notes);
+  const res = mode === 'sea' ? await seaOptions({ ...input, mode }, seller, buyer, deps, setup, notes) : await roadOptions({ ...input, mode }, seller, buyer, deps, setup, notes);
   const scope = scopeTitle(seller, buyer, mode);
   return { input: { ...input, mode }, seller, buyer, notes, scopeTitle: scope.title, scopeShort: scope.short, tariffSource, customsDate: date, ...res };
 }

@@ -28,6 +28,8 @@ export function landBlockOf(iso2: string) {
 /** Kiểm tra hai nước có nối được bằng đường bộ không, kèm lý do nếu không */
 export function roadAvailability(a: string | undefined, b: string | undefined): { ok: boolean; reason?: string } {
   if (!a || !b) return { ok: false, reason: 'Chọn điểm của hai bên trước' };
+  // Island countries and South Korea still have domestic roads. The routing API checks actual connectivity.
+  if (a === b) return { ok: true };
   const ba = landBlockOf(a), bb = landBlockOf(b);
   if (!ba || !bb) return { ok: false, reason: 'Một trong hai nước là đảo quốc / không có đường bộ thông ra ngoài' };
   if (ba.id !== bb.id) return { ok: false, reason: `Hai điểm khác khối lục địa (${ba.name} ↔ ${bb.name})` };

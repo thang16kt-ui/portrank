@@ -88,6 +88,13 @@ export default function Sidebar() {
         </div>
         <AddressInput label="Bên tôi" value={f.mine} onChange={(mine) => setForm({ mine })} color={f.role === 'seller' ? SELLER_C : BUYER_C} placeholder="VD: Bình Dương, Việt Nam – hoặc Việt Nam" />
         <AddressInput label="Bên đối tác" value={f.partner} onChange={(partner) => setForm({ partner })} color={f.role === 'seller' ? BUYER_C : SELLER_C} placeholder="VD: Munich, Đức – hoặc Đức" />
+        {f.mode === 'road' && (
+          <div>
+            <label className="lbl" htmlFor="road-departure">Giờ khởi hành (để trống = đi ngay)</label>
+            <input id="road-departure" className="field" type="datetime-local" value={f.roadDepartureTime ?? ''} onChange={(e) => setForm({ roadDepartureTime: e.target.value })} />
+            <p className="mt-1 text-[10.5px] text-mute">Theo múi giờ thiết bị. Google Maps tính km và giờ lái xe có xét giao thông; cần chọn thành phố/địa chỉ ở hai đầu. Tuyến ô tô chưa xét hạn chế xe tải/container.</p>
+          </div>
+        )}
         <div className={f.mode === 'sea' ? '' : 'opacity-40'}>
           <label className="lbl">Hãng tàu {f.mode !== 'sea' && '(chỉ với Đường biển)'}</label>
           <button disabled={f.mode !== 'sea'} onClick={() => setCarrierOpen(!carrierOpen)} className="field flex items-center justify-between text-left">

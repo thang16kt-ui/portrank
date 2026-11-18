@@ -40,6 +40,8 @@ export interface FormState {
   goodsValue: number;
   valueTerm: Incoterm;
   readyDate: string;
+  /** Local datetime input; converted to RFC3339 before requesting road directions. Empty = now. */
+  roadDepartureTime: string;
   priority: Priority;
   radiusKm: number;
   avoidRedSea: boolean;
@@ -59,7 +61,8 @@ export interface SavedPlan {
   summary: string;
   youPay: number;
   total: number;
-  days: number;
+  /** Google driving times are fetched again on reopening, not persisted as cached directions. */
+  days: number | null;
 }
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -104,6 +107,7 @@ export const DEFAULT_FORM: FormState = {
   goodsValue: 0,
   valueTerm: 'FOB',
   readyDate: today(),
+  roadDepartureTime: '',
   priority: 'balanced',
   radiusKm: 400,
   avoidRedSea: false,
