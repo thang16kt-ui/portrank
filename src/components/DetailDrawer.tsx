@@ -330,7 +330,7 @@ function PriceHistory({ r }: { r: RankedOption }) {
   return (
     <div>
       <p className="mb-2 text-[11.5px] text-mute">
-        <span className="chip chip-warn">Dữ liệu mô phỏng</span> Chuỗi {o.mode === 'sea' ? 'cước biển' : 'cước xe'} 12 tháng của <b className="text-fg">{o.title}</b> (seed cố định theo cặp cảng) – dùng để chấm điểm “ổn định giá”, không phải giá lịch sử thật.
+        <span className="chip chip-warn">Dữ liệu mô phỏng</span> Chuỗi {o.mode === 'sea' ? 'cước biển' : 'cước xe'} 12 tháng của <b className="text-fg">{o.title}</b> (seed cố định theo cặp cảng) – không phải giá lịch sử thật. {r.excluded.includes('stability') ? <b className="text-fg">Không được dùng để xếp hạng</b> : <b className="text-amber-200">Đang dùng để xếp hạng (chế độ demo)</b>} – bật/tắt ở “Tùy chọn thêm”.
       </p>
       <div className="h-56">
         <ResponsiveContainer width="100%" height="100%">
@@ -343,7 +343,7 @@ function PriceHistory({ r }: { r: RankedOption }) {
           </LineChart>
         </ResponsiveContainer>
       </div>
-      <p className="mt-1 text-[11.5px] text-mute">Hệ số biến thiên CV = <b className="text-fg">{(o.cv * 100).toFixed(1)}%</b> · điểm ổn định {r.scores.stability.toFixed(0)}/100 · tần suất ≈ {o.frequency} chuyến/tuần (mô phỏng) · điểm rủi ro {(o.risk * 100).toFixed(0)}/100.</p>
+      <p className="mt-1 text-[11.5px] text-mute">Hệ số biến thiên CV = <b className="text-fg">{(o.cv * 100).toFixed(1)}%</b> · điểm ổn định {r.excluded.includes('stability') ? 'không tính' : `${r.scores.stability.toFixed(0)}/100`} · tần suất ≈ {o.frequency} chuyến/tuần (mô phỏng) · điểm rủi ro {(o.risk * 100).toFixed(0)}/100.</p>
     </div>
   );
 }
@@ -409,8 +409,8 @@ function ApiScheduleBox({ plan, r }: { plan: Plan; r: RankedOption }) {
         <b className="text-cyan-100">🔌 API hãng tàu (chuẩn DCSA)</b>
         {wanted.length > 0 && <button className="btn !py-0.5" disabled={state?.status === 'loading'} onClick={load}>{state?.status === 'loading' ? 'Đang lấy…' : '↻ Lấy lịch'}</button>}
       </div>
-      {!cfg ? (
-        <p className="mt-1 text-mute">Trang đang chạy dạng tĩnh, không có máy chủ PortRank nên chưa gọi được API hãng tàu. Chạy <code>npm start</code> với key hãng tàu (xem README) để bật.</p>
+      {!cfg || !cfg.server ? (
+        <p className="mt-1 text-mute">{cfg?.note ? `${cfg.note} ` : ''}Trang đang chạy dạng tĩnh, không có máy chủ PortRank nên chưa gọi được API hãng tàu. Chạy <code>npm start</code> với key hãng tàu (xem README) để bật.</p>
       ) : !configured.length ? (
         <p className="mt-1 text-mute">Máy chủ chưa cấu hình key hãng nào (biến <code>DCSA_CARRIERS</code>, <code>DCSA_&lt;HÃNG&gt;_URL</code>, <code>DCSA_&lt;HÃNG&gt;_HEADERS</code>).</p>
       ) : !wanted.length ? (

@@ -91,17 +91,24 @@ export function dcsaToSchedule(p: DcsaPointToPoint, carrierId: string, index = 0
 }
 
 export interface ApiConfig {
+  /** false = trang tĩnh (file public/api/config.json), không có máy chủ PortRank */
   server: boolean;
   hts: boolean;
   dcsa: { id: string; configured: boolean }[];
+  mode?: 'static' | 'server';
+  vnTariff?: boolean;
+  note?: string;
 }
 
 let configPromise: Promise<ApiConfig | null> | null = null;
 /** Hỏi máy chủ PortRank tính năng nào đang bật. Trang tĩnh (không có máy chủ) → null. */
 export function fetchApiConfig(): Promise<ApiConfig | null> {
-  configPromise ??= fetch('/api/config', { headers: { Accept: 'application/json' } })
-    .then(async (r) => (r.ok && (r.headers.get('content-type') ?? '').includes('json') ? ((await r.json()) as ApiConfig) : null))
-    .catch(() => null);
+  const get = (url: string) =>
+    fetch(url, { headers: { Accept: 'application/json' } })
+      .then(async (r) => (r.ok && (r.headers.get('content-type') ?? '').includes('json') ? ((await r.json()) as ApiConfig) : null))
+      .catch(() => null);
+  // máy chủ Node: /api/config; trang tĩnh: file mô tả khả năng /api/config.json (nêu rõ "chưa cấu hình", không 404)
+  configPromise ??= get('/api/config').then((c) => c ?? get(`${import.meta.env.BASE_URL ?? '/'}api/config.json`));
   return configPromise;
 }
 

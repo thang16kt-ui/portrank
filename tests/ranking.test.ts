@@ -43,7 +43,22 @@ describe('rankOptions', async () => {
     const r = rankOptions(plan.options, 'FCA', 'seller', WEIGHT_PRESETS.balanced);
     expect(r.map((x) => x.rank)).toEqual(r.map((_, i) => i + 1));
     for (let i = 1; i < r.length; i++) expect(r[i - 1].score).toBeGreaterThanOrEqual(r[i].score);
-    expect(r.flatMap((c) => c.tags)).toEqual(expect.arrayContaining(['Rẻ nhất', 'Nhanh nhất', 'Ổn định nhất']));
+    expect(r.flatMap((c) => c.tags)).toEqual(expect.arrayContaining(['Rẻ nhất', 'Nhanh nhất']));
+    // PR-22: dữ liệu mô phỏng không được chấm điểm / gắn nhãn khi chưa bật chế độ demo
+    expect(r.flatMap((c) => c.tags)).not.toContain('Ổn định nhất (mô phỏng)');
+    expect(r[0].excluded).toEqual(['stability', 'frequency']);
+    const demo = rankOptions(plan.options, 'FCA', 'seller', WEIGHT_PRESETS.balanced, 'mine', {}, { simulated: true });
+    expect(demo.flatMap((c) => c.tags)).toContain('Ổn định nhất (mô phỏng)');
+    expect(demo[0].excluded).toEqual([]);
+  });
+  it('PR-22: điểm không phụ thuộc lịch sử mô phỏng khi tắt demo', () => {
+    const base = rankOptions(plan.options, 'FCA', 'seller', WEIGHT_PRESETS.balanced).map((x) => [x.option.key, x.score]);
+    const changed = plan.options.map((o) => ({ ...o, cv: o.cv * 7 + 0.3, frequency: o.frequency + 9 }));
+    expect(rankOptions(changed, 'FCA', 'seller', WEIGHT_PRESETS.balanced).map((x) => [x.option.key, x.score])).toEqual(base);
+  });
+  it('PR-08: phương án thiếu thuế không thắng nhờ tổng thấp giả', () => {
+    const opts = plan.options.slice(0, 2).map((o, i) => ({ ...o, completeness: (i === 0 ? 'unavailable' : 'complete') as typeof o.completeness, total: i === 0 ? 1 : o.total }));
+    expect(rankOptions(opts, 'FCA', 'seller', WEIGHT_PRESETS.balanced, 'total')[0].option.completeness).toBe('complete');
   });
   it('chi phí xếp hạng = phần người dùng trả theo Incoterm; nút "Tổng" dùng tổng 10 khoản', () => {
     const cpt = rankOptions(plan.options, 'CPT', 'seller', WEIGHT_PRESETS.balanced);
