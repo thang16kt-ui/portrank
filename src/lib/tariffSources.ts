@@ -218,7 +218,7 @@ export function ukEntry(code: string, origin: string, preferFta: boolean, parsed
   // thuế phức hợp ("6.5% + 33 GBP / 100 kg"): tính phần %, hiển thị phần tuyệt đối
   const split = chosen.pct == null ? splitDuty(chosen.text) : { pct: chosen.pct, specific: null };
   if (split.pct == null) return { entry: null, notes: [`Thuế tuyệt đối: ${chosen.text} – cần tính theo khối lượng / số lượng.`] };
-  if (split.specific) notes.push(`Thuế phức hợp ${chosen.text}: đã tính phần ${split.pct}%, phần ${split.specific} chưa tính (cần khối lượng / số lượng).`);
+  if (split.specific) notes.push(`Thuế phức hợp ${chosen.text}: phần ${split.pct}% tính trên trị giá, phần ${split.specific} tính theo số lượng / khối lượng nhập ở bảng Hàng hoá.`);
   if (pref && !usePref) notes.push(`Có ưu đãi cho xuất xứ này (${pref.area ?? pref.areaId}: ${pref.text}) nếu có C/O hợp lệ – đang tính thuế MFN vì chưa tích “Có C/O”.`);
   if (vat && vat.pct == null) notes.push(`VAT dạng đặc biệt: ${vat.text}`);
   if (parsed.otherVat.length) notes.push(`Các mức VAT khác theo điều kiện: ${parsed.otherVat.join(', ')} – đang dùng mức chuẩn.`);
@@ -333,7 +333,7 @@ export function usEntry(row: HtsRow, origin: string, preferFta: boolean): { entr
   const usePref = sp != null && (mfn == null || sp <= mfn);
   if (!usePref && mfn == null) return { entry: null, notes: [`Thuế tuyệt đối: “${row.general}” – cần tính theo khối lượng / số lượng.`, ...notes] };
   const specific = usePref ? null : general.specific;
-  if (specific) notes.unshift(`Thuế phức hợp “${row.general}”: đã tính phần ${mfn}%, phần ${specific} chưa tính (cần số lượng / khối lượng).`);
+  if (specific) notes.unshift(`Thuế phức hợp “${row.general}”: phần ${mfn}% tính trên trị giá, phần ${specific} tính theo số lượng / khối lượng nhập ở bảng Hàng hoá.`);
   const code = digits(row.htsno);
   // Hàng có xuất xứ USMCA (Canada, Mexico) được miễn MPF
   const mpfExempt = usePref && (origin === 'CA' || origin === 'MX');

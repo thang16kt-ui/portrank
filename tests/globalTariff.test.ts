@@ -253,7 +253,7 @@ describe('thuế phức hợp Mỹ', () => {
     const row: HtsRow = { htsno: '6404.11.79', description: 'Other', indent: '6', general: '90¢/pr. + 37.5%', special: 'Free (AU,BH,CL,CO,IL,JO,KR,MA,OM,P,PA,PE,S,SG)', other: '' };
     const { entry, notes } = usEntry(row, 'VN', false);
     expect(entry).toMatchObject({ dutyPct: 37.5, specificDuty: '90¢/pr.' });
-    expect(notes[0]).toContain('phần 90¢/pr. chưa tính');
+    expect(notes[0]).toContain('phần 90¢/pr. tính theo số lượng');
     expect(usEntry(row, 'KR', true).entry).toMatchObject({ dutyPct: 0, rateType: 'FTA' });
     expect(usEntry(row, 'KR', true).entry?.specificDuty).toBeUndefined();
     void UsHtsSource;
