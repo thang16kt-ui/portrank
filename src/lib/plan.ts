@@ -28,6 +28,8 @@ export interface PlanInput {
   goodsValue: number;
   valueTerm: Incoterm;
   hs: string;
+  /** Số lượng để tính thuế tuyệt đối (thiếu → dùng khối lượng hàng cho kg) */
+  dutyQty?: { units: number; netKg: number; liters: number };
   /** Xuất xứ (ISO2); rỗng = nước người bán */
   origin: string;
   hasCo: boolean;
@@ -150,10 +152,11 @@ export function finalize(items: CostItem[], input: PlanInput, importCountry: str
   const clearance = domestic ? 0 : P.customs.importPerShipment;
   let exw = input.goodsValue, fob = exw, cif = exw;
   let duty = computeDuty(importCountry, 0, 0, null, false);
+  const qty = { units: input.dutyQty?.units ?? 0, netKg: input.dutyQty?.netKg || input.shipment.weightKg || 0, liters: input.dutyQty?.liters ?? 0 };
   for (let k = 0; k < 8; k++) {
     const ins = hasValue ? P.insurance.rate * P.insurance.uplift * cif : 0;
     get(6).amount = ins;
-    duty = domestic ? { ...computeDuty(importCountry, 0, 0, null, false), status: 'domestic' } : computeDuty(importCountry, cif, fob, tariff, hasValue && hasHs);
+    duty = domestic ? { ...computeDuty(importCountry, 0, 0, null, false), status: 'domestic' } : computeDuty(importCountry, cif, fob, tariff, hasValue && hasHs, qty);
     get(8).amount = clearance + duty.total;
     const sellerPart = items.reduce((s, it) => s + (it.amount ?? 0) * sellerShare(input.valueTerm, it.n), 0);
     exw = Math.max(0, input.goodsValue - sellerPart);
@@ -168,6 +171,7 @@ export function finalize(items: CostItem[], input: PlanInput, importCountry: str
   if (duty.status === 'ok') {
     i8.lines.push({ label: `Thuế nhập khẩu ${duty.entry!.dutyPct}% × trị giá ${duty.basis.basis}`, amount: r0(duty.duty) });
     if (duty.other) i8.lines.push({ label: `Thuế khác ${duty.entry!.otherPct}%`, amount: r0(duty.other) });
+    if (duty.specific) i8.lines.push({ label: `Phần thuế tuyệt đối (${duty.entry!.specificDuty})`, amount: r0(duty.specific) });
     if (duty.additional) i8.lines.push({ label: `${duty.entry!.additionalLabel || 'Thuế bổ sung'} ${duty.entry!.additionalPct}%`, amount: r0(duty.additional) });
     if (duty.fees) i8.lines.push({ label: `${duty.entry!.feeLabel || 'Phí theo trị giá'} ${duty.entry!.feePct}%`, amount: r0(duty.fees) });
     if (!duty.vatMissing) i8.lines.push({ label: `VAT/GST ${duty.entry!.vatPct}%`, amount: r0(duty.vat) });

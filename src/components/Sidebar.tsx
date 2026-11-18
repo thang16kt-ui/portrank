@@ -161,6 +161,14 @@ export default function Sidebar() {
             </select>
           </div>
         </div>
+        <div>
+          <label className="lbl" title="Dùng cho thuế tuyệt đối / theo lượng, vd 90¢/đôi, 2.50 EUR/100 kg, 1.20 EUR/hl">Số lượng tính thuế theo lượng <span className="font-normal text-mute">(nếu có)</span></label>
+          <div className="grid grid-cols-3 gap-2">
+            <input type="number" min={0} className="field" placeholder="Chiếc/đôi" title="Số lượng sản phẩm (chiếc, đôi, cái)" value={f.dutyUnits || ''} onChange={(e) => setForm({ dutyUnits: Math.max(0, +e.target.value || 0) })} />
+            <input type="number" min={0} className="field" placeholder={`KL tịnh kg${f.weightKg ? ` (${f.weightKg})` : ''}`} title="Khối lượng tịnh (kg); để trống = dùng khối lượng hàng ở trên" value={f.netKg || ''} onChange={(e) => setForm({ netKg: Math.max(0, +e.target.value || 0) })} />
+            <input type="number" min={0} className="field" placeholder="Lít" title="Thể tích (lít) – đồ uống, hoá chất lỏng" value={f.dutyLiters || ''} onChange={(e) => setForm({ dutyLiters: Math.max(0, +e.target.value || 0) })} />
+          </div>
+        </div>
       </Block>
 
       <Block n={3} title="Điều kiện giao hàng">

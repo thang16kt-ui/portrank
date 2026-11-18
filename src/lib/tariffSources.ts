@@ -476,9 +476,14 @@ export function parseWits(doc: any): WitsTariff | null {
 
 const NOMEN: Record<string, string> = { H6: 'HS 2022', H5: 'HS 2017', H4: 'HS 2012', H3: 'HS 2007' };
 
+/** Lãnh thổ hải ngoại thuộc lãnh thổ hải quan EU (vùng ngoại vi: Guadeloupe, Martinique, Réunion, Guyane, Mayotte, Saint-Martin) */
+export const EU_OUTERMOST = new Set(['GP', 'MQ', 'RE', 'GF', 'YT', 'MF']);
+/** Thuộc lãnh thổ hải quan EU → dùng biểu thuế chung EU */
+export const inEuCustoms = (iso2: string) => EU_SET.has(iso2) || EU_OUTERMOST.has(iso2);
+
 /** Mã số WITS (ISO 3166 numeric) của nước nhập; nước EU → biểu thuế chung EU */
 export function witsReporter(iso2: string): string | null {
-  if (EU_SET.has(iso2)) return WITS_EU;
+  if (inEuCustoms(iso2)) return WITS_EU;
   const n = countries.alpha2ToNumeric(iso2);
   return n ? String(n).padStart(3, '0') : null;
 }
@@ -506,8 +511,35 @@ export interface WitsBulkFile {
   converted?: string;
   /** Mã HS 2022 → các mã gốc dùng để quy đổi (chỉ ghi khi khác mã HS 2022) */
   conv?: Record<string, string[]>;
-  /** Thuế ưu đãi cho hàng xuất xứ Việt Nam (TRAINS): đối tác 704, hoặc nhóm có VN (ASEAN N52, AANZFTA C02) */
-  prefVN?: { partner: string; year: number; rates: Record<string, number> };
+}
+
+/** Nhóm đối tác của TRAINS có thành viên rõ ràng (để tra ưu đãi theo nhóm) */
+export const PREF_GROUPS: Record<string, string[]> = {
+  N52: ['BN', 'KH', 'ID', 'LA', 'MY', 'MM', 'PH', 'SG', 'TH', 'VN'],
+  C02: ['BN', 'KH', 'ID', 'LA', 'MY', 'MM', 'PH', 'SG', 'TH', 'VN', 'AU', 'NZ'],
+};
+export const PREF_GROUP_LABEL: Record<string, string> = { N52: 'ASEAN', C02: 'ASEAN–Úc–New Zealand (AANZFTA)' };
+
+/** Thuế ưu đãi theo đối tác của một nước nhập (public/data/wits/pref/{nước}.json) – chỉ mã thấp hơn MFN */
+export interface WitsPrefFile {
+  reporter: string;
+  fetchedAt: string;
+  /** mã đối tác WITS (704, 156, 918 = EU, N52 = ASEAN…) → năm số liệu + mã HS6 theo mức thuế */
+  partners: Record<string, { year: number; byRate: Record<string, string> }>;
+}
+
+/** Nén { hs6: thuế } → { thuế: "hs6hs6hs6…" } (mỗi mã 6 ký tự). Hàm thuần. */
+export function packRates(rates: Record<string, number>): Record<string, string> {
+  const out: Record<string, string[]> = {};
+  for (const [hs, r] of Object.entries(rates)) (out[String(r)] ??= []).push(hs);
+  return Object.fromEntries(Object.entries(out).map(([r, codes]) => [r, codes.sort().join('')]));
+}
+
+/** Tra thuế của mã HS6 trong bảng đã nén; null nếu không có. Hàm thuần. */
+export function unpackRate(byRate: Record<string, string>, hs6: string): number | null {
+  for (const [r, codes] of Object.entries(byRate))
+    for (let i = codes.indexOf(hs6); i >= 0; i = codes.indexOf(hs6, i + 1)) if (i % 6 === 0) return +r;
+  return null;
 }
 
 /**
@@ -563,10 +595,7 @@ export function parseWitsAll(doc: any): { nomen: string; rates: WitsBulkFile['ra
   return { nomen, rates };
 }
 
-const bulkKey = (iso2: string) => (EU_SET.has(iso2) ? 'EU' : iso2);
-
-/** Nhóm đối tác trong file tải sẵn có thuế ưu đãi cho hàng xuất xứ Việt Nam */
-export const VN_PARTNER_LABEL: Record<string, string> = { '704': 'ưu đãi riêng cho Việt Nam', N52: 'ASEAN', C02: 'ASEAN–Úc–New Zealand (AANZFTA)' };
+const bulkKey = (iso2: string) => (inEuCustoms(iso2) ? 'EU' : iso2);
 
 interface BulkHit {
   year: number;
@@ -574,28 +603,52 @@ interface BulkHit {
   t: WitsTariff | null;
   /** Mã gốc (danh mục cũ) dùng để quy đổi sang HS 2022 */
   conv?: string[];
-  /** Thuế ưu đãi cho xuất xứ VN: null = file có dữ liệu ưu đãi nhưng mã này không thấp hơn MFN; undefined = không có dữ liệu */
-  prefVN?: { pct: number | null; partner: string; year: number };
 }
+
+const baseUrl = () => (import.meta as unknown as { env?: { BASE_URL?: string } }).env?.BASE_URL ?? '/';
 
 /** Thuế từ file tải sẵn; null nếu nước không có file (→ gọi trực tiếp) */
 async function witsFromBulk(iso2: string, hs6: string): Promise<BulkHit | null> {
-  const key = bulkKey(iso2);
-  const base = (import.meta as unknown as { env?: { BASE_URL?: string } }).env?.BASE_URL ?? '/';
   let f: WitsBulkFile;
   try {
-    f = await getJson<WitsBulkFile>(`${base}data/wits/${key}.json`);
+    f = await getJson<WitsBulkFile>(`${baseUrl()}data/wits/${bulkKey(iso2)}.json`);
   } catch {
     return null;
   }
   if (!f || typeof f !== 'object' || !f.rates) return null;
   const r = f.rates[hs6];
   const hit: BulkHit = { year: f.year, nomen: f.nomen, t: null, conv: f.conv?.[hs6] };
-  if (f.prefVN) hit.prefVN = { pct: f.prefVN.rates[hs6] ?? null, partner: f.prefVN.partner, year: f.prefVN.year };
   if (r == null) return hit;
   const [pct, min, max, lines] = Array.isArray(r) ? r : [r, r, r, null];
   hit.t = { pct, min, max, lines, tariffType: 'MFN', nomen: f.converted ? 'H6' : f.nomen };
   return hit;
+}
+
+/** Nhãn của đối tác trong biểu ưu đãi */
+const prefLabel = (partner: string, origin: string) => PREF_GROUP_LABEL[partner] ?? (partner === WITS_EU ? 'ưu đãi cho EU' : `ưu đãi riêng cho ${origin}`);
+
+/**
+ * Thuế ưu đãi tải sẵn cho xuất xứ `origin` tại nước nhập: xét đối tác = chính nước đó (EU → 918) và các nhóm có nước đó
+ * (ASEAN, AANZFTA). undefined = nước nhập không có file ưu đãi; status 'none' = không có biểu ưu đãi cho xuất xứ này.
+ */
+async function witsPrefFromBulk(importIso: string, origin: string, hs6: string) {
+  let f: WitsPrefFile;
+  try {
+    f = await getJson<WitsPrefFile>(`${baseUrl()}data/wits/pref/${bulkKey(importIso)}.json`);
+  } catch {
+    return undefined;
+  }
+  if (!f?.partners) return undefined;
+  const own = witsReporter(origin);
+  const cands = [own, ...Object.entries(PREF_GROUPS).filter(([, m]) => m.includes(origin)).map(([g]) => g)].filter((c): c is string => !!c && !!f.partners[c]);
+  if (!cands.length) return { status: 'none' as const };
+  let best: { pct: number; partner: string; year: number } | null = null;
+  for (const c of cands) {
+    const r = unpackRate(f.partners[c].byRate, hs6);
+    if (r != null && (!best || r < best.pct)) best = { pct: r, partner: c, year: f.partners[c].year };
+  }
+  if (!best) return { status: 'not-lower' as const, partner: cands[0], year: f.partners[cands[0]].year };
+  return { status: 'ok' as const, ...best };
 }
 
 /** Năm gần nhất có dữ liệu (TRAINS thường trễ 1–3 năm) */
@@ -643,30 +696,31 @@ export const WitsTariffSource: OfficialTariffSource = {
       if (bulk?.nomen && bulk.nomen !== 'H6')
         notes.push(`Biểu thuế gốc năm ${year} dùng ${NOMEN[bulk.nomen] ?? bulk.nomen}${bulk.conv ? ` – mã ${hs6} (HS 2022) được quy đổi từ mã ${bulk.conv.join(', ')}` : ''} theo bảng tương quan của WITS.`);
       else if (t.nomen && t.nomen !== 'H6') notes.push(`Biểu thuế năm ${year} dùng danh mục ${NOMEN[t.nomen] ?? t.nomen} – mã HS có thể khác HS 2022.`);
-      // thuế ưu đãi theo xuất xứ: VN → dữ liệu tải sẵn; xuất xứ khác → gọi trực tiếp (TRAINS có cho một số cặp nước)
+      // thuế ưu đãi theo xuất xứ: dữ liệu tải sẵn (nước nhập có file ưu đãi); không có file → gọi trực tiếp
       let pref: { pct: number; label: string; partner: string; year: number } | null = null;
       let prefNote = '';
-      const partner = q.origin && q.origin !== '*' ? witsReporter(q.origin) : null;
-      if (q.origin === 'VN' && bulk?.prefVN) {
-        const p = bulk.prefVN;
-        if (p.pct != null && p.pct < t.pct) pref = { pct: p.pct, label: VN_PARTNER_LABEL[p.partner] ?? p.partner, partner: p.partner, year: p.year };
-        else prefNote = `TRAINS năm ${p.year} có biểu ưu đãi ${VN_PARTNER_LABEL[p.partner] ?? p.partner} nhưng mã ${hs6} không thấp hơn MFN.`;
-      } else if (q.origin === 'VN' && bulk) {
-        prefNote = `TRAINS không có biểu thuế ưu đãi cho hàng xuất xứ Việt Nam tại ${isEu ? 'EU' : q.importCountry} (thường do không có FTA). Nếu có FTA, tra thuế ưu đãi ở nguồn chính thức rồi nhập vào trang Biểu thuế.`;
-      } else if (partner && partner !== reporter && !(isEu && EU_SET.has(q.origin))) {
+      const o = q.origin && q.origin !== '*' ? q.origin.toUpperCase() : '';
+      const partner = o ? witsReporter(o) : null;
+      const sameBloc = isEu && inEuCustoms(o);
+      const fromBulk = o && !sameBloc ? await witsPrefFromBulk(q.importCountry, o, hs6) : undefined;
+      const noFta = `Nếu có FTA, tra thuế ưu đãi ở nguồn chính thức rồi nhập vào trang Biểu thuế.`;
+      if (fromBulk?.status === 'ok') pref = { pct: fromBulk.pct, label: prefLabel(fromBulk.partner, o), partner: fromBulk.partner, year: fromBulk.year };
+      else if (fromBulk?.status === 'not-lower') prefNote = `TRAINS năm ${fromBulk.year} có biểu ưu đãi ${prefLabel(fromBulk.partner, o)} nhưng mã ${hs6} không thấp hơn MFN.`;
+      else if (fromBulk?.status === 'none') prefNote = `TRAINS không có biểu thuế ưu đãi cho hàng xuất xứ ${o} tại ${isEu ? 'EU' : q.importCountry} (thường do không có FTA, hoặc FTA mới chưa có số liệu). ${noFta}`;
+      else if (partner && partner !== reporter && !sameBloc) {
         try {
           const p = parseWits(await getJson(witsUrl(reporter, partner, hs6, year)));
-          if (p && p.tariffType !== 'MFN' && p.pct < t.pct) pref = { pct: p.pct, label: `ưu đãi cho ${q.origin}`, partner, year };
-          else prefNote = `TRAINS năm ${year} không có thuế ưu đãi riêng cho xuất xứ ${q.origin}. Nếu có FTA, tra thuế ưu đãi ở nguồn chính thức rồi nhập vào trang Biểu thuế.`;
+          if (p && p.tariffType !== 'MFN' && p.pct < t.pct) pref = { pct: p.pct, label: `ưu đãi cho ${o}`, partner, year };
+          else prefNote = `TRAINS năm ${year} không có thuế ưu đãi riêng cho xuất xứ ${o}. ${noFta}`;
         } catch (e) {
           prefNote =
             (e as { status?: number }).status === 404
-              ? `TRAINS năm ${year} không có thuế ưu đãi riêng cho xuất xứ ${q.origin}. Nếu có FTA, tra thuế ưu đãi ở nguồn chính thức rồi nhập vào trang Biểu thuế.`
-              : `Chưa kiểm tra được thuế ưu đãi cho xuất xứ ${q.origin} (WITS không phản hồi). Nếu có FTA, tra thuế ưu đãi ở nguồn chính thức rồi nhập vào trang Biểu thuế.`;
+              ? `TRAINS năm ${year} không có thuế ưu đãi riêng cho xuất xứ ${o}. ${noFta}`
+              : `Chưa kiểm tra được thuế ưu đãi cho xuất xứ ${o} (WITS không phản hồi). ${noFta}`;
         }
       }
       const usePref = !!pref && q.preferFta;
-      if (pref && !usePref) notes.push(`TRAINS năm ${pref.year} ghi thuế ưu đãi ${pref.pct}% (${pref.label}) cho hàng xuất xứ ${q.origin} – tích “Có C/O” để áp dụng.`);
+      if (pref && !usePref) notes.push(`TRAINS năm ${pref.year} ghi thuế ưu đãi ${pref.pct}% (${pref.label}) cho hàng xuất xứ ${o} – tích “Có C/O” để áp dụng.`);
       if (pref && usePref) notes.push(`Đang áp dụng thuế ưu đãi ${pref.pct}% (${pref.label}, TRAINS năm ${pref.year}) – cần C/O hợp lệ theo hiệp định.`);
       if (prefNote) notes.push(prefNote);
       const vat = standardVat(q.importCountry);
@@ -705,9 +759,12 @@ export function splitDuty(text: string | null | undefined): { pct: number | null
   let pct: number | null = null;
   const rest: string[] = [];
   for (const part of t.split(/\s\+\s|\+/)) {
-    const m = part.trim().match(/^(\d+(?:\.\d+)?)\s*%$/);
-    if (m) pct = (pct ?? 0) + parseFloat(m[1]);
-    else if (part.trim()) rest.push(part.trim());
+    // "4.00 % MIN 0.30 EUR / 100 kg" → phần % + phần MIN/MAX
+    const m = part.trim().match(/^(\d+(?:\.\d+)?)\s*%\s*(.*)$/);
+    if (m) {
+      pct = (pct ?? 0) + parseFloat(m[1]);
+      if (m[2].trim()) rest.push(m[2].trim());
+    } else if (part.trim()) rest.push(part.trim());
   }
   return { pct, specific: rest.length ? rest.join(' + ') : null };
 }
@@ -791,7 +848,7 @@ async function getText(url: string, timeoutMs = 20000): Promise<string> {
 export const TaricSource: OfficialTariffSource = {
   id: 'taric',
   label: 'EU TARIC (Uỷ ban châu Âu)',
-  supports: (c) => EU_SET.has(c),
+  supports: (c) => inEuCustoms(c),
   async lookup(q) {
     const code = digits(q.hs).slice(0, 10);
     const origin = q.origin && q.origin !== '*' ? q.origin.toUpperCase() : '';

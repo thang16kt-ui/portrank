@@ -23,6 +23,10 @@ export interface FormState {
   woodPallet: boolean;
   hs: string;
   hsDesc: string;
+  /** Để tính thuế tuyệt đối: số lượng sản phẩm (chiếc/đôi), khối lượng tịnh (kg, 0 = dùng khối lượng hàng), thể tích (lít) */
+  dutyUnits: number;
+  netKg: number;
+  dutyLiters: number;
   /** Xuất xứ (ISO2); rỗng = nước người bán */
   origin: string;
   hasCo: boolean;
@@ -81,6 +85,9 @@ export const DEFAULT_FORM: FormState = {
   weightKg: 1500,
   woodPallet: true,
   hs: '',
+  dutyUnits: 0,
+  netKg: 0,
+  dutyLiters: 0,
   hsDesc: '',
   origin: '',
   hasCo: true,
