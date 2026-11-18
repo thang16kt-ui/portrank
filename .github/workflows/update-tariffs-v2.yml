@@ -1,7 +1,7 @@
 name: Cập nhật biểu thuế v2 (theo lịch)
 
 # Lịch (schedule) chỉ chạy từ nhánh mặc định, nên file này nằm trên main nhưng làm việc với nhánh v2:
-# lấy code v2, chạy `npm run tariffs:update` (US HTS, UK Trade Tariff, WITS ~170 nước, HS 2022, VAT/GST),
+# lấy code v2, chạy `npm run tariffs:update` (US HTS, UK Trade Tariff, WITS ~170 nước + ưu đãi theo xuất xứ, HS 2022, VAT/GST, tỷ giá ECB),
 # chạy test rồi mở pull request vào v2 khi dữ liệu thay đổi.
 # Cần bật: Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests".
 on:
@@ -16,7 +16,7 @@ permissions:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 300
+    timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
         with:
@@ -41,7 +41,8 @@ jobs:
             src/data/tariffSnapshot.json
             src/data/vatRates.json
             public/data/hs6.json
-            public/data/wits/*.json
+            public/data/wits/**
+            src/data/fxRates.json
           commit-message: 'Cập nhật biểu thuế v2 tự động'
           title: 'Cập nhật biểu thuế v2 (tự động)'
           body-path: tariff-report.txt
