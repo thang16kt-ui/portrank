@@ -129,6 +129,8 @@ export function parseUkCommodity(doc: JsonApiDoc, origin: string) {
       pct: parsePercent(expr?.base ?? expr?.verbose_duty),
       quota: !!ref(m, 'order_number'),
       additionalCode: !!ref(m, 'additional_code'),
+      addCode: String(inc.get(`additional_code:${ref(m, 'additional_code')?.id}`)?.attributes.code ?? ''),
+      typeName: String(inc.get(`measure_type:${typeId}`)?.attributes.description ?? ''),
       conditions: refs(m, 'measure_conditions').length > 0,
       start: String(m.attributes.effective_start_date ?? '').slice(0, 10),
     };
@@ -143,13 +145,25 @@ export function parseUkCommodity(doc: JsonApiDoc, origin: string) {
   const pref = prefs.filter((r) => r.pct != null).sort((a, b) => a.pct! - b.pct! || areaSize(a.areaId) - areaSize(b.areaId))[0] ?? prefs[0];
   const vats = rows.filter((r) => r.typeId === '305' && !r.quota);
   const vat = vats.find((r) => !r.additionalCode && !r.conditions) ?? vats.sort((a, b) => (b.pct ?? 0) - (a.pct ?? 0))[0];
+  // thuế bổ sung theo xuất xứ: chống bán phá giá / chống trợ cấp / tự vệ / thuế bổ sung (551–570, 695, 696)
+  // theo công ty (mã bổ sung) → lấy mức "các công ty khác" (mã …999) hoặc mức không có mã bổ sung
+  const additional: { pct: number; label: string; text: string; firms: number }[] = [];
+  const addRows = rows.filter((r) => UK_ADDITIONAL_TYPES.has(r.typeId) && inArea(r.areaId) && !r.excluded && !r.quota);
+  for (const typeId of new Set(addRows.map((r) => r.typeId))) {
+    const list = addRows.filter((r) => r.typeId === typeId);
+    const other = list.find((r) => r.addCode.endsWith('999') && r.pct != null) ?? list.find((r) => !r.additionalCode && r.pct != null);
+    if (other && other.pct! > 0) additional.push({ pct: other.pct!, label: other.typeName || 'Thuế bổ sung', text: other.text, firms: list.filter((r) => r.additionalCode && !r.addCode.endsWith('999')).length });
+  }
   return {
     code: String(doc.data.attributes.goods_nomenclature_item_id ?? ''),
     description: String(doc.data.attributes.description_plain ?? doc.data.attributes.description ?? ''),
-    mfn, pref, vat,
+    mfn, pref, vat, additional,
     otherVat: vats.filter((r) => r !== vat).map((r) => r.text),
   };
 }
+
+/** Loại biện pháp thuế bổ sung của UK Trade Tariff */
+const UK_ADDITIONAL_TYPES = new Set(['551', '552', '553', '554', '555', '561', '562', '564', '565', '566', '570', '695', '696']);
 
 /** Danh sách mã 10 số (leaf) trong một heading, kèm mô tả có cấp cha. Hàm thuần. */
 export function parseUkHeadingLeaves(doc: JsonApiDoc): TariffChoice[] {
@@ -207,6 +221,9 @@ export function ukEntry(code: string, origin: string, preferFta: boolean, parsed
   if (pref && !usePref) notes.push(`Có ưu đãi cho xuất xứ này (${pref.area ?? pref.areaId}: ${pref.text}) nếu có C/O hợp lệ – đang tính thuế MFN vì chưa tích “Có C/O”.`);
   if (vat && vat.pct == null) notes.push(`VAT dạng đặc biệt: ${vat.text}`);
   if (parsed.otherVat.length) notes.push(`Các mức VAT khác theo điều kiện: ${parsed.otherVat.join(', ')} – đang dùng mức chuẩn.`);
+  const addPct = Math.round((parsed.additional ?? []).reduce((s, a) => s + a.pct, 0) * 100) / 100;
+  for (const a of parsed.additional ?? [])
+    notes.push(`${a.label} cho xuất xứ ${origin}: ${a.text || `${a.pct}%`}${a.firms ? ` (mức chung; ${a.firms} công ty có mức riêng theo mã bổ sung)` : ''} – đã cộng vào tổng.`);
   return {
     notes,
     entry: {
@@ -214,6 +231,7 @@ export function ukEntry(code: string, origin: string, preferFta: boolean, parsed
       importCountry: 'GB', hs: code, origin: usePref ? origin : '*',
       rateType: usePref ? 'FTA' : 'MFN', fta: usePref ? `UK – ${pref!.area ?? pref!.areaId}` : '',
       dutyPct: split.pct, vatPct: vat?.pct ?? null, otherPct: 0, ...(split.specific && { specificDuty: split.specific }),
+      ...(addPct > 0 && { additionalPct: addPct, additionalLabel: parsed.additional!.map((a) => a.label).join(' + ') }),
       source: `${UK_WEB}/${code}`, effectiveDate: chosen.start, updatedAt: todayIso(), verified: true,
     },
   };

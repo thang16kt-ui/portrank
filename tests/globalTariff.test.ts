@@ -4,9 +4,10 @@ import { handleApi } from '../server/api.mjs';
 import { otherTaxesFor } from '../src/data/otherTaxes';
 import { standardVat, VAT_DATA } from '../src/data/vatRates';
 import { describeHs, fmtHsCode, hs6Of, indexHs, searchHs, type HsCatalog } from '../src/lib/hs';
-import { OFFICIAL_SOURCES, TaricSource, inEuCustoms, packRates, unpackRate, type WitsPrefFile, UsHtsSource, WitsTariffSource, clearTariffCache, convertToHs2022, parseTaricDetails, parseWits, parseWitsAll, splitDuty, usEntry, witsReporter, type HtsRow, type WitsBulkFile } from '../src/lib/tariffSources';
+import { OFFICIAL_SOURCES, TaricSource, inEuCustoms, packRates, unpackRate, type WitsPrefFile, UsHtsSource, WitsTariffSource, clearTariffCache, convertToHs2022, parseTaricDetails, parseWits, parseWitsAll, splitDuty, usEntry, ukEntry, parseUkCommodity, witsReporter, type HtsRow, type WitsBulkFile } from '../src/lib/tariffSources';
 import { computeDuty } from '../src/lib/duty';
 import witsAll from './fixtures/wits-918-000-all-2023-sample.json';
+import ukBike from './fixtures/uk-commodity-8712003010.json';
 import witsEu from './fixtures/wits-918-000-610910-2023.json';
 import witsJp from './fixtures/wits-392-000-610910-2023.json';
 
@@ -233,6 +234,16 @@ describe('EU TARIC (nguồn chính thức cho 27 nước EU)', () => {
     expect(r.provider).toBe('wits');
     expect(r.entry?.dutyPct).toBe(12);
     expect(r.notes[0]).toContain('Không gọi được TARIC');
+  });
+});
+
+describe('thuế bổ sung theo xuất xứ – UK Trade Tariff', () => {
+  it('xe đạp: Trung Quốc mức "các công ty khác" 48,5% (5 công ty có mức riêng); xuất xứ khác theo biện pháp áp cho mọi nước', () => {
+    const cn = ukEntry('8712003010', 'CN', false, parseUkCommodity(ukBike as never, 'CN'));
+    expect(cn.entry).toMatchObject({ dutyPct: 14, additionalPct: 48.5, additionalLabel: 'Definitive anti-dumping duty' });
+    expect(cn.notes.join(' ')).toContain('5 công ty có mức riêng');
+    const by = ukEntry('8712003010', 'BY', false, parseUkCommodity(ukBike as never, 'BY'));
+    expect(by.entry?.additionalPct).toBeGreaterThanOrEqual(35);
   });
 });
 
