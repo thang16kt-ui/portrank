@@ -48,3 +48,18 @@ export function tariffLookupLink(iso2: string): { url: string; label: string } {
   if (iso2 === 'US') return { url: 'https://hts.usitc.gov/', label: 'US HTS' };
   return { url: 'https://ttd.wto.org/', label: 'WTO Tariff & Trade Data' };
 }
+
+/**
+ * Cơ sở tính VAT/GST khi nhập khẩu – có thể KHÁC cơ sở tính thuế nhập khẩu.
+ *  - Úc: GST trên VoTI = customs value + duty + cước & bảo hiểm quốc tế (+ WET). Nguồn: ABF "GST and other taxes when importing".
+ *  - New Zealand: GST trên customs value + duty + cước & bảo hiểm quốc tế. Nguồn: NZ Customs.
+ * Nước khác: trị giá tính thuế nhập khẩu (CIF/FOB như trên) + thuế NK + thuế khác.
+ */
+export const VAT_BASIS: Record<string, { basis: 'CIF'; source: string }> = {
+  AU: { basis: 'CIF', source: 'https://www.abf.gov.au/importing-exporting-and-manufacturing/importing/cost-of-importing-goods/gst-and-other-taxes' },
+  NZ: { basis: 'CIF', source: 'https://www.customs.govt.nz/' },
+};
+
+export function vatBasisOf(iso2: string): 'CIF' | 'customs' {
+  return VAT_BASIS[iso2]?.basis ?? 'customs';
+}

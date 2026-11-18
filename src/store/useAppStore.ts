@@ -23,13 +23,20 @@ export interface FormState {
   woodPallet: boolean;
   hs: string;
   hsDesc: string;
-  /** Để tính thuế tuyệt đối: số lượng sản phẩm (chiếc/đôi), khối lượng tịnh (kg, 0 = dùng khối lượng hàng), thể tích (lít) */
+  /** Để tính thuế tuyệt đối: số lượng sản phẩm (chiếc/đôi), khối lượng tịnh (kg, 0 = CHƯA NHẬP), thể tích (lít) */
   dutyUnits: number;
   netKg: number;
   dutyLiters: number;
   /** Xuất xứ (ISO2); rỗng = nước người bán */
   origin: string;
+  /** Có C/O / chứng từ xuất xứ → xét thuế FTA. Mặc định KHÔNG (tính MFN, hiện mức ưu đãi để chọn) */
   hasCo: boolean;
+  /** Hiệp định đã chọn (khi có C/O); rỗng = chưa chọn → dùng mức thấp nhất, ghi rõ là có điều kiện */
+  fta: string;
+  /** Ngày dự kiến khai hải quan nhập; rỗng = ngày hàng sẵn sàng */
+  customsDate: string;
+  /** Nhà sản xuất / xuất khẩu (mức phòng vệ thương mại riêng theo công ty) */
+  company: string;
   goodsValue: number;
   valueTerm: Incoterm;
   readyDate: string;
@@ -90,7 +97,10 @@ export const DEFAULT_FORM: FormState = {
   dutyLiters: 0,
   hsDesc: '',
   origin: '',
-  hasCo: true,
+  hasCo: false,
+  fta: '',
+  customsDate: '',
+  company: '',
   goodsValue: 0,
   valueTerm: 'FOB',
   readyDate: today(),
@@ -112,6 +122,9 @@ interface AppState {
   /** Nhóm C: tính phí cảng đến cho người bán */
   destChargesBySeller: boolean;
   plan: Plan | null;
+  /** Dấu vân tay đầu vào của `plan` và ảnh chụp form lúc tính (dùng khi lưu) */
+  planKey: string | null;
+  planForm: FormState | null;
   planning: { done: number; total: number } | null;
   planError: string | null;
   /** Đổi mỗi lần tính xong để bản đồ căn lại khung nhìn */
@@ -161,6 +174,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   costBasis: 'mine',
   destChargesBySeller: false,
   plan: null,
+  planKey: null,
+  planForm: null,
   planning: null,
   planError: null,
   planRun: 0,

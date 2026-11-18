@@ -79,19 +79,24 @@ export interface SpecificResult {
   maxUsd?: number;
   /** Diễn giải hoặc lý do chưa tính */
   note: string;
+  /** Lý do chưa tính: thiếu số lượng (cần nhập) / dạng không hỗ trợ / thiếu tỷ giá */
+  reason?: 'qty' | 'format' | 'fx';
+  /** Số lượng còn thiếu */
+  needs?: 'netKg' | 'units' | 'liters';
 }
 
 /** Tính phần thuế tuyệt đối (USD) theo số lượng hàng và tỷ giá ECB */
 export function specificDutyUsd(text: string, qty: DutyQty | undefined): SpecificResult {
   const terms = parseSpecific(text);
-  if (!terms) return { usd: null, note: `"${text}" – dạng thuế này cần tính tay (theo độ cồn, thành phần…).` };
+  if (!terms) return { usd: null, reason: 'format', note: `"${text}" – dạng thuế này chưa tự tính được (theo độ cồn, thành phần…) – cần tính tay.` };
   let usd = 0, minUsd: number | undefined, maxUsd: number | undefined;
   const parts: string[] = [];
   for (const t of terms) {
     const rate = FX.usdPer[t.currency];
-    if (!rate) return { usd: null, note: `Chưa có tỷ giá ${t.currency} để quy đổi "${t.text}".` };
-    const q = qty?.[t.basis === 'kg' ? 'netKg' : t.basis] ?? 0;
-    if (!(q > 0)) return { usd: null, note: `Nhập ${QTY_LABEL[t.basis]} để tính phần "${t.text}".` };
+    if (!rate) return { usd: null, reason: 'fx', note: `Chưa có tỷ giá ${t.currency} để quy đổi "${t.text}".` };
+    const field = t.basis === 'kg' ? 'netKg' : t.basis;
+    const q = qty?.[field] ?? 0;
+    if (!(q > 0)) return { usd: null, reason: 'qty', needs: field, note: `Nhập ${QTY_LABEL[t.basis]} để tính phần "${t.text}".` };
     const v = ((t.amount * q) / t.per) * rate;
     if (t.bound === 'MIN') minUsd = v;
     else if (t.bound === 'MAX') maxUsd = v;

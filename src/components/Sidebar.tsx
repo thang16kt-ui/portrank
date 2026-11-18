@@ -3,7 +3,9 @@ import { INCOTERMS, termsForMode } from '../config/incoterms';
 import { CARGO_LABEL, CONTAINER_LABEL } from '../config/pricing';
 import { CRITERIA_LABEL, PRIORITY_LABEL, type Weights } from '../config/weights';
 import { CARRIERS } from '../data/carriers';
-import { COUNTRIES } from '../data/countries';
+import { COUNTRIES, ftasBetween } from '../data/countries';
+import { SIMULATED_CRITERIA } from '../lib/ranking';
+import { useDataStore } from '../store/useDataStore';
 import { roadAvailability } from '../data/landBlocks';
 import { runPlan } from '../lib/actions';
 import { suggestIncoterm } from '../lib/incoterm';
@@ -58,6 +60,10 @@ export default function Sidebar() {
   const buyerC = f.role === 'seller' ? f.partner?.country : f.mine?.country;
   const road = roadAvailability(sellerC, buyerC);
   const terms = termsForMode(f.mode);
+  const simulated = useDataStore((s) => s.simulatedMetrics);
+  const setSimulated = useDataStore((s) => s.setSimulatedMetrics);
+  const originC = f.origin || sellerC;
+  const ftaChoices = originC && buyerC ? ftasBetween(originC, buyerC) : [];
   const containerised = f.shipMode === 'LCL' || f.cargo !== 'oog';
   const seaOnlyWarn = f.mode === 'sea' && INCOTERMS[f.term].group === 'sea' && containerised;
   const sellerPlace = f.role === 'seller' ? f.mine : f.partner, buyerPlace = f.role === 'seller' ? f.partner : f.mine;
@@ -165,9 +171,22 @@ export default function Sidebar() {
           <label className="lbl" title="Dùng cho thuế tuyệt đối / theo lượng, vd 90¢/đôi, 2.50 EUR/100 kg, 1.20 EUR/hl">Số lượng tính thuế theo lượng <span className="font-normal text-mute">(nếu có)</span></label>
           <div className="grid grid-cols-3 gap-2">
             <input type="number" min={0} className="field" placeholder="Chiếc/đôi" title="Số lượng sản phẩm (chiếc, đôi, cái)" value={f.dutyUnits || ''} onChange={(e) => setForm({ dutyUnits: Math.max(0, +e.target.value || 0) })} />
-            <input type="number" min={0} className="field" placeholder={`KL tịnh kg${f.weightKg ? ` (${f.weightKg})` : ''}`} title="Khối lượng tịnh (kg); để trống = dùng khối lượng hàng ở trên" value={f.netKg || ''} onChange={(e) => setForm({ netKg: Math.max(0, +e.target.value || 0) })} />
+            <input type="number" min={0} className="field" placeholder="KL tịnh kg" title="Khối lượng TỊNH (kg) theo luật thuế. Để trống = chưa biết: thuế theo kg sẽ báo “cần nhập”, không lấy khối lượng cả bì hay giá trị mặc định" value={f.netKg || ''} onChange={(e) => setForm({ netKg: Math.max(0, +e.target.value || 0) })} />
             <input type="number" min={0} className="field" placeholder="Lít" title="Thể tích (lít) – đồ uống, hoá chất lỏng" value={f.dutyLiters || ''} onChange={(e) => setForm({ dutyLiters: Math.max(0, +e.target.value || 0) })} />
           </div>
+        </div>
+        <div className="rounded-md border border-line/60 p-2">
+          <label className="flex items-center gap-2 text-xs text-fg">
+            <input type="checkbox" checked={f.hasCo} onChange={(e) => setForm({ hasCo: e.target.checked })} /> Có C/O / chứng từ xuất xứ (xét thuế ưu đãi FTA)
+          </label>
+          {f.hasCo && (
+            <div className="mt-1.5">
+              <label className="lbl">Hiệp định áp dụng <span className="font-normal text-mute">(mỗi C/O chỉ dùng cho hiệp định của nó)</span></label>
+              <input className="field" list="fta-list" placeholder="Chưa chọn = mức thấp nhất, có điều kiện" value={f.fta} onChange={(e) => setForm({ fta: e.target.value })} />
+              <datalist id="fta-list">{ftaChoices.map((x) => <option key={x} value={x} />)}</datalist>
+            </div>
+          )}
+          {!f.hasCo && <div className="mt-1 text-[10.5px] text-mute">Đang tính thuế MFN; mức ưu đãi (nếu có) hiện ở tab Thuế nhập khẩu.</div>}
         </div>
       </Block>
 
@@ -234,20 +253,30 @@ export default function Sidebar() {
                 </select>
               </div>
             </div>
-            <label className="flex items-center gap-2 text-xs text-fg">
-              <input type="checkbox" checked={f.hasCo} onChange={(e) => setForm({ hasCo: e.target.checked })} /> Có C/O hợp lệ (áp thuế ưu đãi FTA nếu có trong biểu thuế)
-            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="lbl" title="Ngày dùng để chọn mức thuế có hiệu lực và sàn/trần phí theo năm tài chính">Ngày khai hải quan dự kiến</label>
+                <input type="date" className="field" value={f.customsDate} onChange={(e) => setForm({ customsDate: e.target.value })} />
+              </div>
+              <div>
+                <label className="lbl" title="Dùng khi thuế chống bán phá giá có mức riêng theo công ty">Nhà sản xuất / xuất khẩu</label>
+                <input className="field" placeholder="(nếu biết)" value={f.company} onChange={(e) => setForm({ company: e.target.value })} />
+              </div>
+            </div>
             <div>
               <label className="lbl">Ưu tiên</label>
               <Seg value={f.priority} onChange={(p) => setPriority(p as Priority)} options={(Object.keys(PRIORITY_LABEL) as Priority[]).map((v) => ({ v, label: PRIORITY_LABEL[v] }))} />
               <div className="mt-2 space-y-1">
                 {(Object.keys(weights) as (keyof Weights)[]).map((k) => (
-                  <div key={k} className="flex items-center gap-2 text-[11px] text-mute">
-                    <span className="w-20 shrink-0">{CRITERIA_LABEL[k]}</span>
+                  <div key={k} className={`flex items-center gap-2 text-[11px] text-mute ${!simulated && SIMULATED_CRITERIA.includes(k) ? 'opacity-50' : ''}`} title={!simulated && SIMULATED_CRITERIA.includes(k) ? 'Chưa có dữ liệu thật – tiêu chí này không được tính điểm' : undefined}>
+                    <span className="w-20 shrink-0">{CRITERIA_LABEL[k]}{!simulated && SIMULATED_CRITERIA.includes(k) ? ' *' : ''}</span>
                     <input type="range" min={0} max={100} value={weights[k]} onChange={(e) => setWeight(k, +e.target.value)} className="h-1 flex-1" />
                     <span className="w-7 text-right text-fg">{weights[k]}</span>
                   </div>
                 ))}
+                <label className="flex items-center gap-2 pt-1 text-[11px] text-mute">
+                  <input type="checkbox" checked={simulated} onChange={(e) => setSimulated(e.target.checked)} /> Chế độ demo: cho dữ liệu MÔ PHỎNG (ổn định giá, tần suất tàu *) tham gia xếp hạng
+                </label>
               </div>
             </div>
             <div>

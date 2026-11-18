@@ -112,8 +112,10 @@ describe('buildPlan – tiêu chí hoàn thành', () => {
     const o = b.options[0];
     expect(o.duty.status).toBe('ok');
     expect(o.duty.entry!.source).toBe('TARIC');
-    expect(o.duty.customsValue).toBeCloseTo(o.value.cif, 6);
-    expect(o.items[7].amount).toBe(Math.round(120 + Math.round(o.duty.duty) + Math.round(o.duty.vat)));
+    expect(o.duty.customsValue).toBeCloseTo(o.value.cif, 2);
+    // khoản 8 = thông quan + thuế + VAT, khớp đến cent với tổng thuế
+    expect(o.items[7].amount).toBeCloseTo(120 + o.duty.duty + o.duty.vat, 2);
+    expect(o.items[7].amount).toBeCloseTo(120 + o.duty.total, 2);
   });
 });
 

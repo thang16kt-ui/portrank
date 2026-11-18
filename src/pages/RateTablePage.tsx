@@ -9,7 +9,7 @@ import { RATE_CSV_HEADER, parseRateRows, type RateEntry } from '../providers/Rat
 import { useAppStore } from '../store/useAppStore';
 import { useDataStore } from '../store/useDataStore';
 import type { ContainerType } from '../types';
-import { ErrorList, Field, ImportButton, PageShell, PortSelect } from './shared';
+import { ErrorList, WarningList, Field, ImportButton, PageShell, PortSelect } from './shared';
 
 const blank = (): Omit<RateEntry, 'id'> => ({ pol: 'VNCMT', pod: 'DEHAM', container: '40HC', freight: 0, surcharges: 0, validFrom: todayIso(), validTo: '', carrier: '', source: '' });
 
@@ -20,12 +20,14 @@ export default function RateTablePage() {
   const showToast = useAppStore((s) => s.showToast);
   const [draft, setDraft] = useState(blank());
   const [errors, setErrors] = useState<string[]>([]);
+  const [warnings, setWarnings] = useState<string[]>([]);
   const today = todayIso();
   const refresh = () => useAppStore.getState().plan && runPlan({ keepSelection: true });
 
   const onRows = (rows: string[][]) => {
-    const { entries, errors } = parseRateRows(rows);
+    const { entries, errors, warnings } = parseRateRows(rows);
     setErrors(errors);
+    setWarnings(warnings);
     if (entries.length) { addRates(entries); refresh(); }
     showToast(`Đã nhập ${entries.length} dòng giá${errors.length ? `, bỏ qua ${errors.length} dòng` : ''}`);
   };
@@ -51,6 +53,7 @@ export default function RateTablePage() {
       }
     >
       <ErrorList errors={errors} />
+      <WarningList items={warnings} />
       <section className="card p-3">
         <h2 className="mb-2 text-[13px] font-semibold text-fg">Nhập tay một dòng giá</h2>
         <div className="grid grid-cols-2 gap-2 md:grid-cols-5">

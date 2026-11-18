@@ -34,8 +34,10 @@ describe('Chương 99 của Mỹ theo xuất xứ', () => {
 describe('Phí MPF/HMF và ưu đãi', () => {
   it('Mỹ: MPF + HMF trên trị giá; xuất xứ USMCA hưởng ưu đãi được miễn MPF', () => {
     const r = row('6109.10.00', '16.5%', 'Of cotton', 'Free (AU,BH,CL,CO,IL,JO,KR,MA,OM,P,PA,PE,S,SG)');
-    expect(usEntry(r, 'VN', true).entry).toMatchObject({ rateType: 'MFN', dutyPct: 16.5, feePct: 0.4714 });
-    expect(usEntry(r, 'MX', true).entry).toMatchObject({ rateType: 'FTA', dutyPct: 0, feePct: 0.125 });
+    expect(usEntry(r, 'VN', true, '2026-11-18').entry).toMatchObject({ rateType: 'MFN', dutyPct: 16.5 });
+    expect(usEntry(r, 'VN', true, '2026-11-18').entry!.fees!.map((f) => [f.code, f.pct, f.minUsd, f.maxUsd])).toEqual([['MPF', 0.3464, 34.58, 670.86], ['HMF', 0.125, undefined, undefined]]);
+    expect(usEntry(r, 'MX', true).entry).toMatchObject({ rateType: 'FTA', dutyPct: 0 });
+    expect(usEntry(r, 'MX', true).entry!.fees!.map((f) => f.code)).toEqual(['HMF']);
   });
   it('phí tính trên trị giá hải quan, không vào trị giá tính VAT', () => {
     const e: TariffEntry = { id: 'x', importCountry: 'DE', hs: '610910', origin: '*', rateType: 'MFN', fta: '', dutyPct: 10, vatPct: 20, otherPct: 0, feePct: 1, source: 's', effectiveDate: '', updatedAt: '2026-11-17', verified: true };

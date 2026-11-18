@@ -1,0 +1,106 @@
+﻿import_country,hs,origin,rate_type,fta,duty_pct,vat_pct,other_pct,source,effective_date,updated_at,verified
+CA,09011100,*,MFN,,0,0,0,https://www.cbsa-asfc.gc.ca/trade-commerce/tariff-tarif/2026/html/02/ch09-eng.html ; T2026-2; ngày hiệu lực thuế suất gốc chưa đối chiếu,,2026-11-18,0
+CA,09011100,VN,FTA,CPTPP,0,0,0,https://www.cbsa-asfc.gc.ca/trade-commerce/tariff-tarif/2026/html/02/ch09-eng.html ; CPTPT; ngày hiệu lực thuế suất gốc chưa đối chiếu,,2026-11-18,0
+CA,61091000,*,MFN,,18,5,0,https://www.cbsa-asfc.gc.ca/trade-commerce/tariff-tarif/2026/html/02/ch61-eng.html ; T2026-2; ngày hiệu lực thuế suất gốc chưa đối chiếu,,2026-11-18,0
+CA,61091000,VN,FTA,CPTPP,0,5,0,https://www.cbsa-asfc.gc.ca/trade-commerce/tariff-tarif/2026/html/02/ch61-eng.html ; CPTPT; ngày hiệu lực thuế suất gốc chưa đối chiếu,,2026-11-18,0
+CA,64041111,*,MFN,,16,5,0,https://www.cbsa-asfc.gc.ca/trade-commerce/tariff-tarif/2026/html/02/ch64-eng.html ; ngày hiệu lực thuế suất gốc chưa đối chiếu,,2026-11-18,0
+CA,64041111,VN,FTA,CPTPP,0,5,0,https://www.cbsa-asfc.gc.ca/trade-commerce/tariff-tarif/2026/html/02/ch64-eng.html ; CPTPT; ngày hiệu lực thuế suất gốc chưa đối chiếu,,2026-11-18,0
+CA,64041119,*,MFN,,16,5,0,https://www.cbsa-asfc.gc.ca/trade-commerce/tariff-tarif/2026/html/02/ch64-eng.html ; ngày hiệu lực thuế suất gốc chưa đối chiếu,,2026-11-18,0
+CA,64041119,VN,FTA,CPTPP,0,5,0,https://www.cbsa-asfc.gc.ca/trade-commerce/tariff-tarif/2026/html/02/ch64-eng.html ; CPTPT; ngày hiệu lực thuế suất gốc chưa đối chiếu,,2026-11-18,0
+CA,64041191,*,MFN,,18,5,0,https://www.cbsa-asfc.gc.ca/trade-commerce/tariff-tarif/2026/html/02/ch64-eng.html ; ngày hiệu lực thuế suất gốc chưa đối chiếu,,2026-11-18,0
+CA,64041191,VN,FTA,CPTPP,0,5,0,https://www.cbsa-asfc.gc.ca/trade-commerce/tariff-tarif/2026/html/02/ch64-eng.html ; CPTPT; ngày hiệu lực thuế suất gốc chưa đối chiếu,,2026-11-18,0
+CA,64041199,*,MFN,,18,5,0,https://www.cbsa-asfc.gc.ca/trade-commerce/tariff-tarif/2026/html/02/ch64-eng.html ; ngày hiệu lực thuế suất gốc chưa đối chiếu,,2026-11-18,0
+CA,64041199,VN,FTA,CPTPP,0,5,0,https://www.cbsa-asfc.gc.ca/trade-commerce/tariff-tarif/2026/html/02/ch64-eng.html ; CPTPT; ngày hiệu lực thuế suất gốc chưa đối chiếu,,2026-11-18,0
+CA,94035000,*,MFN,,9.5,5,0,https://www.cbsa-asfc.gc.ca/trade-commerce/tariff-tarif/2026/html/02/ch94-eng.html ; ngày hiệu lực thuế suất gốc chưa đối chiếu,,2026-11-18,0
+CA,94035000,VN,FTA,CPTPP,0,5,0,https://www.cbsa-asfc.gc.ca/trade-commerce/tariff-tarif/2026/html/02/ch94-eng.html ; CPTPT; ngày hiệu lực thuế suất gốc chưa đối chiếu,,2026-11-18,0
+MX,09011103,*,MFN,,20,0,0,https://www.diputados.gob.mx/LeyesBiblio/pdf/LIGIE_2022.pdf ; Cafe Veracruz; mã địa lý cần kiểm tra tính phù hợp với hàng VN; ngày hiệu lực mức hiện tại chưa đối chiếu,,2026-11-18,1
+MX,09011103,VN,FTA,CPTPP,14.5,0,0,https://sidof.segob.gob.mx/notas/docFuente/5663061 ; Điều Decimo Cuarto; chỉ giống Robusta; mã Cafe Veracruz cần xác định lại phân loại,2026-01-01,2026-11-18,1
+MX,09011104,*,MFN,,20,0,0,https://www.diputados.gob.mx/LeyesBiblio/pdf/LIGIE_2022.pdf ; Cafe Chiapas; mã địa lý cần kiểm tra tính phù hợp với hàng VN; ngày hiệu lực mức hiện tại chưa đối chiếu,,2026-11-18,1
+MX,09011104,VN,FTA,CPTPP,14.5,0,0,https://sidof.segob.gob.mx/notas/docFuente/5663061 ; Điều Decimo Cuarto; chỉ giống Robusta; mã Cafe Chiapas cần xác định lại phân loại,2026-01-01,2026-11-18,1
+MX,09011105,*,MFN,,20,0,0,https://www.diputados.gob.mx/LeyesBiblio/pdf/LIGIE_2022.pdf ; Cafe Pluma; mã địa lý cần kiểm tra tính phù hợp với hàng VN; ngày hiệu lực mức hiện tại chưa đối chiếu,,2026-11-18,1
+MX,09011105,VN,FTA,CPTPP,14.5,0,0,https://sidof.segob.gob.mx/notas/docFuente/5663061 ; Điều Decimo Cuarto; chỉ giống Robusta; mã Cafe Pluma cần xác định lại phân loại,2026-01-01,2026-11-18,1
+MX,09011199,*,MFN,,20,0,0,https://www.diputados.gob.mx/LeyesBiblio/pdf/LIGIE_2022.pdf ; Los demas; ngày hiệu lực mức hiện tại chưa đối chiếu,,2026-11-18,1
+MX,09011199,VN,FTA,CPTPP,14.5,0,0,https://sidof.segob.gob.mx/notas/docFuente/5663061 ; Điều Decimo Cuarto; chỉ giống Robusta; không áp mức của cà phê khác giống,2026-01-01,2026-11-18,1
+MX,61091003,*,MFN,,35,16,0,https://www.diputados.gob.mx/LeyesBiblio/pdf/LIGIE_2022.pdf ; sửa đổi DOF 2025-12-29,2026-01-01,2026-11-18,1
+MX,61091003,VN,FTA,CPTPP,15,16,0,https://sidof.segob.gob.mx/notas/docFuente/5663061 ; Phụ lục IV; cột năm 2026,2026-01-01,2026-11-18,1
+MX,64041109,*,MFN,,35,16,0,https://www.diputados.gob.mx/LeyesBiblio/pdf/LIGIE_2022.pdf ; sửa đổi DOF 2025-12-29,2026-01-01,2026-11-18,1
+MX,64041109,VN,FTA,CPTPP,0,16,0,https://sidof.segob.gob.mx/notas/docFuente/5663061 ; Điều Primero; không thuộc danh mục ngoại lệ; ngày bắt đầu mức 0 chưa đối chiếu,,2026-11-18,1
+MX,64041112,*,MFN,,35,16,0,https://www.diputados.gob.mx/LeyesBiblio/pdf/LIGIE_2022.pdf ; sửa đổi DOF 2025-12-29,2026-01-01,2026-11-18,1
+MX,64041112,VN,FTA,CPTPP,0,16,0,https://sidof.segob.gob.mx/notas/docFuente/5663061 ; Điều Primero; không thuộc danh mục ngoại lệ; ngày bắt đầu mức 0 chưa đối chiếu,,2026-11-18,1
+MX,64041116,*,MFN,,35,16,0,https://www.diputados.gob.mx/LeyesBiblio/pdf/LIGIE_2022.pdf ; sửa đổi DOF 2025-12-29,2026-01-01,2026-11-18,1
+MX,64041116,VN,FTA,CPTPP,11.5,16,0,https://sidof.segob.gob.mx/notas/docFuente/5663061 ; Điều Octavo; cột năm 2026,2026-01-01,2026-11-18,1
+MX,64041117,*,MFN,,35,16,0,https://www.diputados.gob.mx/LeyesBiblio/pdf/LIGIE_2022.pdf ; sửa đổi DOF 2025-12-29,2026-01-01,2026-11-18,1
+MX,64041117,VN,FTA,CPTPP,11.5,16,0,https://sidof.segob.gob.mx/notas/docFuente/5663061 ; Điều Octavo; cột năm 2026,2026-01-01,2026-11-18,1
+MX,64041199,*,MFN,,35,16,0,https://www.diputados.gob.mx/LeyesBiblio/pdf/LIGIE_2022.pdf ; sửa đổi DOF 2025-12-29,2026-01-01,2026-11-18,1
+MX,64041199,VN,FTA,CPTPP,11.5,16,0,https://sidof.segob.gob.mx/notas/docFuente/5663061 ; Điều Octavo; cột năm 2026,2026-01-01,2026-11-18,1
+MX,94035001,*,MFN,,25,16,0,https://www.diputados.gob.mx/LeyesBiblio/pdf/LIGIE_2022.pdf ; sửa đổi DOF 2025-12-29,2026-01-01,2026-11-18,1
+MX,94035001,VN,FTA,CPTPP,2,16,0,https://sidof.segob.gob.mx/notas/docFuente/5663061 ; Phụ lục III; cột năm 2026,2026-01-01,2026-11-18,1
+JP,090111000,*,MFN,,0,8,0,https://www.customs.go.jp/tariff/2026_10_31/data/j_09.htm ; biểu hiện hành; văn bản ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+JP,090111000,VN,FTA,AJCEP,0,8,0,https://www.customs.go.jp/tariff/2026_10_31/data/j_09.htm ; cột ASEAN; văn bản ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+JP,090111000,VN,FTA,VJEPA,0,8,0,https://www.customs.go.jp/tariff/2026_10_31/data/j_09.htm ; cột Viet Nam; văn bản ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+JP,090111000,VN,FTA,CPTPP,0,8,0,https://www.customs.go.jp/tariff/2026_10_31/data/j_09.htm ; văn bản ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+JP,090111000,VN,FTA,RCEP,0,8,0,https://www.customs.go.jp/tariff/2026_10_31/data/j_09.htm ; cột RCEP ASEAN; văn bản ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+JP,610910010,*,MFN,,10.9,10,0,https://www.customs.go.jp/tariff/2026_10_31/data/j_61.htm ; sợi khác màu hoặc in; văn bản ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+JP,610910010,VN,FTA,AJCEP,0,10,0,https://www.customs.go.jp/tariff/2026_10_31/data/j_61.htm ; cột ASEAN; văn bản ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+JP,610910010,VN,FTA,VJEPA,0,10,0,https://www.customs.go.jp/tariff/2026_10_31/data/j_61.htm ; cột Viet Nam; văn bản ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+JP,610910010,VN,FTA,CPTPP,0,10,0,https://www.customs.go.jp/tariff/2026_10_31/data/j_61.htm ; văn bản ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+JP,610910010,VN,FTA,RCEP,0,10,0,https://www.customs.go.jp/tariff/2026_10_31/data/j_61.htm ; cột RCEP ASEAN; văn bản ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+JP,610910020,*,MFN,,7.4,10,0,https://www.customs.go.jp/tariff/2026_10_31/data/j_61.htm ; loại khác; văn bản ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+JP,610910020,VN,FTA,AJCEP,0,10,0,https://www.customs.go.jp/tariff/2026_10_31/data/j_61.htm ; cột ASEAN; văn bản ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+JP,610910020,VN,FTA,VJEPA,0,10,0,https://www.customs.go.jp/tariff/2026_10_31/data/j_61.htm ; cột Viet Nam; văn bản ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+JP,610910020,VN,FTA,CPTPP,0,10,0,https://www.customs.go.jp/tariff/2026_10_31/data/j_61.htm ; văn bản ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+JP,610910020,VN,FTA,RCEP,0,10,0,https://www.customs.go.jp/tariff/2026_10_31/data/j_61.htm ; cột RCEP ASEAN; văn bản ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+JP,640411000,*,MFN,,8,10,0,https://www.customs.go.jp/tariff/2026_10_31/data/j_64.htm ; văn bản ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+JP,640411000,VN,FTA,AJCEP,0,10,0,https://www.customs.go.jp/tariff/2026_10_31/data/j_64.htm ; cột ASEAN; văn bản ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+JP,640411000,VN,FTA,VJEPA,0,10,0,https://www.customs.go.jp/tariff/2026_10_31/data/j_64.htm ; cột Viet Nam; văn bản ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+JP,640411000,VN,FTA,CPTPP,1.4,10,0,https://www.customs.go.jp/tariff/2026_10_31/data/j_64.htm ; mức hiện hành 2026; văn bản ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+JP,640411000,VN,FTA,RCEP,5,10,0,https://www.customs.go.jp/tariff/2026_10_31/data/j_64.htm ; cột RCEP ASEAN; văn bản ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+JP,940350000,*,MFN,,0,10,0,https://www.customs.go.jp/tariff/2026_10_31/data/j_94.htm ; văn bản ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+JP,940350000,VN,FTA,AJCEP,0,10,0,https://www.customs.go.jp/tariff/2026_10_31/data/j_94.htm ; cột ASEAN; văn bản ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+JP,940350000,VN,FTA,VJEPA,0,10,0,https://www.customs.go.jp/tariff/2026_10_31/data/j_94.htm ; cột Viet Nam; văn bản ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+JP,940350000,VN,FTA,CPTPP,0,10,0,https://www.customs.go.jp/tariff/2026_10_31/data/j_94.htm ; văn bản ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+JP,940350000,VN,FTA,RCEP,0,10,0,https://www.customs.go.jp/tariff/2026_10_31/data/j_94.htm ; cột RCEP ASEAN; văn bản ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+KR,0901110000,*,MFN,,0,0,0,https://www.mafra.go.kr/bbs/home/791/597699/download.do ; Công bố 2026-327 Phụ lục 2; P3 0 cho toàn lượng nhập năm 2026; mức cơ bản A là 2; chưa hoàn tất đối chiếu toàn bộ văn bản gốc,2026-01-01,2026-11-18,0
+KR,0901110000,VN,FTA,AKFTA,0,0,0,https://www.data.go.kr/en/data/15051179/fileData.do ; 관세율(2026).xlsx mã FAS1; chưa đối chiếu toàn bộ phụ lục pháp luật gốc,2026-01-01,2026-11-18,0
+KR,0901110000,VN,FTA,VKFTA,0,0,0,https://www.data.go.kr/en/data/15051179/fileData.do ; 관세율(2026).xlsx mã FVN1; đối chiếu thêm VKFTA Annex 2-A Section B; chưa hoàn tất xác minh pháp lý,2026-01-01,2026-11-18,0
+KR,0901110000,VN,FTA,RCEP,0,0,0,https://www.data.go.kr/en/data/15051179/fileData.do ; 관세율(2026).xlsx mã FRCAS1; đối chiếu RCEP Korea ASEAN Year 5; chưa hoàn tất xác minh pháp lý,2026-01-01,2026-11-18,0
+KR,6109101000,*,MFN,,13,10,0,https://www.data.go.kr/en/data/15051179/fileData.do ; 관세율(2026).xlsx A 13 thấp hơn C 35; chưa đối chiếu văn bản pháp luật gốc,2026-01-01,2026-11-18,0
+KR,6109101000,VN,FTA,AKFTA,0,10,0,https://www.data.go.kr/en/data/15051179/fileData.do ; 관세율(2026).xlsx mã FAS1; chưa đối chiếu toàn bộ phụ lục pháp luật gốc,2026-01-01,2026-11-18,0
+KR,6109101000,VN,FTA,VKFTA,0,10,0,https://www.data.go.kr/en/data/15051179/fileData.do ; 관세율(2026).xlsx mã FVN1; chưa đối chiếu toàn bộ phụ lục pháp luật gốc,2026-01-01,2026-11-18,0
+KR,6109101000,VN,FTA,RCEP,0,10,0,https://www.data.go.kr/en/data/15051179/fileData.do ; 관세율(2026).xlsx mã FRCAS1; chưa đối chiếu toàn bộ phụ lục pháp luật gốc,2026-01-01,2026-11-18,0
+KR,6109109000,*,MFN,,13,10,0,https://www.data.go.kr/en/data/15051179/fileData.do ; 관세율(2026).xlsx A 13 thấp hơn C 35; chưa đối chiếu văn bản pháp luật gốc,2026-01-01,2026-11-18,0
+KR,6109109000,VN,FTA,AKFTA,0,10,0,https://www.data.go.kr/en/data/15051179/fileData.do ; 관세율(2026).xlsx mã FAS1; chưa đối chiếu toàn bộ phụ lục pháp luật gốc,2026-01-01,2026-11-18,0
+KR,6109109000,VN,FTA,VKFTA,0,10,0,https://www.data.go.kr/en/data/15051179/fileData.do ; 관세율(2026).xlsx mã FVN1; chưa đối chiếu toàn bộ phụ lục pháp luật gốc,2026-01-01,2026-11-18,0
+KR,6109109000,VN,FTA,RCEP,0,10,0,https://www.data.go.kr/en/data/15051179/fileData.do ; 관세율(2026).xlsx mã FRCAS1; chưa đối chiếu toàn bộ phụ lục pháp luật gốc,2026-01-01,2026-11-18,0
+KR,6404110000,*,MFN,,13,10,0,https://www.data.go.kr/en/data/15051179/fileData.do ; 관세율(2026).xlsx A và C đều 13; chưa đối chiếu văn bản pháp luật gốc,2026-01-01,2026-11-18,0
+KR,6404110000,VN,FTA,AKFTA,0,10,0,https://www.data.go.kr/en/data/15051179/fileData.do ; 관세율(2026).xlsx mã FAS1; chưa đối chiếu toàn bộ phụ lục pháp luật gốc,2026-01-01,2026-11-18,0
+KR,6404110000,VN,FTA,VKFTA,0,10,0,https://www.data.go.kr/en/data/15051179/fileData.do ; 관세율(2026).xlsx mã FVN1; chưa đối chiếu toàn bộ phụ lục pháp luật gốc,2026-01-01,2026-11-18,0
+KR,6404110000,VN,FTA,RCEP,0,10,0,https://www.data.go.kr/en/data/15051179/fileData.do ; 관세율(2026).xlsx mã FRCAS1; chưa đối chiếu toàn bộ phụ lục pháp luật gốc,2026-01-01,2026-11-18,0
+KR,9403501000,*,MFN,,0,10,,https://www.data.go.kr/en/data/15051179/fileData.do ; 관세율(2026).xlsx C 0; other_pct trống vì thuế nội thất cao cấp phụ thuộc trị giá; xem C; chưa hoàn tất xác minh pháp lý,2026-01-01,2026-11-18,0
+KR,9403501000,VN,FTA,AKFTA,0,10,,https://www.data.go.kr/en/data/15051179/fileData.do ; 관세율(2026).xlsx mã FAS1; other_pct phụ thuộc ngưỡng nội thất cao cấp tại C; chưa hoàn tất xác minh pháp lý,2026-01-01,2026-11-18,0
+KR,9403501000,VN,FTA,VKFTA,0,10,,https://www.data.go.kr/en/data/15051179/fileData.do ; 관세율(2026).xlsx mã FVN1; other_pct phụ thuộc ngưỡng nội thất cao cấp tại C; chưa hoàn tất xác minh pháp lý,2026-01-01,2026-11-18,0
+KR,9403501000,VN,FTA,RCEP,0,10,,https://www.data.go.kr/en/data/15051179/fileData.do ; 관세율(2026).xlsx mã FRCAS1; other_pct phụ thuộc ngưỡng nội thất cao cấp tại C; chưa hoàn tất xác minh pháp lý,2026-01-01,2026-11-18,0
+KR,9403509000,*,MFN,,0,10,,https://www.data.go.kr/en/data/15051179/fileData.do ; 관세율(2026).xlsx C 0; other_pct trống vì thuế nội thất cao cấp phụ thuộc trị giá; xem C; chưa hoàn tất xác minh pháp lý,2026-01-01,2026-11-18,0
+KR,9403509000,VN,FTA,AKFTA,0,10,,https://www.data.go.kr/en/data/15051179/fileData.do ; 관세율(2026).xlsx mã FAS1; other_pct phụ thuộc ngưỡng nội thất cao cấp tại C; chưa hoàn tất xác minh pháp lý,2026-01-01,2026-11-18,0
+KR,9403509000,VN,FTA,VKFTA,0,10,,https://www.data.go.kr/en/data/15051179/fileData.do ; 관세율(2026).xlsx mã FVN1; other_pct phụ thuộc ngưỡng nội thất cao cấp tại C; chưa hoàn tất xác minh pháp lý,2026-01-01,2026-11-18,0
+KR,9403509000,VN,FTA,RCEP,0,10,,https://www.data.go.kr/en/data/15051179/fileData.do ; 관세율(2026).xlsx mã FRCAS1; other_pct phụ thuộc ngưỡng nội thất cao cấp tại C; chưa hoàn tất xác minh pháp lý,2026-01-01,2026-11-18,0
+AU,09011100,*,MFN,,0,0,0,https://www.abf.gov.au/importing-exporting-and-manufacturing/tariff-classification/current-tariff/schedule-3/section-ii/chapter-9 ; luật ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+AU,09011100,VN,FTA,AANZFTA,0,0,0,https://www.abf.gov.au/importing-exporting-and-manufacturing/tariff-classification/current-tariff/schedule-8 ; mức Free ngoài ngoại lệ; ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+AU,09011100,VN,FTA,CPTPP,0,0,0,https://www.abf.gov.au/importing-exporting-and-manufacturing/tariff-classification/current-tariff/schedule-8b ; mức Free ngoài ngoại lệ; ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+AU,09011100,VN,FTA,RCEP,0,0,0,https://www.abf.gov.au/importing-exporting-and-manufacturing/tariff-classification/current-tariff/schedule-14 ; mức Free ngoài ngoại lệ; ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+AU,61091000,*,MFN,,5,10,0,https://www.abf.gov.au/importing-exporting-and-manufacturing/tariff-classification/current-tariff/schedule-3/section-xi/chapter-61 ; luật ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+AU,61091000,VN,FTA,AANZFTA,0,10,0,https://www.abf.gov.au/importing-exporting-and-manufacturing/tariff-classification/current-tariff/schedule-8 ; mức Free ngoài ngoại lệ; ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+AU,61091000,VN,FTA,CPTPP,0,10,0,https://www.abf.gov.au/importing-exporting-and-manufacturing/tariff-classification/current-tariff/schedule-8b ; mức Free ngoài ngoại lệ; ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+AU,61091000,VN,FTA,RCEP,0,10,0,https://www.abf.gov.au/importing-exporting-and-manufacturing/tariff-classification/current-tariff/schedule-14-2 ; mục 918; chưa đối chiếu luật ban hành,2024-01-01,2026-11-18,0
+AU,64041110,*,MFN,,0,10,0,https://www.abf.gov.au/importing-exporting-and-manufacturing/tariff-classification/current-tariff/schedule-3/section-xii/chapter-64 ; giày trượt tuyết; luật ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+AU,64041110,VN,FTA,AANZFTA,0,10,0,https://www.abf.gov.au/importing-exporting-and-manufacturing/tariff-classification/current-tariff/schedule-8 ; mức Free ngoài ngoại lệ; ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+AU,64041110,VN,FTA,CPTPP,0,10,0,https://www.abf.gov.au/importing-exporting-and-manufacturing/tariff-classification/current-tariff/schedule-8b ; mức Free ngoài ngoại lệ; ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+AU,64041110,VN,FTA,RCEP,0,10,0,https://www.abf.gov.au/importing-exporting-and-manufacturing/tariff-classification/current-tariff/schedule-14-2 ; mức Free ngoài ngoại lệ; ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+AU,64041190,*,MFN,,5,10,0,https://www.abf.gov.au/importing-exporting-and-manufacturing/tariff-classification/current-tariff/schedule-3/section-xii/chapter-64 ; luật ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+AU,64041190,VN,FTA,AANZFTA,0,10,0,https://www.abf.gov.au/importing-exporting-and-manufacturing/tariff-classification/current-tariff/schedule-8 ; mức Free ngoài ngoại lệ; ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+AU,64041190,VN,FTA,CPTPP,0,10,0,https://www.abf.gov.au/importing-exporting-and-manufacturing/tariff-classification/current-tariff/schedule-8b ; mục 381; chưa đối chiếu luật ban hành,2021-01-01,2026-11-18,0
+AU,64041190,VN,FTA,RCEP,0,10,0,https://www.abf.gov.au/importing-exporting-and-manufacturing/tariff-classification/current-tariff/schedule-14-2 ; mục 1098; chưa đối chiếu luật ban hành,2024-01-01,2026-11-18,0
+AU,94035000,*,MFN,,5,10,0,https://www.abf.gov.au/importing-exporting-and-manufacturing/tariff-classification/current-tariff/schedule-3/section-xx/chapter-94 ; luật ban hành và ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+AU,94035000,VN,FTA,AANZFTA,0,10,0,https://www.abf.gov.au/importing-exporting-and-manufacturing/tariff-classification/current-tariff/schedule-8 ; mức Free ngoài ngoại lệ; ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+AU,94035000,VN,FTA,CPTPP,0,10,0,https://www.abf.gov.au/importing-exporting-and-manufacturing/tariff-classification/current-tariff/schedule-8b ; mức Free ngoài ngoại lệ; ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
+AU,94035000,VN,FTA,RCEP,0,10,0,https://www.abf.gov.au/importing-exporting-and-manufacturing/tariff-classification/current-tariff/schedule-14-3 ; mức Free ngoài ngoại lệ; ngày hiệu lực gốc chưa đối chiếu,,2026-11-18,0
