@@ -18,6 +18,7 @@ export function planInputOf(f: FormState): PlanInput | null {
     role: f.role, mine: f.mine, partner: f.partner, mode: f.mode,
     shipment: { cargo: f.cargo, mode: f.shipMode, container: f.container, quantity: f.quantity, cbm: f.cbm, weightKg: f.weightKg, woodPallet: f.woodPallet },
     goodsValue: f.goodsValue, valueTerm: f.valueTerm, hs: f.hs, origin: f.origin, hasCo: f.hasCo, readyDate: f.readyDate,
+    dutyQty: { units: f.dutyUnits ?? 0, netKg: f.netKg ?? 0, liters: f.dutyLiters ?? 0 },
     radiusKm: f.radiusKm, avoidRedSea: f.avoidRedSea, avoidPanama: f.avoidPanama, carriers: f.carriers,
   };
 }

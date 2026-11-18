@@ -12,7 +12,8 @@
     "gen:crane": "node scripts/gen-crane-glb.mjs",
     "start": "node server/index.mjs",
     "tariffs:update": "tsx scripts/update-tariffs.ts",
-    "tariffs:check": "tsx scripts/update-tariffs.ts --check"
+    "tariffs:check": "tsx scripts/update-tariffs.ts --check",
+    "tariffs:vn": "tsx scripts/import-vn-tariff.ts"
   },
   "dependencies": {
     "@deck.gl/core": "~9.4.1",

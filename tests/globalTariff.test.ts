@@ -4,9 +4,10 @@ import { handleApi } from '../server/api.mjs';
 import { otherTaxesFor } from '../src/data/otherTaxes';
 import { standardVat, VAT_DATA } from '../src/data/vatRates';
 import { describeHs, fmtHsCode, hs6Of, indexHs, searchHs, type HsCatalog } from '../src/lib/hs';
-import { OFFICIAL_SOURCES, TaricSource, UsHtsSource, WitsTariffSource, clearTariffCache, convertToHs2022, parseTaricDetails, parseWits, parseWitsAll, splitDuty, usEntry, witsReporter, type HtsRow, type WitsBulkFile } from '../src/lib/tariffSources';
+import { OFFICIAL_SOURCES, TaricSource, inEuCustoms, packRates, unpackRate, type WitsPrefFile, UsHtsSource, WitsTariffSource, clearTariffCache, convertToHs2022, parseTaricDetails, parseWits, parseWitsAll, splitDuty, usEntry, ukEntry, parseUkCommodity, witsReporter, type HtsRow, type WitsBulkFile } from '../src/lib/tariffSources';
 import { computeDuty } from '../src/lib/duty';
 import witsAll from './fixtures/wits-918-000-all-2023-sample.json';
+import ukBike from './fixtures/uk-commodity-8712003010.json';
 import witsEu from './fixtures/wits-918-000-610910-2023.json';
 import witsJp from './fixtures/wits-392-000-610910-2023.json';
 
@@ -55,7 +56,8 @@ describe('WITS / UNCTAD TRAINS', () => {
     expect(OFFICIAL_SOURCES.find((s) => s.supports('GB'))?.id).toBe('uk');
     expect(OFFICIAL_SOURCES.find((s) => s.supports('US'))?.id).toBe('us');
     for (const c of ['DE', 'FR', 'NL']) expect(OFFICIAL_SOURCES.find((s) => s.supports(c))?.id, c).toBe('taric');
-    for (const c of ['VN', 'JP', 'KR', 'IN', 'BR', 'AU', 'CA', 'MX', 'TH', 'AE']) expect(OFFICIAL_SOURCES.find((s) => s.supports(c))?.id, c).toBe('wits');
+    expect(OFFICIAL_SOURCES.find((s) => s.supports('VN'))?.id).toBe('vn'); // biểu thuế VN đã nạp, không có → WITS
+    for (const c of ['JP', 'KR', 'IN', 'BR', 'AU', 'CA', 'MX', 'TH', 'AE']) expect(OFFICIAL_SOURCES.find((s) => s.supports(c))?.id, c).toBe('wits');
   });
   it('lookup: thử năm gần nhất → lùi dần khi 404; qua /api/wits; VAT tiêu chuẩn của nước nhập', async () => {
     const f = vi.fn(async (url: string) =>
@@ -67,7 +69,7 @@ describe('WITS / UNCTAD TRAINS', () => {
     const r = await WitsTariffSource.lookup({ importCountry: 'DE', hs: '6109100010', origin: 'VN', preferFta: true });
     const urls = f.mock.calls.map((c) => String(c[0]));
     expect(urls[0]).toBe('/data/wits/EU.json'); // thử file tải sẵn trước (ở đây: 404 → gọi trực tiếp)
-    expect(urls.slice(1).every((u) => u.startsWith('/api/wits/reporter/918/'))).toBe(true);
+    expect(urls.filter((u) => !u.startsWith('/data/wits/')).every((u) => u.startsWith('/api/wits/reporter/918/'))).toBe(true);
     expect(urls.some((u) => u.includes('/partner/704/'))).toBe(true);
     expect(r.entry).toMatchObject({ importCountry: 'DE', hs: '610910', dutyPct: 12, rateType: 'MFN', vatPct: 19, effectiveDate: '2023-01-01', verified: false });
     expect(r.entry?.id.startsWith('wits-')).toBe(true);
@@ -106,9 +108,9 @@ describe('WITS tải sẵn (public/data/wits – trang tĩnh không gọi đư�
     const r = await WitsTariffSource.lookup({ importCountry: 'FR', hs: '640411', origin: 'VN', preferFta: true });
     expect(r.entry).toMatchObject({ importCountry: 'FR', dutyPct: 16.9, effectiveDate: '2023-01-01', vatPct: standardVat('FR')?.pct });
     expect(r.notes.join(' ')).toContain('từ 16.9% đến 17%');
-    // xuất xứ VN: không gọi WITS trực tiếp, dùng dữ liệu ưu đãi tải sẵn (file này không có → ghi rõ)
-    expect(r.notes.join(' ')).toContain('không có biểu thuế ưu đãi cho hàng xuất xứ Việt Nam');
-    expect(f.mock.calls.filter((c) => String(c[0]).startsWith('/api/wits'))).toHaveLength(0);
+    // MFN lấy từ file tải sẵn (không gọi partner/000); không có file ưu đãi → thử trực tiếp, bị chặn → ghi chưa kiểm tra được
+    expect(f.mock.calls.filter((c) => String(c[0]).includes('/partner/000/'))).toHaveLength(0);
+    expect(r.notes.join(' ')).toContain('Chưa kiểm tra được thuế ưu đãi');
     // xuất xứ khác: gọi trực tiếp, bị chặn (403) → ghi chưa kiểm tra được
     clearTariffCache();
     const cn = await WitsTariffSource.lookup({ importCountry: 'FR', hs: '640411', origin: 'CN', preferFta: true });
@@ -133,9 +135,21 @@ describe('WITS tải sẵn (public/data/wits – trang tĩnh không gọi đư�
     expect(rates).toEqual({ '111111': 10, '999999': [12.5, 5, 20, 2] });
     expect(conv).toEqual({ '999999': ['222222', '333333'] });
   });
-  it('xuất xứ Việt Nam: dùng thuế ưu đãi tải sẵn (ASEAN) khi có C/O; không có C/O → MFN kèm ghi chú', async () => {
-    const file: WitsBulkFile = { reporter: '764', year: 2023, nomen: 'H6', fetchedAt: '', rates: { '610910': 30, '090111': 0 }, prefVN: { partner: 'N52', year: 2021, rates: { '610910': 0 } } };
-    vi.stubGlobal('fetch', vi.fn(async () => res(200, file)));
+  it('nén / giải nén bảng ưu đãi theo mức thuế', () => {
+    const packed = packRates({ '610910': 0, '610990': 0, '090111': 5 });
+    expect(packed).toEqual({ '0': '610910610990', '5': '090111' });
+    expect(unpackRate(packed, '610990')).toBe(0);
+    expect(unpackRate(packed, '090111')).toBe(5);
+    expect(unpackRate(packed, '109106')).toBeNull(); // không khớp lệch vị trí
+  });
+  const thMfn: WitsBulkFile = { reporter: '764', year: 2023, nomen: 'H6', fetchedAt: '', rates: { '610910': 30, '090111': 40 } };
+  const thPref: WitsPrefFile = {
+    reporter: '764', fetchedAt: '',
+    partners: { N52: { year: 2021, byRate: packRates({ '610910': 0 }) }, '156': { year: 2021, byRate: packRates({ '610910': 5, '090111': 10 }) } },
+  };
+  const stubTh = () => vi.stubGlobal('fetch', vi.fn(async (url: string) => (url.includes('/pref/') ? res(200, thPref) : url.includes('/data/wits/') ? res(200, thMfn) : res(403, {}))));
+  it('xuất xứ Việt Nam vào Thái Lan: ưu đãi ASEAN khi có C/O; không có C/O → MFN kèm ghi chú', async () => {
+    stubTh();
     const co = await WitsTariffSource.lookup({ importCountry: 'TH', hs: '610910', origin: 'VN', preferFta: true });
     expect(co.entry).toMatchObject({ rateType: 'FTA', dutyPct: 0, fta: 'TRAINS – ASEAN', effectiveDate: '2021-01-01' });
     clearTariffCache();
@@ -143,9 +157,23 @@ describe('WITS tải sẵn (public/data/wits – trang tĩnh không gọi đư�
     expect(noCo.entry).toMatchObject({ rateType: 'MFN', dutyPct: 30 });
     expect(noCo.notes.join(' ')).toContain('tích “Có C/O”');
     clearTariffCache();
-    const zero = await WitsTariffSource.lookup({ importCountry: 'TH', hs: '090111', origin: 'VN', preferFta: true });
-    expect(zero.entry?.rateType).toBe('MFN');
-    expect(zero.notes.join(' ')).toContain('không thấp hơn MFN');
+    const notLower = await WitsTariffSource.lookup({ importCountry: 'TH', hs: '090111', origin: 'VN', preferFta: true });
+    expect(notLower.entry?.rateType).toBe('MFN');
+    expect(notLower.notes.join(' ')).toContain('không thấp hơn MFN');
+  });
+  it('xuất xứ khác (Trung Quốc) dùng biểu ưu đãi riêng; xuất xứ không có biểu (Brazil) → ghi rõ', async () => {
+    stubTh();
+    const cn = await WitsTariffSource.lookup({ importCountry: 'TH', hs: '090111', origin: 'CN', preferFta: true });
+    expect(cn.entry).toMatchObject({ rateType: 'FTA', dutyPct: 10, fta: 'TRAINS – ưu đãi riêng cho CN' });
+    clearTariffCache();
+    const br = await WitsTariffSource.lookup({ importCountry: 'TH', hs: '610910', origin: 'BR', preferFta: true });
+    expect(br.entry?.rateType).toBe('MFN');
+    expect(br.notes.join(' ')).toContain('không có biểu thuế ưu đãi cho hàng xuất xứ BR');
+  });
+  it('lãnh thổ hải ngoại thuộc EU (Mayotte, Réunion…) dùng biểu thuế chung EU / TARIC', () => {
+    expect(inEuCustoms('YT')).toBe(true);
+    expect(witsReporter('RE')).toBe('918');
+    expect(OFFICIAL_SOURCES.find((x) => x.supports('GP'))?.id).toBe('taric');
   });
   it('mã quy đổi từ HS 2017 → ghi mã gốc', async () => {
     const file: WitsBulkFile = { reporter: '076', year: 2023, nomen: 'H5', converted: 'H5', conv: { '850760': ['850780'] }, fetchedAt: '', rates: { '850760': 18 } };
@@ -207,6 +235,16 @@ describe('EU TARIC (nguồn chính thức cho 27 nước EU)', () => {
     expect(r.provider).toBe('wits');
     expect(r.entry?.dutyPct).toBe(12);
     expect(r.notes[0]).toContain('Không gọi được TARIC');
+  });
+});
+
+describe('thuế bổ sung theo xuất xứ – UK Trade Tariff', () => {
+  it('xe đạp: Trung Quốc mức "các công ty khác" 48,5% (5 công ty có mức riêng); xuất xứ khác theo biện pháp áp cho mọi nước', () => {
+    const cn = ukEntry('8712003010', 'CN', false, parseUkCommodity(ukBike as never, 'CN'));
+    expect(cn.entry).toMatchObject({ dutyPct: 14, additionalPct: 48.5, additionalLabel: 'Definitive anti-dumping duty' });
+    expect(cn.notes.join(' ')).toContain('5 công ty có mức riêng');
+    const by = ukEntry('8712003010', 'BY', false, parseUkCommodity(ukBike as never, 'BY'));
+    expect(by.entry?.additionalPct).toBeGreaterThanOrEqual(35);
   });
 });
 

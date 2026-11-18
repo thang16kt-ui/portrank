@@ -22,7 +22,7 @@ import { fileURLToPath } from 'node:url';
 import { COUNTRIES, EU_SET } from '../src/data/countries';
 import { parseCsv } from '../src/lib/csv';
 import {
-  CH99_RANGES, TARIFF_SNAPSHOT, US_SPECIAL, convertToHs2022, htsLeaves, parseWitsAll, type WitsBulkFile, type WitsRate, parseChapter99, parseUkCommodity, parseUkHeadingLeaves, ukEntry, usEntry,
+  CH99_RANGES, PREF_GROUPS, TARIFF_SNAPSHOT, US_SPECIAL, convertToHs2022, htsLeaves, packRates, parseWitsAll, type WitsBulkFile, type WitsPrefFile, type WitsRate, parseChapter99, parseUkCommodity, parseUkHeadingLeaves, ukEntry, usEntry,
   type Chapter99Item, type HtsRow, type TariffSnapshot,
 } from '../src/lib/tariffSources';
 import { parseTariffRows, type TariffEntry } from '../src/providers/TariffProvider';
@@ -103,14 +103,27 @@ async function updateVat() {
   report.push(`✓ VAT/GST: ${Object.keys(rates).length} nước`);
 }
 
+/* ───────────── Tỷ giá tham chiếu ECB (để quy đổi thuế tuyệt đối EUR/GBP… sang USD) ───────────── */
+async function updateFx() {
+  const xml = await get<string>('https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', 'text/xml');
+  const date = xml.match(/time=['"](\d{4}-\d{2}-\d{2})['"]/)?.[1] ?? today;
+  const perEur: Record<string, number> = { EUR: 1 };
+  for (const m of xml.matchAll(/currency=['"]([A-Z]{3})['"]\s+rate=['"]([\d.]+)['"]/g)) perEur[m[1]] = +m[2];
+  if (!perEur.USD || Object.keys(perEur).length < 20) throw new Error('Phản hồi ECB không hợp lệ');
+  // số USD cho 1 đơn vị tiền tệ
+  const usdPer = Object.fromEntries(Object.entries(perEur).map(([c, r]) => [c, Math.round((perEur.USD / r) * 1e6) / 1e6]));
+  if (!CHECK_ONLY) writeFileSync(join(DATA, 'fxRates.json'), JSON.stringify({ source: 'ECB – euro foreign exchange reference rates', sourceUrl: 'https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html', date, usdPer }) + '\n');
+  report.push(`✓ Tỷ giá ECB ngày ${date}: ${Object.keys(usdPer).length} đồng tiền`);
+}
+
 /* ───────────── WITS / TRAINS – toàn bộ HS6 cho mọi nước có số liệu ───────────── */
 const WITS = 'https://wits.worldbank.org/API/V1/SDMX/V21/datasource/TRN';
 const WITS_META = 'https://wits.worldbank.org/API/V1/wits/datasource/trn';
 const CONCORD = 'https://wits.worldbank.org/data/public/concordance';
 /** Mã ISO3 riêng của WITS → ISO2 */
 const WITS_ISO3: Record<string, string> = { EUN: 'EU', ROM: 'RO', SER: 'RS', SUD: 'SD', ZAR: 'CD', TMP: 'TL', MNT: 'ME' };
-/** Nhóm đối tác có Việt Nam là thành viên (ưu tiên từ trên xuống): VN, ASEAN, ASEAN–Úc–NZ */
-const VN_PARTNERS = ['704', 'N52', 'C02'];
+/** Xuất xứ được tải sẵn thuế ưu đãi (mã ISO2; EU = cả khối) */
+const PREF_ORIGINS = ['VN', 'CN', 'TH', 'ID', 'MY', 'PH', 'SG', 'KH', 'LA', 'MM', 'BN', 'IN', 'BD', 'LK', 'PK', 'KR', 'JP', 'TW', 'HK', 'AU', 'NZ', 'US', 'CA', 'MX', 'BR', 'CL', 'PE', 'TR', 'GB', 'CH', 'NO', 'EU'];
 
 /** Đọc file .zip chỉ có 1 tệp (bảng tương quan của WITS) – không cần thư viện ngoài */
 function unzipFirst(buf: Buffer): string {
@@ -145,17 +158,34 @@ function concordance(nomen: string) {
 
 async function updateWitsBulk() {
   const dir = join(ROOT, 'public/data/wits');
-  mkdirSync(dir, { recursive: true });
+  mkdirSync(join(dir, 'pref'), { recursive: true });
   const now = new Date().getFullYear();
-  // danh sách nước báo cáo từ danh mục số liệu của WITS (bỏ nhóm nước, nước EU → biểu thuế chung EU)
+  const prefsOnly = process.argv.includes('--prefs-only');
+  // danh mục số liệu của WITS: nước báo cáo, năm, danh sách đối tác có biểu ưu đãi
   const xml = await get<string>(`${WITS_META}/dataavailability/country/all/year/all`, 'text/xml');
   const reporters = new Map<string, string>();
-  for (const m of xml.matchAll(/<wits:reporter countrycode="(\w+)" iso3Code="(\w*)" isgroup="No"/g)) {
-    const iso2 = WITS_ISO3[m[2]] ?? countries.alpha3ToAlpha2(m[2]);
-    if (!iso2 || (iso2 !== 'EU' && EU_SET.has(iso2)) || iso2 === 'US' || iso2 === 'GB') continue;
-    reporters.set(iso2, m[1]);
+  const codeOf = new Map<string, string>(); // ISO2 → mã WITS (dùng làm mã đối tác)
+  const partnersOf = new Map<string, Map<number, Set<string>>>(); // mã WITS nước nhập → năm → đối tác
+  for (const m of xml.matchAll(/<wits:reporter countrycode="(\w+)" iso3Code="(\w*)" isgroup="No"[\s\S]*?<wits:year>(\d+)<\/wits:year>[\s\S]*?<wits:partnerlist>([^<]*)<\/wits:partnerlist>/g)) {
+    const [, code, iso3, year, plist] = m;
+    const iso2 = WITS_ISO3[iso3] ?? countries.alpha3ToAlpha2(iso3);
+    if (!iso2) continue;
+    codeOf.set(iso2, code);
+    const byYear = partnersOf.get(code) ?? new Map<number, Set<string>>();
+    byYear.set(+year, new Set(plist.split(';').filter(Boolean)));
+    partnersOf.set(code, byYear);
+    if ((iso2 !== 'EU' && EU_SET.has(iso2)) || iso2 === 'US' || iso2 === 'GB') continue;
+    reporters.set(iso2, code);
   }
-  const index: Record<string, { year: number; nomen: string; count: number; converted?: string; prefVN?: { partner: string; year: number; count: number } }> = {};
+  // mã đối tác cần tải: xuất xứ chính + nhóm hiệp định có tên rõ (ASEAN, AANZFTA)
+  const wanted = new Map<string, string>(); // mã WITS → nhãn
+  for (const o of PREF_ORIGINS) {
+    const c = o === 'EU' ? '918' : codeOf.get(o);
+    if (c) wanted.set(c, o);
+  }
+  for (const g of Object.keys(PREF_GROUPS)) wanted.set(g, g);
+
+  const index: Record<string, { year: number; nomen: string; count: number; converted?: string; prefs?: Record<string, number> }> = {};
   // WITS_ONLY=TH,BR npm run tariffs:update -- --only-wits  → chạy thử vài nước
   const only = process.env.WITS_ONLY?.split(',').map((x) => x.trim().toUpperCase()).filter(Boolean);
   const queue = [...reporters.keys()].filter((k) => !only?.length || only.includes(k)).sort();
@@ -166,7 +196,14 @@ async function updateWitsBulk() {
     for (let key = queue.shift(); key; key = queue.shift()) {
       const reporter = reporters.get(key)!;
       let file: WitsBulkFile | null = null;
-      for (let year = now - 1; year >= now - 10 && !file; year--) {
+      if (prefsOnly) {
+        try {
+          file = JSON.parse(readFileSync(join(dir, `${key}.json`), 'utf8')) as WitsBulkFile;
+        } catch {
+          file = null;
+        }
+      }
+      for (let year = now - 1; year >= now - 15 && !file; year--) {
         try {
           const { nomen, rates } = parseWitsAll(await get<unknown>(url(reporter, '000', year), 'application/json', 3));
           if (Object.keys(rates).length < 1000) continue;
@@ -180,41 +217,51 @@ async function updateWitsBulk() {
         missing.push(key);
         continue;
       }
-      // thuế ưu đãi cho xuất xứ Việt Nam (chỉ giữ mã thấp hơn MFN)
-      for (const partner of key === 'VN' ? [] : VN_PARTNERS) {
-        for (let year = file.year; year >= file.year - 4 && !file.prefVN; year--) {
+      delete (file as { prefVN?: unknown }).prefVN;
+      // thuế ưu đãi theo đối tác (chỉ giữ mã thấp hơn MFN), đối tác lấy từ danh mục số liệu của nước nhập
+      const listed = new Set<string>();
+      for (const [y, ps] of partnersOf.get(reporter) ?? []) if (y >= file.year - 6) ps.forEach((p) => listed.add(p));
+      const pref: WitsPrefFile = { reporter, fetchedAt: today, partners: {} };
+      for (const [partner] of wanted) {
+        if (!listed.has(partner) || partner === reporter) continue;
+        for (let year = file.year; year >= file.year - 6 && !pref.partners[partner]; year--) {
           try {
             const { nomen, rates } = parseWitsAll(await get<unknown>(url(reporter, partner, year), 'application/json', 2));
-            if (Object.keys(rates).length < 100) continue;
+            if (Object.keys(rates).length < 50) continue;
             const c = await toHs22(nomen, rates);
             const lower: Record<string, number> = {};
             for (const [hs, v] of Object.entries(c.rates)) {
-              const p = Array.isArray(v) ? v[0] : v, m = file.rates[hs];
-              if (m != null && p < (Array.isArray(m) ? m[0] : m)) lower[hs] = p;
+              const pr = Array.isArray(v) ? v[0] : v, m = file.rates[hs];
+              if (m != null && pr < (Array.isArray(m) ? m[0] : m)) lower[hs] = pr;
             }
-            file.prefVN = { partner, year, rates: lower };
+            if (Object.keys(lower).length) pref.partners[partner] = { year, byRate: packRates(lower) };
+            else break;
           } catch (e) {
             if ((e as { status?: number }).status !== 404) report.push(`! WITS ${key} ưu đãi ${partner} ${year}: ${(e as Error).message}`);
           }
         }
-        if (file.prefVN) break;
       }
-      if (!CHECK_ONLY) writeFileSync(join(dir, `${key}.json`), JSON.stringify(file) + '\n');
+      if (!CHECK_ONLY) {
+        writeFileSync(join(dir, `${key}.json`), JSON.stringify(file) + '\n');
+        if (Object.keys(pref.partners).length) writeFileSync(join(dir, 'pref', `${key}.json`), JSON.stringify(pref) + '\n');
+      }
+      const counts = Object.fromEntries(Object.entries(pref.partners).map(([p, v]) => [p, Object.values(v.byRate).reduce((s, x) => s + x.length / 6, 0)]));
       index[key] = {
         year: file.year, nomen: file.nomen, count: Object.keys(file.rates).length,
         ...(file.converted && { converted: file.converted }),
-        ...(file.prefVN && { prefVN: { partner: file.prefVN.partner, year: file.prefVN.year, count: Object.keys(file.prefVN.rates).length } }),
+        ...(Object.keys(counts).length && { prefs: counts }),
       };
     }
   };
   await Promise.all(Array.from({ length: 6 }, worker));
-  if (!CHECK_ONLY) writeFileSync(join(dir, 'index.json'), JSON.stringify({ source: 'WITS – UNCTAD TRAINS (World Bank)', fetchedAt: today, countries: index }) + '\n');
+  if (!CHECK_ONLY && !only?.length) writeFileSync(join(dir, 'index.json'), JSON.stringify({ source: 'WITS – UNCTAD TRAINS (World Bank)', fetchedAt: today, groups: PREF_GROUPS, countries: index }) + '\n');
   const vals = Object.values(index);
   report.push(
     `✓ WITS: ${vals.length}/${reporters.size} nước, số liệu năm ${Math.min(...vals.map((x) => x.year))}–${Math.max(...vals.map((x) => x.year))}; ` +
-      `${vals.filter((x) => x.converted).length} nước quy đổi sang HS 2022; ${vals.filter((x) => x.prefVN).length} nước có thuế ưu đãi cho xuất xứ VN`,
+      `${vals.filter((x) => x.converted).length} nước quy đổi sang HS 2022; ${vals.filter((x) => x.prefs).length} nước có biểu thuế ưu đãi theo xuất xứ ` +
+      `(${vals.reduce((s, x) => s + Object.keys(x.prefs ?? {}).length, 0)} cặp nước nhập – đối tác)`,
   );
-  if (missing.length) report.push(`! WITS không có số liệu 10 năm gần nhất: ${missing.join(', ')}`);
+  if (missing.length) report.push(`! WITS không có số liệu 15 năm gần nhất: ${missing.join(', ')}`);
 }
 
 /* ───────────── Mỹ – USITC HTS ───────────── */
@@ -301,13 +348,19 @@ const run = async <T>(name: string, job: () => Promise<T>, fallback: T): Promise
   }
 };
 
-if (process.argv.includes('--only-wits')) {
+if (process.argv.includes('--fx-only')) {
+  await run('Tỷ giá', updateFx, undefined);
+  console.log(report.map((r) => '  ' + r).join('\n'));
+  process.exit(failed ? 1 : 0);
+}
+if (process.argv.includes('--only-wits') || process.argv.includes('--prefs-only')) {
   await run('WITS', updateWitsBulk, undefined);
   console.log(report.map((r) => '  ' + r).join('\n'));
   process.exit(failed ? 1 : 0);
 }
 await run('HS 2022', checkHs6, undefined);
 await run('VAT/GST', updateVat, undefined);
+await run('Tỷ giá', updateFx, undefined);
 await run('WITS', updateWitsBulk, undefined);
 const us = await run('US', updateUS, { entries: keep('us-'), chapter99: prev.chapter99, release: prev.sources.find((s) => s.id === 'us-hts')?.release ?? '' });
 const gb = await run('GB', updateGB, keep('uk-'));
