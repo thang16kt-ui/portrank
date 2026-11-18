@@ -25,6 +25,24 @@ Nhánh `codex/road-google-maps`, dựa trên `claude/v2-sua-loi` tại `334d0453
 5. Thiết lập quota Google Cloud phù hợp. Máy chủ giới hạn tối đa 30 lần gọi/phút và 4 yêu cầu đồng thời cho mỗi instance; quota dự án là giới hạn bổ sung cho nhiều instance. Một lần tìm tuyến có thể phát sinh phí Google; bản đồ cũng có cách tính phí riêng.
 6. Trước khi phát hành công khai, bổ sung điều khoản sử dụng và chính sách quyền riêng tư của app theo yêu cầu Google Maps Platform; giữ nguyên ghi công trên bản đồ. Đây là yêu cầu vận hành dịch vụ, không tự nhận app đã có các trang này.
 
+### Cấu hình bản thử Render riêng
+
+| Trường | Giá trị |
+| --- | --- |
+| Tên dự kiến | `portrank-road-google-maps` (Render xác nhận tên/URL khi tạo) |
+| Repository | `https://github.com/thang16kt-ui/portrank` |
+| Branch | `codex/road-google-maps` |
+| Service type / runtime | Web Service / Node |
+| Build command | `npm ci && npm run build` |
+| Start command | `npm start` |
+| Health check path | `/api/health` |
+| Khóa định tuyến phía server | `GOOGLE_ROUTES_API_KEY` |
+| Khóa bản đồ phía trình duyệt | `GOOGLE_MAPS_BROWSER_KEY` |
+
+Giữ bản thử là dịch vụ riêng, không thay nhánh hoặc cấu hình dịch vụ v2. Render cần chọn đúng workspace trước khi tạo. Máy chủ lắng nghe trên `0.0.0.0` và cổng `PORT` do Render cấp.
+
+`/api/health` xác nhận máy chủ đang phục vụ HTTP, không gọi Google hoặc phát sinh truy vấn định tuyến. Kiểm tra `/api/road/config` để xem Google đã được cấu hình chưa; health thành công không có nghĩa là key Google đã hoạt động.
+
 ### Chạy local
 
 ```sh
@@ -44,6 +62,7 @@ node --env-file=.env server/index.mjs
 
 | Đường dẫn | Kết quả |
 | --- | --- |
+| `GET /api/health` | HTTP 200, `{"status":"ok"}`, không gọi nguồn ngoài |
 | `GET /api/road/config` | Trạng thái định tuyến, chế độ DRIVE, key trình duyệt công khai nếu được cấu hình |
 | `GET /api/road/routes?origin=106.7,10.77&destination=105.84,21.03` | Tối đa ba tuyến; khoảng cách m, thời gian giây, tọa độ `[lng,lat]`, nguồn, thời điểm lấy/khởi hành |
 | Thêm `departureTime=...` | RFC3339 có múi giờ, tại hiện tại/tương lai |

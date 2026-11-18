@@ -29,6 +29,15 @@ const stub = (body: unknown, status = 200) => {
 afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
 describe('Google Routes server boundary', () => {
+  it('reports server health without calling optional providers or exposing credentials', async () => {
+    const f = stub({});
+    const result = await bodyOf('/api/health');
+    expect(result.status).toBe(200);
+    expect(result.data).toEqual({ status: 'ok' });
+    expect(result.headers['Cache-Control']).toBe('no-store');
+    expect(result.body).not.toContain(env.GOOGLE_ROUTES_API_KEY);
+    expect(f).not.toHaveBeenCalled();
+  });
   it('does not call a billable API without a key and never exposes the Routes key in configuration', async () => {
     const f = stub({});
     expect((await bodyOf(url, { GOOGLE_ROUTES_API_KEY: '', GOOGLE_MAPS_BROWSER_KEY: '' })).status).toBe(503);

@@ -182,6 +182,8 @@ export async function handleApi(method, rawUrl, env = process.env) {
   if (!url.pathname.startsWith('/api/')) return null;
   if (method !== 'GET') return json(405, { error: 'Chỉ hỗ trợ GET' });
   try {
+    // Liveness is independent of optional, billable data providers.
+    if (url.pathname === '/api/health') return json(200, { status: 'ok' }, { 'Cache-Control': 'no-store' });
     if (url.pathname === '/api/config') {
       const { browserKey: _publicBrowserKey, ...road } = roadConfig(env);
       return json(200, { server: true, hts: true, road, dcsa: dcsaCarriers(env).map((c) => ({ id: c.id, configured: c.ok })) });
