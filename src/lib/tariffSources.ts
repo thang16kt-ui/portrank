@@ -5,6 +5,7 @@ import countries from 'i18n-iso-countries';
 import { EU_SET } from '../data/countries';
 import { VAT_DATA, standardVat } from '../data/vatRates';
 import { tariffLookupLink } from '../data/customsBasis';
+import { vnPreferences, type VnTariffFile } from './vnTariff';
 
 /**
  * Adapter lấy thuế suất tự động từ NGUỒN CHÍNH THỨC (đã kiểm tra tài liệu API trước khi viết):
@@ -21,7 +22,7 @@ export interface TariffChoice {
 
 /** Kết quả từ nguồn chính thức */
 export interface OfficialTariffResult {
-  provider: 'uk' | 'us' | 'wits' | 'taric';
+  provider: 'uk' | 'us' | 'wits' | 'taric' | 'vn';
   providerLabel: string;
   /** Mã đã dùng để tra (10 số UK / HTS 8–10 số Mỹ) */
   code?: string;
@@ -69,7 +70,7 @@ export interface TariffSnapshot {
 export const TARIFF_SNAPSHOT = snapshotJson as unknown as TariffSnapshot;
 
 export interface OfficialTariffSource {
-  readonly id: 'uk' | 'us' | 'wits' | 'taric';
+  readonly id: 'uk' | 'us' | 'wits' | 'taric' | 'vn';
   readonly label: string;
   supports(importCountry: string): boolean;
   lookup(q: TariffQuery): Promise<OfficialTariffResult>;
@@ -946,7 +947,66 @@ export const TaricSource: OfficialTariffSource = {
   },
 };
 
-export const OFFICIAL_SOURCES: OfficialTariffSource[] = [UkTariffSource, UsHtsSource, TaricSource, WitsTariffSource];
+/* ───────────────── Biểu thuế Việt Nam (file chính thức đã nạp, mã 8 số) ───────────────── */
+
+export const VnTariffSource: OfficialTariffSource = {
+  id: 'vn',
+  label: 'Biểu thuế XNK Việt Nam (file đã nạp)',
+  supports: (c) => c === 'VN',
+  async lookup(q) {
+    const d = digits(q.hs);
+    const base = { provider: 'vn' as const, providerLabel: this.label, notes: [] as string[], entry: null, url: 'https://www.customs.gov.vn/' };
+    let file: VnTariffFile;
+    try {
+      file = await getJson<VnTariffFile>(`${baseUrl()}data/vn/tariff.json`);
+      if (!file?.codes) throw new Error('trống');
+    } catch {
+      const w = await WitsTariffSource.lookup(q);
+      return { ...w, notes: ['Chưa nạp biểu thuế Việt Nam theo mã 8 số (npm run tariffs:vn -- <file Excel>) – dùng số liệu WITS theo HS6.', ...w.notes] };
+    }
+    if (d.length < 6) return { ...base, error: 'Cần mã HS ít nhất 6 số (chuẩn HS6)' };
+    let code = d.length >= 8 ? d.slice(0, 8) : '';
+    if (!code || !file.codes[code]) {
+      const under = Object.keys(file.codes).filter((c) => c.startsWith(d.slice(0, Math.min(d.length, 8))));
+      if (under.length === 1) code = under[0];
+      else if (under.length > 1)
+        return { ...base, choices: under.slice(0, 60).map((c) => ({ code: c, description: `${file.codes[c][0]} · ${file.codes[c][1] ?? '—'}%` })), notes: [`Mã ${d} có ${under.length} dòng 8 số trong biểu thuế Việt Nam – chọn mã chi tiết.`] };
+      else {
+        const w = await WitsTariffSource.lookup(q);
+        return { ...w, notes: [`Mã ${d} không có trong biểu thuế Việt Nam đã nạp – dùng số liệu WITS theo HS6.`, ...w.notes] };
+      }
+    }
+    const [desc, mfn, vatPct, excise, env] = file.codes[code];
+    if (mfn == null) return { ...base, code, description: desc, error: `Dòng ${code} không ghi thuế NK ưu đãi (MFN) dạng % – tra văn bản gốc.` };
+    const notes: string[] = [`Biểu thuế Việt Nam ${file.fileName ? `(${file.fileName}) ` : ''}nạp ngày ${file.importedAt.split('-').reverse().join('/')}.`];
+    const o = q.origin && q.origin !== '*' ? q.origin.toUpperCase() : '';
+    const prefs = o ? vnPreferences(file, code, o) : [];
+    const best = prefs[0];
+    const usePref = !!best && q.preferFta && best.pct < mfn;
+    if (best && best.pct < mfn && !q.preferFta) notes.push(`Có thuế ưu đãi đặc biệt ${best.pct}% (${best.label}) cho hàng xuất xứ ${o} – tích “Có C/O” để áp dụng.`);
+    if (usePref) notes.push(`Đang áp dụng ${best!.label}: ${best!.pct}% – cần C/O mẫu tương ứng.${prefs.length > 1 ? ` Hiệp định khác: ${prefs.slice(1, 4).map((p) => `${p.label} ${p.pct}%`).join(', ')}.` : ''}`);
+    if (o && !prefs.length) notes.push(`Không có thuế ưu đãi đặc biệt cho xuất xứ ${o} ở dòng này – áp thuế NK ưu đãi (MFN).`);
+    if (excise != null && excise > 0) notes.push(`Thuế TTĐB ${excise}% (tính trên trị giá + thuế NK) – đã cộng vào tổng.`);
+    if (env) notes.push(`Thuế bảo vệ môi trường: ${env} – thuế tuyệt đối, chưa cộng vào tổng.`);
+    const vat = vatPct ?? standardVat('VN')?.pct ?? null;
+    if (vatPct == null) notes.push(`File không ghi VAT – dùng thuế suất tiêu chuẩn ${vat}%.`);
+    return {
+      ...base,
+      code,
+      description: desc,
+      notes,
+      entry: {
+        id: `vn-${code}-${usePref ? o : '*'}`,
+        importCountry: 'VN', hs: code, origin: usePref ? o : '*',
+        rateType: usePref ? 'FTA' : 'MFN', fta: usePref ? best!.label : '',
+        dutyPct: usePref ? best!.pct : mfn, vatPct: vat, otherPct: excise ?? 0,
+        source: `${file.source}${file.fileName ? ` – ${file.fileName}` : ''}`, effectiveDate: '', updatedAt: file.importedAt, verified: true,
+      },
+    };
+  },
+};
+
+export const OFFICIAL_SOURCES: OfficialTariffSource[] = [UkTariffSource, UsHtsSource, TaricSource, VnTariffSource, WitsTariffSource];
 
 /** Nhãn nguồn của mức thuế lấy tự động (theo tiền tố id) */
 export function autoSourceOf(e: { id: string }): string | null {
@@ -954,6 +1014,7 @@ export function autoSourceOf(e: { id: string }): string | null {
   if (e.id.startsWith('us-')) return 'US HTS';
   if (e.id.startsWith('wits-')) return 'WITS / UNCTAD TRAINS';
   if (e.id.startsWith('taric-')) return 'EU TARIC';
+  if (e.id.startsWith('vn-')) return 'Biểu thuế Việt Nam';
   return null;
 }
 export const officialSourceFor = (importCountry: string) => OFFICIAL_SOURCES.find((s) => s.supports(importCountry));

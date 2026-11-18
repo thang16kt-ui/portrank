@@ -36,10 +36,11 @@ dữ liệu cảng 3D (vector tiles OpenStreetMap qua OpenFreeMap). Bản đồ 
 
 | Lệnh | Mô tả |
 | --- | --- |
-| `npm test` | 161 unit test (Vitest): routing, pricing + bảng giá, incoterm (đủ 11 điều kiện), duty, ranking, plan (tiêu chí hoàn thành), track + cảnh cảng, rules, nguồn thuế UK/US/EU TARIC/WITS + Chương 99 + bản chụp + chuẩn HS6, DCSA + máy chủ trung gian |
+| `npm test` | 180 unit test (Vitest): routing, pricing + bảng giá, incoterm (đủ 11 điều kiện), duty, ranking, plan (tiêu chí hoàn thành), track + cảnh cảng, rules, nguồn thuế UK/US/EU TARIC/WITS + Chương 99 + bản chụp + chuẩn HS6, DCSA + máy chủ trung gian |
 | `npm start` | Máy chủ Node phục vụ `dist/` + API trung gian (`/api/hts`, `/api/schedules`) |
 | `npm run tariffs:update` | Tải lại bản chụp biểu thuế (Mỹ, Anh) cho `src/data/tariffProducts.csv`, danh mục HS 2022 chuẩn và VAT/GST tiêu chuẩn |
 | `npm run tariffs:check` | Kiểm tra mã trong danh mục hàng, gợi ý mã còn thiếu (không ghi file) |
+| `npm run tariffs:vn -- <file.xlsx>` | Nạp biểu thuế nhập khẩu Việt Nam (mã 8 số, MFN + FTA + VAT + TTĐB) từ file Excel/CSV chính thức |
 | `npm run build` | Kiểm tra type + build production vào `dist/` |
 | `npm run gen:ship` / `gen:crane` | Sinh lại mô hình tàu / cẩu bờ `.glb` (tự vẽ bằng code, CC0) |
 | `npx tsx scripts/check-land.ts [searoute\|graph] [ALL\|POL-POD]` | Kiểm tra tuyến biển không cắt qua đất liền |
@@ -103,6 +104,7 @@ thời gian quay về ước tính. Khi chọn một lộ trình: dòng thời g
 | Anh | UK Trade Tariff API v2 (`/api/v2/headings`, `/api/v2/commodities`) | Trình duyệt gọi thẳng (API cho phép CORS) | Thuế MFN (Third country duty), ưu đãi theo xuất xứ (Tariff preference, có xét nhóm nước như CPTPP), VAT |
 | Mỹ | USITC HTS REST (`/reststop/exportList`, dự phòng `/reststop/search`) | Qua trung gian `/api/hts/exportList` và `/api/hts/search` (USITC chặn gọi từ trình duyệt) | Cột General (MFN), cột Special (FTA của Mỹ), phí MPF 0,3464% + HMF 0,125% (cộng vào tổng). Thuế bổ sung **Chương 99** theo xuất xứ (thuế đối ứng, Section 301 – vd. Việt Nam +20%) hiện mục **“Cần xác minh”**, KHÔNG cộng vào tổng vì phụ thuộc ngày xếp hàng và danh mục loại trừ |
 | **27 nước EU** | EU TARIC (Uỷ ban châu Âu) – `measures.jsp` → `measures_details.jsp` | Qua trung gian `/api/taric/…` (TARIC không có CORS) | **Nguồn chính thức, tra trực tiếp** theo mã 6–10 số + xuất xứ: thuế MFN, ưu đãi theo hiệp định (EVFTA…), thuế chống bán phá giá / chống trợ cấp / tự vệ (mức "Other" khi theo công ty, cộng vào tổng), hạn ngạch, biện pháp phi thuế quan, thuế hàng giá trị thấp (chỉ ghi chú). TARIC lỗi → dùng WITS |
+| **Việt Nam** | Biểu thuế XNK chính thức (file Excel do bạn nạp) | Tĩnh `public/data/vn/tariff.json` | Mã 8 số: MFN, ưu đãi đặc biệt theo từng FTA, VAT, TTĐB; chưa nạp → WITS |
 | **Mọi nước khác** (~170 nước: Việt Nam, Nhật, Hàn, Trung Quốc, Ấn Độ, ASEAN, Úc, Canada, Mexico, Brazil, Trung Đông, châu Phi…) | WITS – UNCTAD TRAINS (World Bank) | **Tải sẵn** `public/data/wits/{nước}.json` (WITS chặn rewrite của Render); nước thiếu file → `/api/wits/…` | Thuế MFN theo **HS6** năm gần nhất có số liệu (thường trễ 1–3 năm, lùi tối đa 10 năm), khoảng min–max giữa các dòng quốc gia. Biểu thuế dùng HS 2017/2012/… được **quy đổi sang HS 2022** bằng bảng tương quan của WITS. **Thuế ưu đãi cho xuất xứ Việt Nam** (đối tác 704, ASEAN, AANZFTA) tải sẵn. Ghi rõ năm số liệu, đánh dấu chưa xác minh |
 | Biểu thuế VN (Hải quan), WTO | – | Không làm | Máy chủ Hải quan VN không cho kết nối từ ngoài; WTO cần key → mức thuế theo mã quốc gia 8–10 số vẫn nhập ở trang **Biểu thuế** (được ưu tiên hơn mọi nguồn tự động) |
 
@@ -115,7 +117,17 @@ thời gian quay về ước tính. Khi chọn một lộ trình: dòng thời g
 - **WITS tải sẵn:** tường lửa của World Bank chặn yêu cầu đi qua rewrite của Render (403). `npm run tariffs:update` lấy danh sách nước từ danh mục số liệu
   của WITS, tải **toàn bộ biểu thuế MFN theo HS6** (1 lần gọi `product/all` mỗi nước) + thuế ưu đãi cho xuất xứ VN, quy đổi sang HS 2022 và ghi
   `public/data/wits/{nước}.json` (~70 KB/nước, chỉ tải file của nước đang tra) và `index.json` (năm, danh mục gốc, có quy đổi / ưu đãi VN hay không).
-- **Thuế phức hợp** (vd. "90¢/pr. + 37.5%", "8 % + 2.50 EUR / 100 kg"): tính phần %, hiển thị phần tuyệt đối (`specificDuty`) – chưa cộng vào tổng.
+- **Thuế ưu đãi theo xuất xứ (WITS):** với mỗi nước nhập, script đọc danh sách đối tác có biểu ưu đãi trong danh mục WITS và tải sẵn cho ~30 xuất xứ chính
+  (VN, CN, ASEAN, IN, KR, JP, AU, NZ, US, CA, MX, BR, TR, GB, EU…) + nhóm ASEAN (N52), AANZFTA (C02) → `public/data/wits/pref/{nước}.json`
+  (chỉ mã thấp hơn MFN, nén theo mức thuế). Hiện có 80 nước nhập / 402 cặp nước nhập – đối tác. `npm run tariffs:update -- --prefs-only` chỉ tải lại phần này.
+- Lãnh thổ hải ngoại thuộc EU (Guadeloupe, Martinique, Réunion, Guyane, Mayotte, Saint-Martin) dùng biểu thuế chung EU / TARIC.
+- **Thuế tuyệt đối / phức hợp** (vd. "90¢/pr. + 37.5%", "8 % + 2.50 EUR / 100 kg", "4 % MIN 0.30 EUR / 100 kg"): nhập *Số lượng tính thuế theo lượng*
+  (chiếc/đôi, KL tịnh, lít) ở bảng Hàng hoá → `src/lib/specificDuty.ts` tính phần tuyệt đối (¢, $, EUR, GBP… / kg, 100 kg, tấn, đôi, tá, chiếc, lít, hl; MIN/MAX),
+  quy đổi bằng **tỷ giá tham chiếu ECB** (`src/data/fxRates.json`), cộng vào thuế và trị giá tính VAT. Thuế theo độ cồn / thành phần → báo cần tính tay.
+- **Biểu thuế Việt Nam (mã 8 số):** máy chủ Hải quan VN chặn kết nối từ ngoài VN nên không tải tự động. Tải file Excel biểu thuế XNK chính thức rồi chạy
+  `npm run tariffs:vn -- "<file>.xlsx" [--sheet "<tên sheet>"]` → `public/data/vn/tariff.json`. Bộ nạp tự nhận cột Mã hàng, thuế NK ưu đãi (MFN), VAT, TTĐB, BVMT
+  và các cột FTA (ACFTA, ATIGA, AJCEP, VJEPA, AKFTA, VKFTA, AANZFTA, AIFTA, AHKFTA, VCFTA, VN-EAEU, CPTPP, EVFTA, UKVFTA, RCEP, VIFTA…), kể cả tiêu đề 2 tầng.
+  Có file → hàng nhập vào Việt Nam tra theo mã 8 số, chọn FTA có lợi nhất theo xuất xứ; chưa có → dùng WITS.
 - **Thuế bổ sung theo xuất xứ** (`additionalPct`, từ TARIC): cộng vào tổng và vào trị giá tính VAT.
 - Hai ưu đãi cùng thuế suất (vd. UKVFTA và CPTPP cùng 0%) → chọn hiệp định song phương.
 

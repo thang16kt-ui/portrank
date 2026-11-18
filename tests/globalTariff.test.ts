@@ -56,7 +56,8 @@ describe('WITS / UNCTAD TRAINS', () => {
     expect(OFFICIAL_SOURCES.find((s) => s.supports('GB'))?.id).toBe('uk');
     expect(OFFICIAL_SOURCES.find((s) => s.supports('US'))?.id).toBe('us');
     for (const c of ['DE', 'FR', 'NL']) expect(OFFICIAL_SOURCES.find((s) => s.supports(c))?.id, c).toBe('taric');
-    for (const c of ['VN', 'JP', 'KR', 'IN', 'BR', 'AU', 'CA', 'MX', 'TH', 'AE']) expect(OFFICIAL_SOURCES.find((s) => s.supports(c))?.id, c).toBe('wits');
+    expect(OFFICIAL_SOURCES.find((s) => s.supports('VN'))?.id).toBe('vn'); // biểu thuế VN đã nạp, không có → WITS
+    for (const c of ['JP', 'KR', 'IN', 'BR', 'AU', 'CA', 'MX', 'TH', 'AE']) expect(OFFICIAL_SOURCES.find((s) => s.supports(c))?.id, c).toBe('wits');
   });
   it('lookup: thử năm gần nhất → lùi dần khi 404; qua /api/wits; VAT tiêu chuẩn của nước nhập', async () => {
     const f = vi.fn(async (url: string) =>
