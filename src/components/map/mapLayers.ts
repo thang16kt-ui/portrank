@@ -251,6 +251,16 @@ export function buildLayers(c: LayerCtx): Layer[] {
         parameters: { depthCompare: 'always' },
       }),
     );
+    if (t.vehicle === 'truck' && c.view3d) {
+      layers.push(new ScenegraphLayer({
+        id: 'truck-3d', data: veh, scenegraph: '/models/truck.glb',
+        getPosition: (d: (typeof veh)[0]) => [d.pos[0], d.pos[1], 0],
+        getOrientation: (d: (typeof veh)[0]) => [0, 90 - d.bearing, 0],
+        sizeScale: 20, sizeMinPixels: 48, sizeMaxPixels: 100, _lighting: 'pbr',
+        updateTriggers: { getPosition: [c.day], getOrientation: [c.day] },
+        parameters: { depthCompare: 'always' },
+      } as any));
+    }
     if (t.vehicle === 'ship') {
       if (c.view3d && c.shipModelOk) {
         layers.push(

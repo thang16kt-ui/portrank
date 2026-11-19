@@ -17,7 +17,7 @@ import { useDataStore } from '../../store/useDataStore';
 import type { LngLat, Place } from '../../types';
 import { aggregateCredits, buildLayers, preflightGoogleTiles, resetGoogleLayer, type GoogleTilesCtx } from './mapLayers';
 import { buildScene, fetchOsmCranes, scanPort, type PortGrid, type PortScene } from './portScene';
-import PlaybackBar from '../PlaybackBar';
+import PlaybackBar, { SeaSimulationSummary } from '../PlaybackBar';
 import MapThemePanel from './MapThemePanel';
 import { labelVars, mix, resolveTheme, type MapTheme } from '../../config/mapThemes';
 
@@ -397,7 +397,7 @@ export default function MapView() {
         }),
       });
       // Xe tải (đường bộ) – ghim HTML
-      if (active && L.track!.vehicle === 'truck' && !L.portView) {
+      if (active && L.track!.vehicle === 'truck' && !L.portView && !L.view3d) {
         const at = trackPosition(L.track!, day);
         if (!s.truck) {
           const el = document.createElement('div');
@@ -742,6 +742,7 @@ export default function MapView() {
           </div>
         )}
 
+        {sel && track && !portView && <SeaSimulationSummary track={track} />}
         {sel && track && !portView && (
           <div className="pointer-events-auto absolute right-3 bottom-8 left-3">
             <PlaybackBar track={track} />

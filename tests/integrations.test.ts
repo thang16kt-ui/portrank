@@ -217,7 +217,7 @@ describe('server/api.mjs', () => {
     const r = (await handleApi('GET', '/api/config', env()))!;
     expect(r.status).toBe(200);
     expect(r.body).not.toContain('secret-123');
-    expect(JSON.parse(r.body)).toEqual({ server: true, hts: true, dcsa: [{ id: 'MAERSK', configured: true }, { id: 'CMACGM', configured: true }] });
+    expect(JSON.parse(r.body)).toEqual({ server: true, hts: true, road: { configured: false, provider: 'google', profile: 'DRIVE', trafficAware: true }, dcsa: [{ id: 'MAERSK', configured: true }, { id: 'CMACGM', configured: true }] });
   });
   it('/api/schedules: gọi GET /v1/point-to-point-routes đúng tham số, gửi key, theo Next-Page-Cursor', async () => {
     seen.length = 0;

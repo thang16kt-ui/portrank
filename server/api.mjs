@@ -21,6 +21,9 @@
  *   DCSA_<ID>_KEY=…  và  DCSA_<ID>_KEY_HEADER=Authorization  (mặc định Authorization)
  */
 
+import { handleRoad, roadConfig } from './road.mjs';
+import { handleTraffic } from './tomtom.mjs';
+
 const HTS_BASE = 'https://hts.usitc.gov/reststop/search';
 const HTS_EXPORT = 'https://hts.usitc.gov/reststop/exportList';
 const HTS_CODE = /^[0-9.]{4,13}$/;
@@ -180,9 +183,14 @@ export async function handleApi(method, rawUrl, env = process.env) {
   if (!url.pathname.startsWith('/api/')) return null;
   if (method !== 'GET') return json(405, { error: 'Chỉ hỗ trợ GET' });
   try {
+    // Liveness is independent of optional, billable data providers.
+    if (url.pathname === '/api/health') return json(200, { status: 'ok' }, { 'Cache-Control': 'no-store' });
     if (url.pathname === '/api/config') {
-      return json(200, { server: true, hts: true, dcsa: dcsaCarriers(env).map((c) => ({ id: c.id, configured: c.ok })) });
+      const { browserKey: _publicBrowserKey, ...road } = roadConfig(env);
+      return json(200, { server: true, hts: true, road, dcsa: dcsaCarriers(env).map((c) => ({ id: c.id, configured: c.ok })) });
     }
+    if (url.pathname === '/api/road/config' || url.pathname === '/api/road/routes') return await handleRoad(url, env);
+    if (url.pathname.startsWith('/api/traffic/')) return await handleTraffic(url, env);
     if (url.pathname === '/api/hts/search') return await handleHts(url);
     if (url.pathname === '/api/hts/exportList') return await handleHtsExport(url);
     if (url.pathname.startsWith('/api/wits/')) return await handleWits(url);

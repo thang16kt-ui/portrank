@@ -12,6 +12,7 @@ import { trackOf, type Track } from './track';
 import { OFFICIAL_SOURCES } from './tariffSources';
 import { fetchDcsaSchedules } from './dcsa';
 import { CURATED_CHARGES, CURATED_MEASURES, curatedTariffProvider } from '../data/curated';
+import { departureIso } from './simulation';
 
 export function planInputOf(f: FormState): PlanInput | null {
   if (!f.mine || !f.partner) return null;
@@ -22,6 +23,8 @@ export function planInputOf(f: FormState): PlanInput | null {
     customsDate: f.customsDate || '', fta: f.hasCo ? f.fta || '' : '', company: f.company || '',
     dutyQty: { units: f.dutyUnits ?? 0, netKg: f.netKg ?? 0, liters: f.dutyLiters ?? 0 },
     radiusKm: f.radiusKm, avoidRedSea: f.avoidRedSea, avoidPanama: f.avoidPanama, carriers: f.carriers,
+    roadDepartureTime: departureIso(f.roadDepartureTime),
+    roadVia: f.mode === 'road' ? f.roadVia ?? undefined : undefined,
   };
 }
 
@@ -35,6 +38,8 @@ export function inputFingerprint(f: FormState): string {
     f.role, p(f.mine), p(f.partner), f.mode, f.cargo, f.shipMode, f.container, f.quantity, f.cbm, f.weightKg, f.woodPallet, f.goodsValue, f.valueTerm,
     f.hs.replace(/\D/g, ''), f.origin, f.hasCo, f.hasCo ? f.fta ?? '' : '', f.customsDate ?? '', f.company ?? '', f.dutyUnits, f.netKg, f.dutyLiters, f.readyDate,
     f.radiusKm, f.avoidRedSea, f.avoidPanama, [...f.carriers].sort(),
+    f.roadDepartureTime ?? '',
+    f.mode === 'road' ? p(f.roadVia ?? null) : '',
   ]);
 }
 
@@ -62,13 +67,12 @@ export async function runPlan(opts: { keepSelection?: boolean } = {}) {
   const key = inputFingerprint(snapshot);
   app.set({ planning: { done: 0, total: 1 }, planError: null });
   try {
+    departureIso(f.roadDepartureTime);
     const [mine, partner] = await Promise.all([resolveCountryCoord(f.mine), resolveCountryCoord(f.partner)]);
-    let form = { ...f, mine, partner };
+    const form = { ...f, mine, partner };
     const sellerC = f.role === 'seller' ? mine.country : partner.country, buyerC = f.role === 'seller' ? partner.country : mine.country;
     if (form.mode === 'road' && !roadAvailability(sellerC, buyerC).ok) {
-      useAppStore.getState().setMode('sea');
-      form = { ...form, mode: 'sea', term: useAppStore.getState().form.term };
-      useAppStore.getState().set({ notice: 'Hai điểm không nối được bằng đường bộ – đã chuyển sang đường biển.' });
+      throw new Error('Hai điểm không có kết nối đường bộ. Hãy chọn phương thức khác.');
     }
     const data = useDataStore.getState();
     const plan = await buildPlan(planInputOf(form)!, {
@@ -94,7 +98,8 @@ export async function runPlan(opts: { keepSelection?: boolean } = {}) {
   } catch (e) {
     if (seq !== runSeq) return;
     console.error(e);
-    useAppStore.getState().set({ planning: null, planError: `Lỗi khi tính tuyến: ${(e as Error).message}` });
+    // A failed request must not leave the previous route looking like a result for the new inputs.
+    useAppStore.getState().set({ planning: null, plan: null, planKey: null, selectedKey: null, planError: `Lỗi khi tính tuyến: ${(e as Error).message}` });
   }
 }
 

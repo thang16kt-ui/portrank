@@ -138,16 +138,22 @@ describe('đường bộ', () => {
     expect(r).toHaveLength(1);
     expect(r[0].straight).toBe(true);
   });
-  it('phương án đường bộ: nhãn khoản 4/5/7 khác, thời gian = km/500 + 1 ngày/cửa khẩu', async () => {
-    const plan = await buildPlan(input(BD, BKK, { mode: 'road' }), deps);
+  it('đường bộ dùng km và giây lái xe từ provider; không cộng thêm hai chặng 30 km', async () => {
+    const route = { id: 'test', description: 'Tuyến kiểm thử', distanceMeters: 900000, durationSeconds: 43200, staticDurationSeconds: 40000, path: [BD.coord, BKK.coord], warnings: [] };
+    const road = { lookup: async () => ({ provider: 'google' as const, profile: 'DRIVE' as const, trafficAware: true as const, fetchedAt: '2026-11-18T12:00:00Z', departureTime: '2026-11-18T12:00:00Z', routes: [route] }) };
+    const plan = await buildPlan(input(BD, BKK, { mode: 'road' }), { ...deps, road });
     expect(plan.input.mode).toBe('road');
     const o = plan.options[0];
     expect(o.mode).toBe('road');
     expect(o.items[4].lines[0].label).toContain('Cước xe');
-    expect(o.days.total).toBeCloseTo(o.roadKm! / 500 + o.gates!.length, 6);
+    expect(o.roadKm).toBe(900);
+    expect(o.days.total).toBe(0.5);
+    expect(o.items[1].amount).toBe(0);
+    expect(o.items[8].amount).toBe(0);
+    expect(o.drivingRoute).toBe(route);
+    expect(o.roadPath).toBeUndefined();
   });
-  it('chọn đường bộ khi không nối được → tự về đường biển', async () => {
-    const plan = await buildPlan(input(BD, MU, { mode: 'road', mine: { ...BD }, partner: { kind: 'address', label: 'Tokyo', country: 'JP', countryName: 'Nhật Bản', coord: [139.69, 35.68] } }), deps);
-    expect(plan.input.mode).toBe('sea');
+  it('không nối được đường bộ → báo rõ thay vì tự chuyển sang biển', async () => {
+    await expect(buildPlan(input(BD, MU, { mode: 'road', mine: { ...BD }, partner: { kind: 'address', label: 'Tokyo', country: 'JP', countryName: 'Nhật Bản', coord: [139.69, 35.68] } }), deps)).rejects.toThrow('Không có kết nối đường bộ');
   });
 });

@@ -7,8 +7,9 @@ import IncotermExplainer from './components/IncotermExplainer';
 import PortCard from './components/PortCard';
 import ResultPanel from './components/ResultPanel';
 import Sidebar from './components/Sidebar';
-import MapView from './components/map/MapView';
 import MapBoundary from './components/map/MapBoundary';
+import RoadMap from './components/map/RoadMap';
+import JourneyMap from './components/map/JourneyMap';
 import PortCatalogPage from './pages/PortCatalogPage';
 import RateTablePage from './pages/RateTablePage';
 import SavedPage from './pages/SavedPage';
@@ -20,6 +21,8 @@ function Planner() {
   const sheetOpen = useAppStore((s) => s.sheetOpen);
   const set = useAppStore((s) => s.set);
   const portView = useAppStore((s) => s.portView);
+  // Keep an existing Google road result on a Google map while a new sea request is still loading.
+  const mode = useAppStore((s) => s.plan?.input.mode === 'road' ? 'road' : s.form.mode);
   const [collapsed, setCollapsed] = useState(false);
   const hidePanel = collapsed || !!portView;
   return (
@@ -38,9 +41,8 @@ function Planner() {
       </aside>
       <main className="flex min-w-0 flex-1 flex-col max-[899px]:block">
         <div className="relative min-h-0 flex-1 max-[899px]:h-[52vh]">
-          <MapBoundary>
-            <MapView />
-          </MapBoundary>
+          {/* Một bản đồ duy nhất: hành trình xe – tàu – xe (đường bộ dùng cùng bản đồ, hoặc Google khi nguồn là Google) */}
+          {mode === 'road' ? <RoadMap /> : <MapBoundary key="journey" webgl={false}><JourneyMap /></MapBoundary>}
           <div className="pointer-events-none absolute inset-0">
             <IncotermExplainer />
             <PortCard />

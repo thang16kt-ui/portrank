@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useRoadConfig } from '../hooks/useRoadConfig';
 import { INCOTERMS, termsForMode } from '../config/incoterms';
 import { CARGO_LABEL, CONTAINER_LABEL } from '../config/pricing';
 import { CRITERIA_LABEL, PRIORITY_LABEL, type Weights } from '../config/weights';
@@ -13,6 +14,7 @@ import { useAppStore } from '../store/useAppStore';
 import type { CargoType, ContainerType, Incoterm, Priority, TransportMode } from '../types';
 import AddressInput from './AddressInput';
 import HsInput from './HsInput';
+import { deviceTimeZone, minimumDeparture } from '../lib/simulation';
 
 const SELLER_C = '#38bdf8', BUYER_C = '#fb923c';
 
@@ -55,6 +57,8 @@ export default function Sidebar() {
   const [more, setMore] = useState(false);
   const [carrierOpen, setCarrierOpen] = useState(false);
   const [suggest, setSuggest] = useState(false);
+  const [showVia, setShowVia] = useState(false);
+  const { config: roadConfig } = useRoadConfig(f.mode === 'road');
 
   const sellerC = f.role === 'seller' ? f.mine?.country : f.partner?.country;
   const buyerC = f.role === 'seller' ? f.partner?.country : f.mine?.country;
@@ -88,6 +92,23 @@ export default function Sidebar() {
         </div>
         <AddressInput label="Bên tôi" value={f.mine} onChange={(mine) => setForm({ mine })} color={f.role === 'seller' ? SELLER_C : BUYER_C} placeholder="VD: Bình Dương, Việt Nam – hoặc Việt Nam" />
         <AddressInput label="Bên đối tác" value={f.partner} onChange={(partner) => setForm({ partner })} color={f.role === 'seller' ? BUYER_C : SELLER_C} placeholder="VD: Munich, Đức – hoặc Đức" />
+        <div>
+          <label className="lbl" htmlFor="road-departure">Ngày, giờ khởi hành</label>
+          <div className="flex items-center gap-2">
+            <input id="road-departure" className="field min-w-0" type="datetime-local" min={minimumDeparture()} value={f.roadDepartureTime ?? ''} onChange={(e) => setForm({ roadDepartureTime: e.target.value })} />
+            <button className="btn shrink-0" onClick={() => setForm({ roadDepartureTime: '' })}>Đi ngay</button>
+          </div>
+          <p className="mt-1 text-xs text-mute">{f.roadDepartureTime ? 'Giờ đã chọn' : 'Để trống = đi ngay'} · múi giờ {deviceTimeZone()}. Bấm Tìm tuyến tối ưu để áp dụng.</p>
+        </div>
+        {f.mode === 'road' && (
+          <div>
+            <p className="mt-1 text-[10.5px] text-mute">{roadConfig?.provider === 'tomtom' ? 'TomTom có xét giao thông. Giờ tương lai là dự báo; giờ đi theo múi giờ thiết bị.' : roadConfig?.provider === 'google' ? 'Google Maps có xét giao thông, giờ đi theo múi giờ thiết bị.' : roadConfig?.provider === 'osrm' ? 'OpenStreetMap / OSRM · bản thử. Thời gian chưa xét kẹt xe và không dự báo theo giờ đi.' : 'Đang kiểm tra nguồn đường bộ.'} Chọn thành phố/địa chỉ ở hai đầu. Tuyến ô tô chưa xét hạn chế xe tải/container.</p>
+            {(roadConfig?.provider === 'osrm' || roadConfig?.provider === 'tomtom' || f.roadVia) && <div className="mt-2 space-y-1">
+              <button className="text-[11px] text-sky underline" onClick={() => { if (showVia || f.roadVia) { setShowVia(false); setForm({ roadVia: null }); } else setShowVia(true); }}>{showVia || f.roadVia ? 'Bỏ điểm đi qua' : 'Thêm điểm đi qua (tuỳ chọn)'}</button>
+              {(showVia || f.roadVia) && <AddressInput label="Đi qua" value={f.roadVia ?? null} onChange={(roadVia) => setForm({ roadVia })} color="#a78bfa" placeholder="VD: Đà Nẵng, Việt Nam" />}
+            </div>}
+          </div>
+        )}
         <div className={f.mode === 'sea' ? '' : 'opacity-40'}>
           <label className="lbl">Hãng tàu {f.mode !== 'sea' && '(chỉ với Đường biển)'}</label>
           <button disabled={f.mode !== 'sea'} onClick={() => setCarrierOpen(!carrierOpen)} className="field flex items-center justify-between text-left">

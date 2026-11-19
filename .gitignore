@@ -5,3 +5,5 @@ dist
 tsconfig.tsbuildinfo
 .env
 .env.local
+
+/public/models/truck.glb

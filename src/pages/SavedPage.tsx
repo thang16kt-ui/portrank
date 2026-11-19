@@ -28,7 +28,7 @@ export default function SavedPage() {
                 <td>{q.summary}</td>
                 <td className="text-right font-semibold text-amber-200">{usd(q.youPay)}</td>
                 <td className="text-right">{usd(q.total)}</td>
-                <td>{fmtDays(q.days)}</td>
+                <td>{q.days == null ? 'Tính lại khi mở' : fmtDays(q.days)}</td>
                 <td className="text-right whitespace-nowrap">
                   <button className="mr-2 text-sky hover:underline" onClick={() => open(q.id)}>Mở lại</button>
                   <button className="text-mute hover:text-red-300" onClick={() => del(q.id)}>Xoá</button>

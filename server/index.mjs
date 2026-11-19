@@ -46,7 +46,7 @@ createServer((req, res) => {
   api(req, res, () => serveStatic(req, res)).catch((e) => {
     res.writeHead(500, { 'Content-Type': 'text/plain' }).end(String(e));
   });
-}).listen(PORT, () => {
+}).listen(PORT, '0.0.0.0', () => {
   const carriers = String(process.env.DCSA_CARRIERS ?? '').trim();
   console.log(`PortRank đang chạy: http://localhost:${PORT}  ·  DCSA: ${carriers || 'chưa cấu hình hãng nào'}`);
 });

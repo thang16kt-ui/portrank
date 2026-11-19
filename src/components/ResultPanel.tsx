@@ -1,10 +1,12 @@
 import { INCOTERMS } from '../config/incoterms';
 import { runPlan, useCurrent, usePlanStale, useRanked } from '../lib/actions';
-import { fmtDays, fmtKm, fmtNm, usd } from '../lib/format';
+import { fmtDays, fmtDrivingDistance, fmtDuration, fmtKm, fmtNm, usd } from '../lib/format';
 import { sellerShare } from '../lib/incoterm';
 import type { Plan } from '../lib/plan';
 import { COMPLETENESS_LABEL } from '../lib/completeness';
 import type { RankedOption } from '../lib/ranking';
+import { roadSourceLabel, roadTrafficLabel } from '../providers/RoadProvider';
+import { transitCountryNames } from '../lib/roadCountries';
 import { useAppStore, type DetailTab } from '../store/useAppStore';
 import IncotermCard, { placeNamesOf } from './IncotermCard';
 
@@ -33,15 +35,17 @@ export function quoteText(plan: Plan, r: RankedOption, term: string): string {
   const lines = [
     `PORTRANK – PHƯƠNG ÁN #${r.rank} (${plan.scopeShort})`,
     `Tuyến: ${plan.seller.label} → ${plan.buyer.label}`,
-    `${o.mode === 'sea' ? 'Đường biển' : 'Đường bộ'}: ${o.title}${o.route ? ` · ${fmtNm(o.route.distanceNm)}` : o.roadKm ? ` · ${fmtKm(o.roadKm)}` : ''}`,
+    ...(i.roadVia ? [`Đi qua: ${i.roadVia.label}`] : []),
+    `${o.mode === 'sea' ? 'Đường biển' : 'Đường bộ'}: ${o.title}${o.route ? ` · ${fmtNm(o.route.distanceNm)}` : o.drivingRoute ? ` · ${fmtDrivingDistance(o.drivingRoute.distanceMeters)}` : o.roadKm != null ? ` · ${fmtKm(o.roadKm)}` : ''}`,
     `Hàng: ${cargo}${i.hs ? ` · HS ${i.hs}` : ''}${i.goodsValue ? ` · trị giá ${usd(i.goodsValue)} (${i.valueTerm})` : ''}`,
     `Điều kiện: ${term} – ${INCOTERMS[term as keyof typeof INCOTERMS].nameVi}`,
-    // thời gian luôn theo mô hình (giá cước thật không làm thời gian thành số đã xác nhận)
-    `Thời gian: ${fmtDays(o.days.total)} (ước tính theo mô hình)`,
+    o.drivingRoute ? `Thời gian lái xe: ${fmtDuration(o.drivingRoute.durationSeconds)} · ${roadSourceLabel(o.roadDirections)} (ô tô, ${roadTrafficLabel(o.roadDirections)}; chưa gồm nghỉ, bốc dỡ và cửa khẩu)` : `Thời gian: ${fmtDays(o.days.total)} (ước tính theo mô hình)`,
+    ...(o.roadDirections ? [`${o.roadDirections.trafficAware ? `Giờ khởi hành: ${o.roadDirections.departureTime} · ` : 'Không dự báo theo giờ đi · '}lấy dữ liệu: ${o.roadDirections.fetchedAt}`, 'Tuyến ô tô chưa xác nhận hạn chế xe tải/container.'] : []),
     `Phạm vi: ${plan.scopeTitle}`,
     `Bạn trả: ${usd(r.youPay)} · Bên kia trả: ${usd(r.otherPays)} · ${o.completeness === 'complete' ? 'Tổng' : 'Đã tính'} 10 khoản: ${usd(o.total)} (khoảng ${usd(o.low)} – ${usd(o.high)})`,
     `Trạng thái tổng: ${COMPLETENESS_LABEL[o.completeness].label.toUpperCase()}${o.missing.length ? ` – chưa gồm: ${o.missing.slice(0, 6).join('; ')}${o.missing.length > 6 ? '…' : ''}` : ''}`,
-    `Thuế NK + VAT: ${o.duty.status === 'ok' ? `${usd(o.duty.total)}${o.duty.completeness !== 'complete' ? ' (CHƯA ĐỦ)' : ''} (nguồn: ${o.duty.entry!.source}, ${o.duty.entry!.verified ? 'đã xác minh' : 'chưa xác minh'}, cập nhật ${o.duty.entry!.updatedAt}${o.duty.entry!.dataYear ? `, biểu thuế năm ${o.duty.entry!.dataYear}` : ''})` : 'chưa có dữ liệu – CHƯA gồm trong tổng'}`,
+    `Thuế NK + VAT: ${o.duty.status === 'ok' ? `${usd(o.duty.total)}${o.duty.completeness !== 'complete' ? ' (CHƯA ĐỦ)' : ''} (nguồn: ${o.duty.entry!.source}, ${o.duty.entry!.verified ? 'đã xác minh' : 'chưa xác minh'}, cập nhật ${o.duty.entry!.updatedAt}${o.duty.entry!.dataYear ? `, biểu thuế năm ${o.duty.entry!.dataYear}` : ''})` : o.duty.status === 'domestic' ? `hai đầu cùng nước${o.roadTransitCountries?.length ? '; CHƯA tính phí quá cảnh' : '; không phát sinh thuế nhập khẩu tại đích'}` : 'chưa có dữ liệu – CHƯA gồm trong tổng'}`,
+    ...o.warnings,
     ...(o.duty.conditions.length ? [`Điều kiện: ${o.duty.conditions.join('; ')}`] : []),
     ...(o.duty.needInputs.length ? [`Cần nhập: ${o.duty.needInputs.join('; ')}`] : []),
     `Giá cước: ${o.rate ? `${o.rate.label} (chỉ cước biển/phụ phí là giá thật; các khoản khác vẫn ước tính)` : 'ƯỚC TÍNH theo mô hình PortRank – không phải giá thị trường'}`,
@@ -84,6 +88,7 @@ function Overview({ plan, r }: { plan: Plan; r: RankedOption }) {
           <span className={`chip ${cl.cls}`} title={cl.hint}>{cl.label}</span>
         </div>
       </div>
+      {!!o.roadTransitCountries?.length && <p className="mb-2 rounded-md border border-amber-500/50 bg-amber-500/10 p-2 text-[11px] text-amber-500" role="status">Tuyến có thể quá cảnh {transitCountryNames(o.roadTransitCountries)}. Chưa tính đủ phí và thời gian cửa khẩu. Có thể thêm điểm đi qua để đổi lộ trình.</p>}
       <div className="grid grid-cols-2 gap-1.5">
         <Big label={`Bạn trả (${role === 'seller' ? 'người bán' : 'người mua'})`} tone="text-amber-300" value={usd(r.youPay)} sub={<>logistics + thuế · bên kia trả {usd(r.otherPays)}</>} />
         <Big
@@ -92,9 +97,9 @@ function Overview({ plan, r }: { plan: Plan; r: RankedOption }) {
           sub={<>{hasValue ? <>giá hàng {term} ≈ {usd(priceAtTerm)} + phần người mua trả</> : <>chưa gồm giá hàng · {usd(o.low)}–{usd(o.high)}</>}{!complete && <> · <b className="text-amber-200">chưa gồm {o.missing.length} khoản</b></>}</>}
         />
         <Big
-          label="Thời gian (ước tính)"
-          value={fmtDays(d.total)}
-          sub={o.mode === 'sea' ? <>{d.inlandO + d.inlandD > 0 ? `nội địa ${d.inlandO + d.inlandD} + ` : ''}chờ tàu {d.wait} + biển {d.main.toFixed(1)} + làm hàng {d.handling} · theo mô hình</> : <>xe {d.main.toFixed(1)} + cửa khẩu {d.handling} · theo mô hình</>}
+          label={o.drivingRoute ? 'Thời gian lái xe (dự kiến)' : 'Thời gian (ước tính)'}
+          value={o.drivingRoute ? fmtDuration(o.drivingRoute.durationSeconds) : fmtDays(d.total)}
+          sub={o.drivingRoute ? <>{fmtDrivingDistance(o.drivingRoute.distanceMeters)} · {roadSourceLabel(o.roadDirections)} · {roadTrafficLabel(o.roadDirections)}; chưa gồm nghỉ, bốc dỡ và cửa khẩu</> : <>{d.inlandO + d.inlandD > 0 ? `nội địa ${d.inlandO + d.inlandD} + ` : ''}chờ tàu {d.wait} + biển {d.main.toFixed(1)} + làm hàng {d.handling} · theo mô hình</>}
         />
         <Big
           label={duty.status === 'ok' && duty.completeness !== 'complete' ? 'Thuế và VAT (chưa đủ)' : 'Thuế và VAT'}
@@ -106,7 +111,7 @@ function Overview({ plan, r }: { plan: Plan; r: RankedOption }) {
             ) : duty.status === 'no-value' ? (
               <>nhập mã HS và giá trị hàng</>
             ) : duty.status === 'domestic' ? (
-              <>nội địa</>
+              <>{o.roadTransitCountries?.length ? 'hai đầu cùng nước · chưa gồm phí quá cảnh' : 'nội địa'}</>
             ) : (
               <button className="text-sky underline" onClick={() => set({ detailTab: 'duty', detailOpen: true })}>Nhập thuế suất</button>
             )
@@ -121,7 +126,7 @@ function Overview({ plan, r }: { plan: Plan; r: RankedOption }) {
           title={stale ? 'Đầu vào đã đổi – tính lại trước khi lưu' : undefined}
           onClick={() => {
             // lưu ĐÚNG đầu vào của lần tính (không trộn form mới với số tiền cũ)
-            savePlan({ form: planForm!, optionKey: o.key, title: `${plan.seller.label} → ${plan.buyer.label}`, summary: `${o.title} · ${term}${complete ? '' : ` · ${cl.label.toLowerCase()}`}`, youPay: r.youPay, total: o.total, days: d.total });
+            savePlan({ form: planForm!, optionKey: o.key, title: `${plan.seller.label} → ${plan.buyer.label}`, summary: `${o.roadDirections ? 'Đường bộ (lấy lại tuyến khi mở)' : o.title} · ${term}${complete ? '' : ` · ${cl.label.toLowerCase()}`}`, youPay: r.youPay, total: o.total, days: o.roadDirections ? null : d.total });
             showToast('Đã lưu phương án');
           }}
         >
@@ -135,6 +140,8 @@ function Overview({ plan, r }: { plan: Plan; r: RankedOption }) {
         </ul>
       )}
       {plan.notes.length > 0 && <ul className="mt-1.5 space-y-0.5 text-[10px] leading-snug text-mute">{plan.notes.map((n, i) => <li key={i}>ℹ️ {n}</li>)}</ul>}
+      {o.warnings.length > 0 && <ul className="mt-1.5 text-[10px] text-amber-200">{o.warnings.map((n, i) => <li key={i}>{n}</li>)}</ul>}
+      {o.roadDirections && <p className="mt-1 text-[10px] text-mute">{o.roadDirections.trafficAware ? `Khởi hành ${new Date(o.roadDirections.departureTime).toLocaleString('vi-VN')} · ` : 'Không dự báo theo giờ đi · '}lấy dữ liệu {new Date(o.roadDirections.fetchedAt).toLocaleString('vi-VN')}{o.roadDirections.cached ? ' · dùng lại dữ liệu trong 5 phút' : ''}</p>}
     </div>
   );
 }
@@ -169,11 +176,12 @@ function Ranking({ ranked }: { ranked: RankedOption[] }) {
             >
               <div className="flex items-center gap-1.5">
                 <span className={`flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-bold ${rankCls(r.rank)}`}>{r.rank}</span>
-                <span className="min-w-0 flex-1 truncate text-[12px] font-medium text-fg">{o.title}</span>
+                <span className="min-w-0 flex-1 truncate text-[12px] font-medium text-fg" title={o.title}>{o.title}</span>
                 <span className="text-[12px] font-semibold text-amber-200">{usd(basis === 'mine' ? r.youPay : o.total)}</span>
               </div>
               <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 pl-6 text-[10.5px] text-mute">
-                <span>{fmtDays(o.days.total)}</span>
+                <span>{o.drivingRoute ? fmtDuration(o.drivingRoute.durationSeconds) : fmtDays(o.days.total)}</span>
+                {o.drivingRoute && <span>{fmtDrivingDistance(o.drivingRoute.distanceMeters)}</span>}
                 <span>tổng {usd(o.total)}</span>
                 <span>điểm {r.score.toFixed(0)}</span>
                 {o.rate ? <span className="chip chip-real">Cước thật</span> : <span className="chip chip-est">Ước tính</span>}

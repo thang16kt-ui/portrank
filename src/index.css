@@ -182,3 +182,52 @@ a { color: var(--color-sky); }
 :root[data-ui="light"] .pr-pass-tip, :root[data-ui="light"] .pr-tag { background: rgba(255,255,255,.96); color: #0f172a; }
 :root[data-ui="light"] .bg-white\/10 { background: rgba(15,23,42,.08); }
 :root[data-ui="light"] .toast-pop { box-shadow: 0 6px 20px rgba(15,23,42,.18); }
+/* Door-to-door playback stays readable over either light OSM tiles or dark map themes. */
+.journey-summary,.journey-controls{position:absolute;z-index:500;color:#172033;background:rgba(255,255,255,.96);border:1px solid #cbd5e1;border-radius:12px;box-shadow:0 4px 20px #0f172a20;padding:12px;font-size:14px;line-height:1.45}
+.journey-summary{left:12px;top:12px;max-width:min(520px,calc(100% - 24px));max-height:calc(100% - 140px);overflow:auto}
+.journey-summary[data-expanded="true"]{width:min(520px,calc(100% - 24px))}
+.journey-summary>button{margin-bottom:6px}
+.journey-controls{left:12px;right:12px;bottom:25px;max-height:calc(100% - 80px);overflow:auto;padding:8px 10px}
+.journey-playback{display:flex;align-items:center;gap:12px}
+.journey-playback .btn{flex-shrink:0}
+.journey-playback input[type="range"]{accent-color:#2563eb;min-height:24px}
+/* The clock lives in the collapsible journey information, never in the playback controls. */
+.simulation-panel{margin-top:10px;padding-top:10px;border-top:1px solid #e2e8f0;font-size:14px;line-height:1.4}
+.simulation-readout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"clock arrival" "leg status";gap:10px 16px;font-size:14px;line-height:1.35}
+.simulation-clock{grid-area:clock}.simulation-arrival{grid-area:arrival}.simulation-leg{grid-area:leg}.simulation-status{grid-area:status}
+.simulation-readout>div{display:flex;flex-direction:column;min-width:0}
+.simulation-readout>div>span{font-size:14px;opacity:.75}
+.simulation-readout strong{font-weight:650;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.simulation-readout .simulation-clock strong{color:#1d4ed8;font-size:16px}
+.simulation-forecast{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:6px;background:#dbeafe;color:#1e40af;font-size:12px;font-weight:500;vertical-align:middle}
+.simulation-meta{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;margin-top:8px;font-size:12px;opacity:.85}
+.simulation-meta small{font-size:12px}
+.simulation-meta details{max-width:100%;font-size:13px}
+.simulation-meta summary{cursor:pointer}
+.simulation-notes{max-height:80px;overflow:auto;margin-top:6px;font-size:13px;line-height:1.45}
+.simulation-stale{margin:0 0 8px;padding:6px 8px;border-radius:6px;background:#fef3c7;color:#92400e;font-size:14px}
+.journey-legend{margin-top:10px!important;padding-top:8px;border-top:1px solid #e2e8f0}
+@media(max-width:599px){.simulation-readout{gap:8px 12px}.journey-playback{gap:6px}.journey-playback .btn{padding:6px 8px}}
+.legacy-simulation{max-height:calc(52vh - 70px);overflow:auto}
+.legacy-simulation .simulation-clock strong{color:var(--color-sky)}
+.journey-stages{display:flex;gap:8px;overflow-x:auto;margin-bottom:8px;padding:2px;scrollbar-width:thin}
+.journey-stages .journey-stage{flex-shrink:0;max-width:340px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.journey-summary .btn,.journey-controls .btn,.journey-controls .field{color:#172033;background:#f1f5f9;border-color:#cbd5e1}
+.journey-stage{padding:5px 9px;background:#e2e8f0;border-radius:7px;font-size:12px;text-align:left;max-width:100%}
+.journey-stage-active{background:#dbeafe;box-shadow:inset 0 0 0 2px #2563eb;color:#1e3a8a}
+.journey-vehicle{display:flex;align-items:center;justify-content:center;font-size:32px;filter:drop-shadow(0 2px 3px #0007);background:#fffffff0;border-radius:50%;border:2px solid #fff}
+.leaflet-top.leaflet-right .leaflet-control-zoom{margin-top:52px}
+@media(max-width:899px){.journey-summary{padding:8px;font-size:12px;max-height:35%;max-width:calc(100% - 24px)}.journey-controls{padding:8px;bottom:22px}.journey-stage{font-size:11px;padding:3px 6px}.journey-vehicle{font-size:28px}}
+.journey-truck-3d,.journey-model-3d{background:transparent!important;border:0!important;pointer-events:none}
+/* Mô hình 3D CSS (truckModel.ts): lăng trụ dựng từ mặt trên + các mặt bên; .vehicle-heading được xoay theo hướng đi */
+.vm{position:relative;width:var(--vm-size);height:var(--vm-size);perspective:520px;filter:drop-shadow(0 1px 1px #0005)}
+.vehicle-heading{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d;transform:rotateX(48deg)}
+.vm-body{position:absolute;left:0;top:0;transform-style:preserve-3d}
+.vm-top,.vm-side{position:absolute;left:0;top:0;display:block;transform-origin:0 0;backface-visibility:visible}
+.vm-side{box-shadow:inset 0 0 0 .4px #0003}
+.vm-shadow{position:absolute;border-radius:45%;background:#0f172a66;filter:blur(4px)}
+.vm-shadow-truck{left:-13px;top:-34px;width:28px;height:70px;transform:translate(4px,3px)}
+.vm-shadow-ship{left:-13px;top:-50px;width:28px;height:98px;border-radius:50% 50% 30% 30%;background:#0c4a6e55}
+.vm-wake{position:absolute;left:-20px;top:-56px;width:40px;height:124px;border-radius:50% 50% 40% 40%;
+  background:radial-gradient(ellipse 30% 22% at 50% 4%,#ffffffd0,transparent 70%),radial-gradient(ellipse 48% 30% at 50% 84%,#ffffffb0,transparent 72%),
+  linear-gradient(to bottom,transparent 8%,#ffffff55 30%,#ffffff40 70%,transparent);filter:blur(1.5px);opacity:.9}
