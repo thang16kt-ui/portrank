@@ -20,21 +20,21 @@ const SELLER_C = '#38bdf8', BUYER_C = '#fb923c';
 
 function Block({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
   return (
-    <section className="card px-3 py-2.5">
-      <h2 className="mb-2 flex items-center gap-2 text-[13px] font-semibold text-fg">
-        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gold/20 text-[11px] text-amber-200">{n}</span>
-        {title}
+    <section className="card px-3.5 py-3">
+      <h2 className="mb-2.5 flex items-center gap-2.5 text-fg">
+        <span className="step-badge" aria-hidden="true">{n}</span>
+        <span className="step-title">{title}</span>
       </h2>
-      <div className="space-y-2">{children}</div>
+      <div className="space-y-2.5">{children}</div>
     </section>
   );
 }
 
 function Seg<T extends string>({ value, options, onChange }: { value: T; options: { v: T; label: string }[]; onChange: (v: T) => void }) {
   return (
-    <div className="flex overflow-hidden rounded-lg border border-line">
+    <div className="flex overflow-hidden rounded-md border border-line">
       {options.map((o) => (
-        <button key={o.v} onClick={() => onChange(o.v)} className={`flex-1 px-2 py-1.5 text-xs font-medium transition ${value === o.v ? 'bg-gold/20 text-amber-200' : 'bg-well text-mute hover:text-fg'}`}>
+        <button key={o.v} onClick={() => onChange(o.v)} aria-pressed={value === o.v} className={`flex-1 px-2 py-1.5 text-xs font-medium transition ${value === o.v ? 'bg-gold/15 font-semibold text-fg shadow-[inset_0_-2px_0_var(--color-gold)]' : 'bg-well text-mute hover:text-fg'}`}>
           {o.label}
         </button>
       ))}

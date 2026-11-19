@@ -21,23 +21,24 @@ export default function Header() {
   const setUi = useDataStore((s) => s.setUiTheme);
   const count: Partial<Record<Page, number>> = { rates: nRates, tariffs: nTariffs, schedules: nSched, saved: nSaved };
   return (
-    <header className="app-header flex h-12 shrink-0 items-center gap-3 border-b border-line bg-panel px-3">
-      <div className="flex shrink-0 items-center gap-2">
-        <svg width="24" height="24" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" style={{ fill: 'var(--color-panel2)' }} stroke="#22d3ee" strokeWidth="1.5" /><path d="M6 20c5-9 15-9 20 0" fill="none" stroke="#fbbf24" strokeWidth="2.2" strokeLinecap="round" /><circle cx="6" cy="20" r="2.4" fill="#38bdf8" /><circle cx="26" cy="20" r="2.4" fill="#fb923c" /></svg>
-        <span className="text-[15px] font-bold tracking-tight text-fg">Port<span className="text-amber-300">Rank</span></span>
-        <span className="hidden text-[11px] text-mute lg:inline">Tối ưu chi phí vận chuyển cửa đến cửa</span>
+    <header className="app-header flex h-13 shrink-0 items-stretch gap-4 border-b border-line bg-panel px-4 max-sm:gap-2 max-sm:px-2.5">
+      <div className="flex shrink-0 items-center gap-2.5">
+        {/* biểu tượng: container trên boong, đường đi cửa → cửa */}
+        <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="7" fill="#e35d0b" /><path d="M5 20h22l-3.2 5H8.2z" fill="#fff" /><rect x="9" y="13" width="6" height="6" fill="#12313f" /><rect x="16" y="13" width="6" height="6" fill="#ffd9c2" /><rect x="12.5" y="7" width="6" height="6" fill="#ffd9c2" /></svg>
+        <span className="font-display text-[20px] leading-none font-bold tracking-tight text-fg max-[479px]:sr-only">PortRank</span>
+        <span className="hidden max-w-[150px] text-[11.5px] leading-tight text-mute xl:inline">Tối ưu chi phí vận chuyển cửa đến cửa</span>
       </div>
-      <nav className="flex min-w-0 flex-1 gap-0.5 overflow-x-auto">
+      <nav className="flex min-w-0 flex-1 items-stretch overflow-x-auto" aria-label="Trang">
         {NAV.map((n) => (
-          <button key={n.page} onClick={() => setPage(n.page)} className={`rounded-md px-2.5 py-1.5 text-[12.5px] font-medium whitespace-nowrap transition ${page === n.page ? 'bg-gold/15 text-amber-200' : 'text-mute hover:bg-white/5 hover:text-fg'}`}>
+          <button key={n.page} onClick={() => setPage(n.page)} aria-current={page === n.page ? 'page' : undefined} className="nav-tab">
             {n.label}
-            {count[n.page] ? <span className="ml-1 rounded-full bg-white/10 px-1.5 text-[10px]">{count[n.page]}</span> : null}
+            {count[n.page] ? <span className="nav-count">{count[n.page]}</span> : null}
           </button>
         ))}
       </nav>
-      <span className="chip chip-est hidden shrink-0 md:inline-flex" title="Mọi con số giá là ước tính trừ khi bạn đã nhập bảng giá thật">Giá: ước tính</span>
+      <span className="chip chip-est shrink-0 self-center max-md:!hidden" title="Mọi con số giá là ước tính trừ khi bạn đã nhập bảng giá thật">Giá: ước tính</span>
       <button
-        className="btn shrink-0 !px-2.5"
+        className="btn shrink-0 self-center !px-2.5"
         onClick={() => setUi(ui === 'light' ? 'dark' : 'light')}
         title={ui === 'light' ? 'Chuyển giao diện sang nền tối' : 'Chuyển giao diện sang nền trắng'}
         aria-label={ui === 'light' ? 'Giao diện tối' : 'Giao diện sáng'}

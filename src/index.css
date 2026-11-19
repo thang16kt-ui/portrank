@@ -3,20 +3,25 @@
 
 @theme {
   --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
-  --color-ink: #070b14;
-  --color-panel: #0b1322;
-  --color-panel2: #101b2f;
-  --color-line: #1c2b45;
-  --color-fg: #dbe7f5;
-  --color-mute: #8195b0;
-  --color-gold: #fbbf24;
-  --color-sky: #22d3ee;
+  /* chữ hẹp kiểu ký hiệu sơn trên container / biển bãi cảng: số tiền, tiêu đề, menu */
+  --font-display: "Barlow Semi Condensed", "Be Vietnam Pro", ui-sans-serif, sans-serif;
+  /* Bến cảng về đêm */
+  --color-ink: #0b1a22;
+  --color-panel: #10242e;
+  --color-panel2: #143039;
+  --color-line: #1f3b47;
+  --color-fg: #e3ecea;
+  --color-mute: #8ea6ab;
+  --color-gold: #3cc2c9;
+  --color-sky: #3cc2c9;
+  /* cam an toàn ISO – nút chính, số tiền bạn trả */
+  --color-signal: #ff8a3d;
   --color-seller: #fbbf24;
   --color-buyer: #3f6ad8;
   --color-road: #a3e635;
   /* nền ô nhập / ô số liệu bên trong thẻ */
-  --color-well: #0a1120;
-  --color-line-strong: #35507c;
+  --color-well: #0d1f27;
+  --color-line-strong: #2f5866;
   /* chữ "Người bán" / "Người mua" trên nền giao diện */
   --color-seller-ink: #fbbf24;
   --color-buyer-ink: #8fb0ff;
@@ -36,31 +41,33 @@
 :root[data-ui="light"] {
   /* Giao diện sáng theo phong cách V1: nền trắng, viền xám nhạt, điểm nhấn xanh dương brand, thanh tiêu đề navy */
   color-scheme: light;
-  --color-ink: #f4f7fb;
+  --color-ink: #eef2f0;
   --color-panel: #ffffff;
-  --color-panel2: #f8fafc;
-  --color-line: #e2e8f0;
-  --color-line-strong: #cbd5e1;
-  --color-fg: #0f172a;
-  --color-mute: #64748b;
-  --color-sky: #0f5cb8;
-  --color-gold: #1d6fd1;
+  --color-panel2: #f4f7f6;
+  --color-line: #d5dedb;
+  --color-line-strong: #aebfbb;
+  --color-fg: #12313f;
+  --color-mute: #5e7177;
+  --color-sky: #0f7c86;
+  --color-gold: #0f7c86;
+  --color-signal: #e35d0b;
   --color-well: #ffffff;
   --color-seller-ink: #b45309;
   --color-buyer-ink: #1d4ed8;
   --color-diagram-node: #ffffff;
   --color-diagram-track: #e2e8f0;
   --color-diagram-dash: #cbd5e1;
-  --color-diagram-lit: #1d6fd1;
-  --color-diagram-label: #334155;
+  --color-diagram-lit: #0f7c86;
+  --color-diagram-label: #2c4651;
   --color-diagram-dim: #94a3b8;
   --color-diagram-axis: #64748b;
   --color-diagram-cargo-edge: #0f172a;
-  --color-amber-100: #0b4f8a;
-  --color-amber-200: #0f5cb8;
-  --color-amber-300: #0f5cb8;
-  --color-cyan-100: #0b4f8a;
-  --color-cyan-200: #0f5cb8;
+  /* chữ nhấn / cảnh báo trên nền sáng: cam đất đậm (đủ tương phản) */
+  --color-amber-100: #9a3d06;
+  --color-amber-200: #b4490a;
+  --color-amber-300: #b4490a;
+  --color-cyan-100: #0b5f67;
+  --color-cyan-200: #0f7c86;
   --color-emerald-300: #047857;
   --color-red-100: #b91c1c;
   --color-red-200: #b91c1c;
@@ -68,36 +75,37 @@
   --color-rose-200: #be123c;
   --color-pink-300: #be185d;
 }
-:root[data-ui="light"] .card { border-color: #e2e8f0; box-shadow: 0 1px 2px rgba(15,23,42,.05); }
-:root[data-ui="light"] .field { border-color: #cbd5e1; }
-:root[data-ui="light"] .field:focus { border-color: #1d6fd1; box-shadow: 0 0 0 3px rgba(29,111,209,.15); }
-:root[data-ui="light"] .btn { background: #ffffff; border-color: #cbd5e1; color: #334155; }
-:root[data-ui="light"] .btn:hover { background: #f1f5f9; border-color: #94a3b8; }
-:root[data-ui="light"] .btn-on, :root[data-ui="light"] .btn-on:hover { background: #eef6ff; border-color: #1d6fd1; color: #0b4f8a; }
-:root[data-ui="light"] input[type=range] { accent-color: #0f5cb8; }
+:root[data-ui="light"] .card { border-color: var(--color-line); box-shadow: none; }
+:root[data-ui="light"] .field { border-color: #c3d0cc; }
+:root[data-ui="light"] .field:focus { border-color: #0f7c86; box-shadow: 0 0 0 3px rgba(15,124,134,.16); }
+:root[data-ui="light"] .btn { background: #ffffff; border-color: #c3d0cc; color: #24414c; }
+:root[data-ui="light"] .btn:hover { background: #eef4f3; border-color: #8fa8a4; }
+:root[data-ui="light"] .btn-on, :root[data-ui="light"] .btn-on:hover { background: #e3f3f3; border-color: #0f7c86; color: #0b5f67; box-shadow: inset 0 -2px 0 #0f7c86; }
+:root[data-ui="light"] input[type=range] { accent-color: #0f7c86; }
 
 /* Thanh tiêu đề navy như V1 – đổi biến màu trong phạm vi header */
 :root[data-ui="light"] .app-header {
-  background: #0a2540;
-  border-color: #0a2540;
+  background: #12313f;
+  border-color: #12313f;
   --color-fg: #ffffff;
-  --color-mute: #bfdbfe;
+  --color-mute: #b9d3d3;
   --color-gold: #ffffff;
   --color-amber-200: #ffffff;
-  --color-amber-300: #fbbf24;
+  --color-amber-300: #ff9a5c;
   --color-panel2: rgba(255,255,255,.08);
   --color-line: rgba(255,255,255,.22);
 }
 :root[data-ui="light"] .app-header .btn { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.25); color: #fff; }
 :root[data-ui="light"] .app-header .btn:hover { background: rgba(255,255,255,.18); }
 :root[data-ui="light"] .app-header .chip-est { background: transparent; color: #fde68a; border: 1px solid rgba(252,211,77,.45); }
-:root[data-ui="light"] .app-header .bg-white\/10 { background: #fbbf24; color: #0a2540; }
+:root[data-ui="light"] .app-header .bg-white\/10 { background: #ff9a5c; color: #12313f; }
 
 /* Nút chính */
-.btn-primary { background: linear-gradient(90deg, #fbbf24, #f97316); color: #0f172a; box-shadow: 0 0 24px rgba(251,191,36,.35); }
-.btn-primary:hover { filter: brightness(1.1); }
-:root[data-ui="light"] .btn-primary { background: #0f5cb8; color: #fff; box-shadow: 0 4px 12px rgba(30,58,138,.25); }
-:root[data-ui="light"] .btn-primary:hover { background: #0b4f8a; filter: none; }
+.btn-primary { background: var(--color-signal); color: #fff; font-family: var(--font-display); font-weight: 700; font-size: 16px !important; letter-spacing: .01em; box-shadow: inset 0 -3px 0 rgba(0,0,0,.18); }
+.btn-primary:hover { filter: brightness(1.06); }
+.btn-primary:active { box-shadow: inset 0 2px 0 rgba(0,0,0,.2); }
+:root[data-ui="light"] .btn-primary { background: #e35d0b; color: #fff; }
+:root[data-ui="light"] .btn-primary:hover { background: #c94f07; filter: none; }
 
 html, body, #root { height: 100%; margin: 0; }
 body { font-family: var(--font-sans); background: var(--color-ink); color: var(--color-fg); }
@@ -107,12 +115,12 @@ body { font-family: var(--font-sans); background: var(--color-ink); color: var(-
 *::-webkit-scrollbar-thumb { background: var(--color-line-strong); border-radius: 3px; }
 input[type=range] { accent-color: var(--color-gold); }
 input, select, textarea { font-family: inherit; }
-.field { width: 100%; border-radius: 8px; border: 1px solid var(--color-line); background: var(--color-well); color: var(--color-fg); padding: 6px 9px; font-size: 13px; outline: none; }
-.field:focus { border-color: var(--color-sky); box-shadow: 0 0 0 2px rgba(34,211,238,.18); }
-.lbl { display: block; font-size: 11px; font-weight: 500; color: var(--color-mute); margin-bottom: 3px; }
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 8px; border: 1px solid var(--color-line); background: var(--color-panel2); color: var(--color-fg); padding: 5px 10px; font-size: 12px; font-weight: 500; cursor: pointer; transition: background .15s, border-color .15s; white-space: nowrap; }
+.field { width: 100%; border-radius: 6px; border: 1px solid var(--color-line); background: var(--color-well); color: var(--color-fg); padding: 6px 9px; font-size: 13px; outline: none; }
+.field:focus { border-color: var(--color-sky); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-sky) 22%, transparent); }
+.lbl { display: block; font-size: 11.5px; font-weight: 500; color: var(--color-mute); margin-bottom: 3px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 6px; border: 1px solid var(--color-line); background: var(--color-panel2); color: var(--color-fg); padding: 5px 10px; font-size: 12px; font-weight: 500; cursor: pointer; transition: background .15s, border-color .15s; white-space: nowrap; }
 .btn:hover { border-color: var(--color-line-strong); background: color-mix(in srgb, var(--color-panel2) 80%, var(--color-sky) 8%); }
-.btn-on, .btn-on:hover { border-color: var(--color-gold); background: linear-gradient(rgba(251,191,36,.16), rgba(251,191,36,.16)), var(--color-panel2); color: var(--color-amber-200, #fde68a); }
+.btn-on, .btn-on:hover { border-color: var(--color-gold); background: color-mix(in srgb, var(--color-gold) 16%, var(--color-panel2)); color: var(--color-fg); box-shadow: inset 0 -2px 0 var(--color-gold); }
 .btn:disabled { opacity: .4; cursor: not-allowed; }
 .chip { display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; padding: 1px 8px; font-size: 10.5px; font-weight: 600; line-height: 1.6; }
 .chip-est { background: rgba(148,163,184,.16); color: #b6c4d8; }
@@ -120,7 +128,20 @@ input, select, textarea { font-family: inherit; }
 .chip-warn { background: rgba(251,191,36,.16); color: #fcd34d; }
 .chip-bad { background: rgba(248,113,113,.16); color: #fca5a5; }
 .chip-sky { background: rgba(34,211,238,.14); color: #67e8f9; }
-.card { border: 1px solid var(--color-line); background: var(--color-panel); border-radius: 12px; }
+.card { border: 1px solid var(--color-line); background: var(--color-panel); border-radius: 10px; }
+/* bàn phím: viền focus rõ ở mọi nút / ô */
+:where(button, a, input, select, textarea, [tabindex]):focus-visible { outline: 2px solid var(--color-sky); outline-offset: 2px; }
+.font-display { font-family: var(--font-display); }
+.num { font-family: var(--font-display); font-variant-numeric: tabular-nums; letter-spacing: .005em; }
+/* tiêu đề bước 1–2–3 của bảng nhập (thực sự là trình tự) */
+.step-badge { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 4px; background: var(--color-fg); color: var(--color-panel); font-family: var(--font-display); font-size: 13px; font-weight: 700; }
+.step-title { font-family: var(--font-display); font-size: 16px; font-weight: 600; letter-spacing: .005em; }
+/* menu chính: gạch chân cam như vạch sơn bãi container */
+.nav-tab { position: relative; font-family: var(--font-display); font-size: 15px; font-weight: 500; letter-spacing: .01em; color: var(--color-mute); padding: 0 10px; height: 100%; display: inline-flex; align-items: center; white-space: nowrap; transition: color .15s; }
+.nav-tab:hover { color: var(--color-fg); }
+.nav-tab[aria-current="page"] { color: var(--color-fg); font-weight: 600; }
+.nav-tab[aria-current="page"]::after { content: ""; position: absolute; left: 10px; right: 10px; bottom: 0; height: 3px; border-radius: 2px 2px 0 0; background: var(--color-signal); }
+.nav-count { margin-left: 5px; border-radius: 4px; padding: 0 5px; font-size: 12px; line-height: 17px; background: color-mix(in srgb, var(--color-signal) 85%, transparent); color: #fff; font-weight: 600; }
 table.tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
 table.tbl th { text-align: left; font-weight: 600; color: var(--color-mute); padding: 6px 8px; border-bottom: 1px solid var(--color-line); white-space: nowrap; position: sticky; top: 0; background: var(--color-panel); }
 table.tbl td { padding: 6px 8px; border-bottom: 1px solid rgba(28,43,69,.6); vertical-align: top; }
@@ -183,38 +204,40 @@ a { color: var(--color-sky); }
 :root[data-ui="light"] .bg-white\/10 { background: rgba(15,23,42,.08); }
 :root[data-ui="light"] .toast-pop { box-shadow: 0 6px 20px rgba(15,23,42,.18); }
 /* Door-to-door playback stays readable over either light OSM tiles or dark map themes. */
-.journey-summary,.journey-controls{position:absolute;z-index:500;color:#172033;background:rgba(255,255,255,.96);border:1px solid #cbd5e1;border-radius:12px;box-shadow:0 4px 20px #0f172a20;padding:12px;font-size:14px;line-height:1.45}
+.journey-summary,.journey-controls{position:absolute;z-index:500;color:#12313f;background:rgba(255,255,255,.97);border:1px solid #c3d0cc;border-radius:10px;box-shadow:0 10px 28px -12px #12313f59,0 2px 6px -2px #12313f26;padding:12px;font-size:14px;line-height:1.45}
+.journey-summary strong{font-family:var(--font-display);font-size:17px;font-weight:600}
 .journey-summary{left:12px;top:12px;max-width:min(520px,calc(100% - 24px));max-height:calc(100% - 140px);overflow:auto}
 .journey-summary[data-expanded="true"]{width:min(520px,calc(100% - 24px))}
 .journey-summary>button{margin-bottom:6px}
 .journey-controls{left:12px;right:12px;bottom:25px;max-height:calc(100% - 80px);overflow:auto;padding:8px 10px}
 .journey-playback{display:flex;align-items:center;gap:12px}
 .journey-playback .btn{flex-shrink:0}
-.journey-playback input[type="range"]{accent-color:#2563eb;min-height:24px}
+.journey-playback input[type="range"]{accent-color:#0f7c86;min-height:24px}
 /* The clock lives in the collapsible journey information, never in the playback controls. */
-.simulation-panel{margin-top:10px;padding-top:10px;border-top:1px solid #e2e8f0;font-size:14px;line-height:1.4}
+.simulation-panel{margin-top:10px;padding-top:10px;border-top:1px solid #d5dedb;font-size:14px;line-height:1.4}
 .simulation-readout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"clock arrival" "leg status";gap:10px 16px;font-size:14px;line-height:1.35}
 .simulation-clock{grid-area:clock}.simulation-arrival{grid-area:arrival}.simulation-leg{grid-area:leg}.simulation-status{grid-area:status}
 .simulation-readout>div{display:flex;flex-direction:column;min-width:0}
 .simulation-readout>div>span{font-size:14px;opacity:.75}
 .simulation-readout strong{font-weight:650;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
-.simulation-readout .simulation-clock strong{color:#1d4ed8;font-size:16px}
-.simulation-forecast{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:6px;background:#dbeafe;color:#1e40af;font-size:12px;font-weight:500;vertical-align:middle}
+.simulation-readout strong{font-family:var(--font-display);font-size:17px}
+.simulation-readout .simulation-clock strong{color:#0f7c86;font-size:19px}
+.simulation-forecast{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:4px;background:#d9efef;color:#0b5f67;font-size:12px;font-weight:500;vertical-align:middle}
 .simulation-meta{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;margin-top:8px;font-size:12px;opacity:.85}
 .simulation-meta small{font-size:12px}
 .simulation-meta details{max-width:100%;font-size:13px}
 .simulation-meta summary{cursor:pointer}
 .simulation-notes{max-height:80px;overflow:auto;margin-top:6px;font-size:13px;line-height:1.45}
 .simulation-stale{margin:0 0 8px;padding:6px 8px;border-radius:6px;background:#fef3c7;color:#92400e;font-size:14px}
-.journey-legend{margin-top:10px!important;padding-top:8px;border-top:1px solid #e2e8f0}
+.journey-legend{margin-top:10px!important;padding-top:8px;border-top:1px solid #d5dedb}
 @media(max-width:599px){.simulation-readout{gap:8px 12px}.journey-playback{gap:6px}.journey-playback .btn{padding:6px 8px}}
 .legacy-simulation{max-height:calc(52vh - 70px);overflow:auto}
 .legacy-simulation .simulation-clock strong{color:var(--color-sky)}
 .journey-stages{display:flex;gap:8px;overflow-x:auto;margin-bottom:8px;padding:2px;scrollbar-width:thin}
 .journey-stages .journey-stage{flex-shrink:0;max-width:340px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.journey-summary .btn,.journey-controls .btn,.journey-controls .field{color:#172033;background:#f1f5f9;border-color:#cbd5e1}
-.journey-stage{padding:5px 9px;background:#e2e8f0;border-radius:7px;font-size:12px;text-align:left;max-width:100%}
-.journey-stage-active{background:#dbeafe;box-shadow:inset 0 0 0 2px #2563eb;color:#1e3a8a}
+.journey-summary .btn,.journey-controls .btn,.journey-controls .field{color:#12313f;background:#f4f7f6;border-color:#c3d0cc}
+.journey-stage{padding:5px 10px;background:#eef2f0;border:1px solid #d5dedb;border-radius:6px;font-size:12.5px;text-align:left;max-width:100%;color:#24414c}
+.journey-stage-active{background:#e3f3f3;border-color:#0f7c86;box-shadow:inset 0 -3px 0 #0f7c86;color:#0b5f67;font-weight:600}
 .journey-vehicle{display:flex;align-items:center;justify-content:center;font-size:32px;filter:drop-shadow(0 2px 3px #0007);background:#fffffff0;border-radius:50%;border:2px solid #fff}
 .leaflet-top.leaflet-right .leaflet-control-zoom{margin-top:52px}
 @media(max-width:899px){.journey-summary{padding:8px;font-size:12px;max-height:35%;max-width:calc(100% - 24px)}.journey-controls{padding:8px;bottom:22px}.journey-stage{font-size:11px;padding:3px 6px}.journey-vehicle{font-size:28px}}
@@ -231,3 +254,7 @@ a { color: var(--color-sky); }
 .vm-wake{position:absolute;left:-20px;top:-56px;width:40px;height:124px;border-radius:50% 50% 40% 40%;
   background:radial-gradient(ellipse 30% 22% at 50% 4%,#ffffffd0,transparent 70%),radial-gradient(ellipse 48% 30% at 50% 84%,#ffffffb0,transparent 72%),
   linear-gradient(to bottom,transparent 8%,#ffffff55 30%,#ffffff40 70%,transparent);filter:blur(1.5px);opacity:.9}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}
