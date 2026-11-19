@@ -1,8 +1,6 @@
 import { fmtDateVi } from '../lib/csv';
 import type { Track } from '../lib/track';
-import { usePlayback, type Speed } from '../store/useAppStore';
-
-const SPEEDS: Speed[] = [0.5, 1, 2, 5];
+import { PLAYBACK_SPEEDS, usePlayback, type Speed } from '../store/useAppStore';
 
 function addIso(iso: string, days: number) {
   const d = new Date(iso + 'T00:00:00Z');
@@ -41,13 +39,9 @@ export default function PlaybackBar({ track }: { track: Track }) {
         </div>
         <input type="range" min={0} max={1000} value={Math.round(progress * 1000)} onChange={(e) => setProgress(+e.target.value / 1000)} className="mt-1 block h-1.5 w-full" />
       </div>
-      <div className="flex shrink-0 overflow-hidden rounded-lg border border-line">
-        {SPEEDS.map((s) => (
-          <button key={s} onClick={() => setSpeed(s)} className={`px-2 py-1 text-[11px] font-medium ${speed === s ? 'bg-gold/20 text-amber-200' : 'bg-panel2 text-mute hover:text-fg'}`}>
-            x{s}
-          </button>
-        ))}
-      </div>
+      <select aria-label="Tốc độ mô phỏng" className="field !w-auto shrink-0 !py-1 text-xs" value={speed} onChange={(e) => setSpeed(+e.target.value as Speed)}>
+        {PLAYBACK_SPEEDS.map((s) => <option key={s} value={s}>×{s}</option>)}
+      </select>
     </div>
   );
 }

@@ -247,7 +247,8 @@ export const useAppStore = create<AppState>((set, get) => ({
 
 /* ───────────── Playback (tách riêng để chỉ thanh tiến trình / bản đồ re-render mỗi khung hình) ───────────── */
 
-export type Speed = 0.5 | 1 | 2 | 5;
+export const PLAYBACK_SPEEDS = [0.05, 0.1, 0.25, 0.5, 1, 2, 5] as const;
+export type Speed = typeof PLAYBACK_SPEEDS[number];
 
 interface PlaybackState {
   /** 0..1 */
@@ -262,7 +263,7 @@ interface PlaybackState {
 export const usePlayback = create<PlaybackState>((set) => ({
   progress: 0,
   playing: true,
-  speed: 1,
+  speed: 0.1,
   setProgress: (progress) => set({ progress: Math.max(0, Math.min(1, progress)) }),
   setPlaying: (playing) => set({ playing }),
   setSpeed: (speed) => set({ speed }),

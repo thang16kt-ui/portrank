@@ -7,7 +7,7 @@ import { unwrapLongitudes } from '../../lib/geo';
 import { journeyPosition, journeyStage, TRAFFIC_COLORS, type JourneyLeg } from '../../lib/journey';
 import { getTrack } from '../../lib/actions';
 import { ServerRoadProvider, type RoadDirections } from '../../providers/RoadProvider';
-import { useAppStore, usePlayback } from '../../store/useAppStore';
+import { PLAYBACK_SPEEDS, useAppStore, usePlayback, type Speed } from '../../store/useAppStore';
 import type { Place, Port } from '../../types';
 import { truckModelMarkup } from './truckModel';
 
@@ -232,7 +232,7 @@ export default function JourneyMap() {
       <div className="flex items-center gap-3"><button className="btn" disabled={!animationReady} aria-label={playing ? 'Tạm dừng hành trình' : 'Phát hành trình'} onClick={() => { const p = usePlayback.getState(); if (p.progress >= 1) p.setProgress(0); p.setPlaying(!p.playing); }}>{playing ? '⏸' : '▶'}</button>
         <input aria-label="Tiến độ hành trình" type="range" min="0" max="1000" value={Math.round(progress * 1000)} disabled={!animationReady} onChange={(e) => usePlayback.getState().setProgress(+e.target.value / 1000)} className="min-w-0 flex-1" />
         <button className="btn !text-xs" aria-pressed={followStages} onClick={() => setFollowStages((v) => !v)}>{followStages ? 'Theo chặng' : 'Toàn cảnh'}</button>
-        <select aria-label="Tốc độ mô phỏng" className="field !w-auto !py-1" value={speed} onChange={(e) => usePlayback.getState().setSpeed(+e.target.value as 0.5 | 1 | 2 | 5)}>{[0.5, 1, 2, 5].map((s) => <option key={s} value={s}>×{s}</option>)}</select>
+        <select aria-label="Tốc độ mô phỏng" className="field !w-auto !py-1" value={speed} onChange={(e) => usePlayback.getState().setSpeed(+e.target.value as Speed)}>{PLAYBACK_SPEEDS.map((s) => <option key={s} value={s}>×{s}</option>)}</select>
       </div>
       <p className="mt-1 text-xs opacity-75">Mô phỏng tăng tốc · dữ liệu giao thông thực. Tuyến ô tô chưa xác nhận hạn chế xe tải; màu trống là chưa có thông tin.</p>
     </section>}
