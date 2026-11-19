@@ -215,6 +215,9 @@ export default function MapView() {
   /** Tăng mỗi lần style bản đồ được nạp lại → các effect gắn lớp/filter chạy lại */
   const [styleRev, setStyleRev] = useState(0);
   const [mapError, setMapError] = useState<string | null>(null);
+  /** Mất WebGL context → ném lỗi cho MapBoundary để thay vùng bản đồ bằng thông báo (không làm trắng app) */
+  const [crash, setCrash] = useState<string | null>(null);
+  if (crash) throw new Error(crash);
   const [scene, setScene] = useState<PortScene | null>(null);
   const [sceneBusy, setSceneBusy] = useState(false);
   const [photoreal, setPhotoreal] = useState(false);
@@ -343,6 +346,7 @@ export default function MapView() {
       map.addControl(overlay as unknown as maplibregl.IControl);
       setReady(true);
     });
+    map.getCanvas().addEventListener('webglcontextlost', () => setCrash('Mất WebGL context của bản đồ'), { once: true });
     map.on('error', (e) => {
       const msg = (e as { error?: Error }).error?.message ?? '';
       if (/style|Failed to fetch/i.test(msg) && !map.isStyleLoaded()) setMapError('Không tải được bản đồ nền chi tiết OpenFreeMap (kiểm tra kết nối mạng) – chọn chủ đề khác trong 🎨 Màu bản đồ.');

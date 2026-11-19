@@ -102,7 +102,7 @@ describe('US HTS', () => {
       expect(urls.some((u) => u.startsWith('/api/hts/exportList?from=9903.'))).toBe(true);
       expect(urls.every((u) => u.startsWith('/api/hts/'))).toBe(true);
       expect(r.entry?.hs).toBe('9403604000');
-      expect(r.entry?.feePct).toBeCloseTo(0.4714);
+      expect(r.entry?.fees?.map((x) => x.code)).toEqual(['MPF', 'HMF']);
     } finally {
       vi.unstubAllGlobals();
     }

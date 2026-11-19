@@ -1,5 +1,5 @@
 import { findCarrier } from '../data/carriers';
-import { rowsToRecords, toIsoDate, toNumber } from '../lib/csv';
+import { parseDate, rowsToRecords, toNumber } from '../lib/csv';
 import { resolvePortCode } from './RateProvider';
 
 export interface Transshipment {
@@ -97,22 +97,38 @@ export function parseScheduleRows(rows: string[][], today: string): { entries: S
     const line = i + 2;
     const carrier = findCarrier(r.carrier);
     const pol = resolvePortCode(r.pol), pod = resolvePortCode(r.pod);
-    const etd = toIsoDate(r.etd), eta = toIsoDate(r.eta);
     if (!carrier) return errors.push(`Dòng ${line}: không nhận ra hãng tàu "${r.carrier ?? ''}"`);
     if (!pol || !pod) return errors.push(`Dòng ${line}: không nhận ra cảng`);
+    // ngày phải có thật trên lịch (2026-02-31 bị từ chối), thứ tự mốc hợp lý
+    const dates: Record<string, string> = {};
+    for (const [k, v] of Object.entries({ etd: r.etd, eta: r.eta, cutoff_cy: r.cutoffCy, cutoff_doc: r.cutoffDoc, cutoff_vgm: r.cutoffVgm, ts1_eta: r.ts1Eta, ts1_etd: r.ts1Etd, ts2_eta: r.ts2Eta, ts2_etd: r.ts2Etd })) {
+      const d = parseDate(v);
+      if (d.invalid) return errors.push(`Dòng ${line}, cột ${k}: ngày không có thật "${v}"`);
+      dates[k] = d.iso;
+    }
+    const { etd, eta } = dates;
     if (!etd || !eta) return errors.push(`Dòng ${line}: thiếu ETD hoặc ETA`);
     if (eta < etd) return errors.push(`Dòng ${line}: ETA trước ETD`);
+    for (const k of ['cutoff_cy', 'cutoff_doc', 'cutoff_vgm']) if (dates[k] && dates[k] > etd) return errors.push(`Dòng ${line}, cột ${k}: cut-off ${dates[k]} sau ETD ${etd}`);
     const ts: Transshipment[] = [];
-    for (const [port, a, d, v] of [[r.ts1Port, r.ts1Eta, r.ts1Etd, r.ts1Vessel], [r.ts2Port, r.ts2Eta, r.ts2Etd, r.ts2Vessel]]) {
+    let prev = etd, prevLabel = 'ETD';
+    for (const [n, port, v] of [[1, r.ts1Port, r.ts1Vessel], [2, r.ts2Port, r.ts2Vessel]] as const) {
       if (!port) continue;
       const code = resolvePortCode(port);
       if (!code) { errors.push(`Dòng ${line}: không nhận ra cảng chuyển tải "${port}"`); return; }
-      ts.push({ port: code, eta: toIsoDate(a), etd: toIsoDate(d), vessel: v ?? '' });
+      const a = dates[`ts${n}_eta`], d = dates[`ts${n}_etd`];
+      for (const [label, x] of [[`ETA chuyển tải ${n}`, a], [`ETD chuyển tải ${n}`, d]] as const) {
+        if (!x) continue;
+        if (x < prev) { errors.push(`Dòng ${line}: ${label} ${x} trước ${prevLabel} ${prev}`); return; }
+        if (x > eta) { errors.push(`Dòng ${line}: ${label} ${x} sau ETA cảng đích ${eta}`); return; }
+        [prev, prevLabel] = [x, label];
+      }
+      ts.push({ port: code, eta: a, etd: d, vessel: v ?? '' });
     }
     const free = toNumber(r.freeDays);
     entries.push({
       id: `${Date.now().toString(36)}-${i}`, carrier: carrier.id, service: r.service ?? '', vessel: r.vessel ?? '', voyage: r.voyage ?? '',
-      pol, pod, etd, eta, cutoffCy: toIsoDate(r.cutoffCy), cutoffDoc: toIsoDate(r.cutoffDoc), cutoffVgm: toIsoDate(r.cutoffVgm),
+      pol, pod, etd, eta, cutoffCy: dates.cutoff_cy, cutoffDoc: dates.cutoff_doc, cutoffVgm: dates.cutoff_vgm,
       transshipments: ts, freeDays: isFinite(free) ? free : null, source: r.source ?? 'Nhập tay', fetchedAt: today,
     });
   });

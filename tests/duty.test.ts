@@ -34,7 +34,8 @@ describe('computeDuty', () => {
     const d = computeDuty('US', 10000, 9000, T({ importCountry: 'US', dutyPct: 10, vatPct: null }));
     expect(d.customsValue).toBe(9000);
     expect(d.duty).toBeCloseTo(900, 6);
-    expect(d.vatMissing).toBe(true);
+    // Mỹ không có VAT liên bang → 0, không phải "thiếu"
+    expect(d.vatMissing).toBe(false);
     expect(d.vat).toBe(0);
   });
   it('không có thuế suất → "no-data", không tự đoán', () => {

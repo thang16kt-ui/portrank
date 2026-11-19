@@ -16,3 +16,9 @@ export const VAT_DATA = vat as { source: string; sourceUrl: string; fetchedAt: s
 export const standardVat = (iso2: string): VatInfo | null => VAT_DATA.rates[iso2] ?? null;
 
 export const vatLabel = (v: VatInfo) => (v.type === 'gst' ? 'GST' : v.type === 'none' ? 'Không có VAT quốc gia' : v.type.toUpperCase());
+
+/** 0 nếu nước không có VAT quốc gia (vd. Mỹ); null nếu chưa biết */
+export const standardVatOf = (iso2: string): number | null => {
+  const v = standardVat(iso2);
+  return v ? (v.type === 'none' ? 0 : v.pct) : null;
+};

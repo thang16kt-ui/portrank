@@ -97,14 +97,28 @@ export interface RankedOption {
   scores: Record<keyof Weights, number>;
   score: number;
   tags: string[];
+  /** Tiêu chí không được tính điểm (thiếu dữ liệu thật) */
+  excluded: (keyof Weights)[];
 }
+
+export interface RankOptions {
+  /** Cho phép dữ liệu MÔ PHỎNG (lịch sử giá 12 tháng, tần suất suy từ số dịch vụ) tham gia điểm – chế độ demo */
+  simulated?: boolean;
+}
+
+/** Tiêu chí dựa trên dữ liệu mô phỏng: độ ổn định giá (CV từ lịch sử giả lập) và tần suất tàu (suy từ weeklyServices) */
+export const SIMULATED_CRITERIA: (keyof Weights)[] = ['stability', 'frequency'];
 
 /**
  * Xếp hạng các phương án. Chuẩn hoá mỗi tiêu chí về 0–100 rồi tính điểm theo trọng số.
  * Chi phí xếp hạng = phần NGƯỜI DÙNG phải trả theo Incoterm đang chọn (hoặc tổng nếu basis = 'total').
  */
-export function rankOptions(options: PlanOption[], term: Incoterm, role: Role, weights: Weights, basis: CostBasis = 'mine', split: SplitOptions = {}): RankedOption[] {
+export function rankOptions(options: PlanOption[], term: Incoterm, role: Role, weights: Weights, basis: CostBasis = 'mine', split: SplitOptions = {}, opts: RankOptions = {}): RankedOption[] {
   if (!options.length) return [];
+  // không có dữ liệu thật → bỏ tiêu chí mô phỏng khỏi điểm, dùng trọng số còn lại
+  const excluded = opts.simulated ? [] : SIMULATED_CRITERIA;
+  const w: Weights = { ...weights };
+  for (const k of excluded) w[k] = 0;
   const parts = options.map((o) => splitItems(o.items, term, role, split));
   let costs = options.map((o, i) => (basis === 'mine' ? parts[i].you : o.total));
   // Phần người dùng trả gần như giống nhau ở mọi phương án (vd. người bán + FOB) → dùng tổng chi phí để phân biệt
@@ -117,15 +131,18 @@ export function rankOptions(options: PlanOption[], term: Incoterm, role: Role, w
   const nRisk = normalize(options.map((o) => o.risk));
   const out: RankedOption[] = options.map((option, i) => {
     const scores = { cost: nCost[i], stability: nStab[i], time: nTime[i], frequency: nFreq[i], risk: nRisk[i] };
-    return { option, rank: 0, cost: costs[i], youPay: parts[i].you, otherPays: parts[i].other, scores, score: weightedScore(scores, weights), tags: [] };
+    return { option, rank: 0, cost: costs[i], youPay: parts[i].you, otherPays: parts[i].other, scores, score: weightedScore(scores, w), tags: [], excluded: [...excluded] };
   });
   if (out.length > 1) {
     const tag = (pick: (c: RankedOption) => number, label: string) => out.reduce((m, c) => (pick(c) < pick(m) ? c : m)).tags.push(label);
     tag((c) => c.cost, 'Rẻ nhất');
     tag((c) => c.option.days.total, 'Nhanh nhất');
-    tag((c) => c.option.cv, 'Ổn định nhất');
+    if (opts.simulated) tag((c) => c.option.cv, 'Ổn định nhất (mô phỏng)');
   }
-  out.sort((a, b) => b.score - a.score || a.cost - b.cost);
+  // phương án tính đủ đứng trước phương án thiếu khoản (tổng thấp vì thiếu thuế không được thắng)
+  const full = (r: RankedOption) => (r.option.completeness === 'complete' ? 0 : 1);
+  const mixed = new Set(out.map(full)).size > 1;
+  out.sort((a, b) => (mixed ? full(a) - full(b) : 0) || b.score - a.score || a.cost - b.cost);
   out.forEach((r, i) => (r.rank = i + 1));
   return out;
 }

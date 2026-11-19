@@ -71,7 +71,7 @@ describe('WITS / UNCTAD TRAINS', () => {
     expect(urls[0]).toBe('/data/wits/EU.json'); // thử file tải sẵn trước (ở đây: 404 → gọi trực tiếp)
     expect(urls.filter((u) => !u.startsWith('/data/wits/')).every((u) => u.startsWith('/api/wits/reporter/918/'))).toBe(true);
     expect(urls.some((u) => u.includes('/partner/704/'))).toBe(true);
-    expect(r.entry).toMatchObject({ importCountry: 'DE', hs: '610910', dutyPct: 12, rateType: 'MFN', vatPct: 19, effectiveDate: '2023-01-01', verified: false });
+    expect(r.entry).toMatchObject({ importCountry: 'DE', hs: '610910', dutyPct: 12, rateType: 'MFN', vatPct: 19, vatProvisional: true, effectiveDate: '', dataYear: 2023, verified: false });
     expect(r.entry?.id.startsWith('wits-')).toBe(true);
     expect(r.notes.join(' ')).toContain('năm 2023');
     expect(r.notes.join(' ')).toContain('không có thuế ưu đãi riêng');
@@ -106,7 +106,7 @@ describe('WITS tải sẵn (public/data/wits – trang tĩnh không gọi đư�
     const f = vi.fn(async (url: string) => (url === '/data/wits/EU.json' ? res(200, file) : res(403, {})));
     vi.stubGlobal('fetch', f);
     const r = await WitsTariffSource.lookup({ importCountry: 'FR', hs: '640411', origin: 'VN', preferFta: true });
-    expect(r.entry).toMatchObject({ importCountry: 'FR', dutyPct: 16.9, effectiveDate: '2023-01-01', vatPct: standardVat('FR')?.pct });
+    expect(r.entry).toMatchObject({ importCountry: 'FR', dutyPct: 16.9, effectiveDate: '', dataYear: 2023, vatPct: standardVat('FR')?.pct });
     expect(r.notes.join(' ')).toContain('từ 16.9% đến 17%');
     // MFN lấy từ file tải sẵn (không gọi partner/000); không có file ưu đãi → thử trực tiếp, bị chặn → ghi chưa kiểm tra được
     expect(f.mock.calls.filter((c) => String(c[0]).includes('/partner/000/'))).toHaveLength(0);
@@ -151,7 +151,7 @@ describe('WITS tải sẵn (public/data/wits – trang tĩnh không gọi đư�
   it('xuất xứ Việt Nam vào Thái Lan: ưu đãi ASEAN khi có C/O; không có C/O → MFN kèm ghi chú', async () => {
     stubTh();
     const co = await WitsTariffSource.lookup({ importCountry: 'TH', hs: '610910', origin: 'VN', preferFta: true });
-    expect(co.entry).toMatchObject({ rateType: 'FTA', dutyPct: 0, fta: 'TRAINS – ASEAN', effectiveDate: '2021-01-01' });
+    expect(co.entry).toMatchObject({ rateType: 'FTA', dutyPct: 0, fta: 'TRAINS – ASEAN', effectiveDate: '', dataYear: 2021 });
     clearTariffCache();
     const noCo = await WitsTariffSource.lookup({ importCountry: 'TH', hs: '610910', origin: 'VN', preferFta: false });
     expect(noCo.entry).toMatchObject({ rateType: 'MFN', dutyPct: 30 });

@@ -1,5 +1,6 @@
 import { todayIso } from './csv';
 import { matchTariff, type TariffEntry, type TariffQuery } from '../providers/TariffProvider';
+import { US_HMF_PCT, US_MPF_PCT, usFees } from './fees';
 import snapshotJson from '../data/tariffSnapshot.json';
 import countries from 'i18n-iso-countries';
 import { EU_SET } from '../data/countries';
@@ -217,7 +218,8 @@ export function ukEntry(code: string, origin: string, preferFta: boolean, parsed
   if (!chosen) return { entry: null, notes: ['Không tìm thấy thuế nhập khẩu (Third country duty) cho mã này.'] };
   // thuế phức hợp ("6.5% + 33 GBP / 100 kg"): tính phần %, hiển thị phần tuyệt đối
   const split = chosen.pct == null ? splitDuty(chosen.text) : { pct: chosen.pct, specific: null };
-  if (split.pct == null) return { entry: null, notes: [`Thuế tuyệt đối: ${chosen.text} – cần tính theo khối lượng / số lượng.`] };
+  if (split.pct == null && !split.specific) return { entry: null, notes: [`Không đọc được thuế suất “${chosen.text}”.`] };
+  if (split.pct == null) notes.push(`Thuế tuyệt đối ${split.specific}: tính theo số lượng / khối lượng nhập ở bảng Hàng hoá.`);
   if (split.specific) notes.push(`Thuế phức hợp ${chosen.text}: phần ${split.pct}% tính trên trị giá, phần ${split.specific} tính theo số lượng / khối lượng nhập ở bảng Hàng hoá.`);
   if (pref && !usePref) notes.push(`Có ưu đãi cho xuất xứ này (${pref.area ?? pref.areaId}: ${pref.text}) nếu có C/O hợp lệ – đang tính thuế MFN vì chưa tích “Có C/O”.`);
   if (vat && vat.pct == null) notes.push(`VAT dạng đặc biệt: ${vat.text}`);
@@ -231,7 +233,8 @@ export function ukEntry(code: string, origin: string, preferFta: boolean, parsed
       id: `uk-${code}-${origin}`,
       importCountry: 'GB', hs: code, origin: usePref ? origin : '*',
       rateType: usePref ? 'FTA' : 'MFN', fta: usePref ? `UK – ${pref!.area ?? pref!.areaId}` : '',
-      dutyPct: split.pct, vatPct: vat?.pct ?? null, otherPct: 0, ...(split.specific && { specificDuty: split.specific }),
+      dutyPct: split.pct ?? 0, vatPct: vat?.pct ?? null, otherPct: 0, ...(split.specific && { specificDuty: split.specific }),
+      ...(usePref && { conditions: [`Ưu đãi ${pref!.area ?? pref!.areaId}: cần chứng từ xuất xứ theo hiệp định`] }),
       ...(addPct > 0 && { additionalPct: addPct, additionalLabel: parsed.additional!.map((a) => a.label).join(' + ') }),
       source: `${UK_WEB}/${code}`, effectiveDate: chosen.start, updatedAt: todayIso(), verified: true,
     },
@@ -316,37 +319,43 @@ export function htsLeaves(rows: HtsRow[], hs: string): (HtsRow & { path: string 
   return out;
 }
 
-/** Phí CBP tính trên trị giá: MPF 0,3464% (có mức tối thiểu/tối đa mỗi tờ khai, điều chỉnh theo năm tài chính) + HMF 0,125% (hàng qua cảng biển). 19 CFR 24.23, 24.24 */
-export const US_MPF_PCT = 0.3464;
-export const US_HMF_PCT = 0.125;
+export { US_MPF_PCT, US_HMF_PCT } from './fees';
 
-export function usEntry(row: HtsRow, origin: string, preferFta: boolean): { entry: TariffEntry | null; notes: string[] } {
+const CH99_UNRESOLVED = 'Thuế bổ sung Chương 99 của Mỹ (Section 301/232, thuế đối ứng…) – chưa cộng, cần xác minh theo xuất xứ';
+const US_ADCVD = 'Thuế chống bán phá giá / chống trợ cấp của Mỹ (AD/CVD theo nhà sản xuất) – chưa kiểm tra';
+
+export function usEntry(row: HtsRow, origin: string, preferFta: boolean, date = todayIso()): { entry: TariffEntry | null; notes: string[] } {
   const notes: string[] = ['Mỹ không có VAT liên bang (thuế bán hàng do từng bang thu khi bán lẻ).'];
   const ch99 = (row.footnotes ?? []).map((f) => f.value ?? '').filter((v) => /99\d{2}\./.test(v));
   notes.push(
     `Tổng chỉ gồm thuế cột General/Special của HTS và phí MPF/HMF – CHƯA cộng thuế bổ sung Chương 99 (Section 301/232, thuế đối ứng…)${ch99.length ? `; dòng này có chú thích: ${ch99.join(' · ')}` : ''}. Kiểm tra trên hts.usitc.gov hoặc với môi giới hải quan.`,
   );
-  // thuế phức hợp ("90¢/pr. + 37.5%"): tính phần %, hiển thị phần tuyệt đối
+  // thuế phức hợp ("90¢/pr. + 37.5%"): phần % trên trị giá + phần tuyệt đối theo lượng; thuế THUẦN tuyệt đối ("4.4¢/kg"): phần % = 0
   const general = splitDuty(row.general);
-  const mfn = general.pct;
   const sp = preferFta ? usSpecialRate(row.special, origin) : null;
-  const usePref = sp != null && (mfn == null || sp <= mfn);
-  if (!usePref && mfn == null) return { entry: null, notes: [`Thuế tuyệt đối: “${row.general}” – cần tính theo khối lượng / số lượng.`, ...notes] };
+  // không có phần % NHƯNG có phần tuyệt đối → thuế thuần tuyệt đối (khác với không đọc được thuế suất)
+  const pureSpecific = general.pct == null && !!general.specific && /\d/.test(general.specific) && /¢|\$|\b[A-Z]{3}\b/.test(general.specific);
+  const mfn = general.pct ?? (pureSpecific ? 0 : null);
+  const usePref = sp != null && (mfn == null || pureSpecific || sp <= mfn);
+  if (!usePref && mfn == null) return { entry: null, notes: [`Không đọc được thuế suất “${row.general ?? ''}” – tra trên hts.usitc.gov.`, ...notes] };
   const specific = usePref ? null : general.specific;
-  if (specific) notes.unshift(`Thuế phức hợp “${row.general}”: phần ${mfn}% tính trên trị giá, phần ${specific} tính theo số lượng / khối lượng nhập ở bảng Hàng hoá.`);
+  if (specific && !pureSpecific) notes.unshift(`Thuế phức hợp “${row.general}”: phần ${mfn}% tính trên trị giá, phần ${specific} tính theo số lượng / khối lượng nhập ở bảng Hàng hoá.`);
+  if (specific && pureSpecific) notes.unshift(`Thuế tuyệt đối “${row.general}”: tính theo số lượng / khối lượng nhập ở bảng Hàng hoá (không có phần theo trị giá).`);
   const code = digits(row.htsno);
-  // Hàng có xuất xứ USMCA (Canada, Mexico) được miễn MPF
+  // Hàng có xuất xứ USMCA (Canada, Mexico) hưởng ưu đãi được miễn MPF
   const mpfExempt = usePref && (origin === 'CA' || origin === 'MX');
-  const feePct = +((mpfExempt ? 0 : US_MPF_PCT) + US_HMF_PCT).toFixed(4);
-  notes.push(`Phí CBP: ${mpfExempt ? '' : `MPF ${US_MPF_PCT}% (có mức tối thiểu/tối đa mỗi tờ khai) + `}HMF ${US_HMF_PCT}% trên trị giá – đã cộng vào tổng.`);
+  const fees = usFees(date, mpfExempt);
+  notes.push(`Phí CBP: ${mpfExempt ? 'miễn MPF (USMCA) · ' : `MPF ${US_MPF_PCT}% có sàn/trần mỗi tờ khai · `}HMF ${US_HMF_PCT}% chỉ khi hàng dỡ từ tàu biển – tính riêng từng khoản.`);
   return {
     notes,
     entry: {
       id: `us-${code}-${origin}`,
       importCountry: 'US', hs: code, origin: usePref ? origin : '*',
       rateType: usePref ? 'FTA' : 'MFN', fta: usePref ? 'Mỹ – cột Special' : '',
-      dutyPct: usePref ? sp! : mfn!, vatPct: 0, otherPct: 0, feePct, feeLabel: mpfExempt ? 'Phí HMF (CBP)' : 'Phí MPF + HMF (CBP)', ...(specific && { specificDuty: specific }),
-      source: `https://hts.usitc.gov/search?query=${encodeURIComponent(row.htsno)}`, effectiveDate: '', updatedAt: todayIso(), verified: true,
+      dutyPct: usePref ? sp! : mfn!, vatPct: 0, otherPct: 0, fees, ...(specific && { specificDuty: specific }),
+      unresolved: [CH99_UNRESOLVED, US_ADCVD],
+      ...(usePref && { conditions: ['Cột Special: cần chứng từ xuất xứ theo chương trình ưu đãi tương ứng'] }),
+      source: `https://hts.usitc.gov/search?query=${encodeURIComponent(row.htsno)}`, effectiveDate: '', updatedAt: todayIso(), fetchedAt: todayIso(), verified: true,
     },
   };
 }
@@ -413,8 +422,13 @@ async function liveChapter99(): Promise<Chapter99Item[]> {
 /** Kết quả từ bản chụp khi API không phản hồi */
 function fromSnapshot(prefix: 'uk-' | 'us-', q: TariffQuery, base: OfficialTariffResult, error: string): OfficialTariffResult {
   const snap = TARIFF_SNAPSHOT;
-  const entry = snap.generatedAt ? matchTariff(snap.entries.filter((e) => e.id.startsWith(prefix)), q) : null;
+  let entry = snap.generatedAt ? matchTariff(snap.entries.filter((e) => e.id.startsWith(prefix)), q) : null;
   if (!entry) return { ...base, error };
+  // bản chụp cũ lưu MPF+HMF gộp thành feePct → tách lại thành từng khoản có sàn/trần, HMF chỉ cho tàu biển
+  if (prefix === 'us-' && entry.feePct != null) {
+    const { feePct: _f, feeLabel: _l, ...rest } = entry;
+    entry = { ...rest, fees: usFees(q.date || todayIso(), entry.feePct < US_MPF_PCT), unresolved: ['Thuế bổ sung Chương 99 của Mỹ – chưa cộng, cần xác minh theo xuất xứ', 'Thuế AD/CVD của Mỹ – chưa kiểm tra'] };
+  }
   return {
     ...base,
     code: entry.hs,
@@ -444,7 +458,7 @@ export const UsHtsSource: OfficialTariffSource = {
         return { ...base, choices: leaves.map((l) => ({ code: digits(l.htsno), description: `${l.path} · ${l.general}` })), notes: [`Mã ${hs} có ${leaves.length} dòng thuế khác nhau trong HTS – chọn mã chi tiết.`] };
       }
       const row = leaves[0];
-      const { entry, notes } = usEntry(row, q.origin, q.preferFta);
+      const { entry, notes } = usEntry(row, q.origin, q.preferFta, q.date);
       if (leaves.length > 1) notes.unshift(`${leaves.length} dòng HTS khớp mã ${hs}, cùng thuế suất.`);
       const additional = chapter99For(await ch99, q.origin);
       return { ...base, code: digits(row.htsno), description: row.path, entry, notes, additional, url: `https://hts.usitc.gov/search?query=${encodeURIComponent(row.htsno)}` };
@@ -743,7 +757,13 @@ export const WitsTariffSource: OfficialTariffSource = {
       if (pref && usePref) notes.push(`Đang áp dụng thuế ưu đãi ${pref.pct}% (${pref.label}, TRAINS năm ${pref.year}) – cần C/O hợp lệ theo hiệp định.`);
       if (prefNote) notes.push(prefNote);
       const vat = standardVat(q.importCountry);
-      if (vat) notes.push(`VAT/GST: dùng thuế suất tiêu chuẩn ${vat.pct}% (${VAT_DATA.source}) – một số mặt hàng có mức giảm/miễn.`);
+      if (vat) notes.push(`VAT/GST: thuế suất tiêu chuẩn ${vat.pct}% (${VAT_DATA.source}) – CHƯA xác minh cho mặt hàng (có thể có mức giảm/miễn).`);
+      // PR-03: WITS chỉ có HS6 → mã quốc gia (8–10 số) và HS6 nhiều dòng thuế chỉ là ƯỚC TÍNH, không chốt
+      const full = digits(q.hs);
+      const estimates: string[] = [];
+      if (!usePref && t.min != null && t.max != null && t.min !== t.max) estimates.push(`trung bình HS6 ${t.pct}% của ${t.lines ?? 'nhiều'} dòng quốc gia (từ ${t.min}% đến ${t.max}%)`);
+      if (full.length > 6) estimates.push(`WITS chỉ có số liệu HS6 ${hs6}; chưa tra được mức riêng của mã ${full}`);
+      const dataYear = usePref ? pref!.year : year;
       return {
         ...base,
         url,
@@ -753,9 +773,13 @@ export const WitsTariffSource: OfficialTariffSource = {
           id: `wits-${q.importCountry}-${hs6}-${usePref ? q.origin : '*'}`,
           importCountry: q.importCountry, hs: hs6, origin: usePref ? q.origin : '*',
           rateType: usePref ? 'FTA' : 'MFN', fta: usePref ? `TRAINS – ${pref!.label}` : '',
-          dutyPct: usePref ? pref!.pct : t.pct, vatPct: vat && vat.type !== 'none' ? vat.pct : vat ? 0 : null, otherPct: 0,
-          source: `https://wits.worldbank.org/API/V1/SDMX/V21/datasource/TRN/reporter/${reporter}/partner/${usePref ? pref!.partner : '000'}/product/${hs6}/year/${usePref ? pref!.year : year}/datatype/reported?format=JSON`,
-          effectiveDate: `${usePref ? pref!.year : year}-01-01`, updatedAt: todayIso(), verified: false,
+          dutyPct: usePref ? pref!.pct : t.pct, vatPct: vat && vat.type !== 'none' ? vat.pct : vat ? 0 : null, ...(vat && vat.type !== 'none' && { vatProvisional: true }), otherPct: 0,
+          ...(estimates.length && { estimate: estimates.join('; ') }),
+          ...(usePref && { conditions: [`Ưu đãi ${pref!.label}: cần C/O / chứng từ xuất xứ theo hiệp định tương ứng; số liệu TRAINS năm ${pref!.year}`] }),
+          unresolved: ['Thuế phòng vệ thương mại (chống bán phá giá / tự vệ) – WITS không có, chưa kiểm tra'],
+          source: `https://wits.worldbank.org/API/V1/SDMX/V21/datasource/TRN/reporter/${reporter}/partner/${usePref ? pref!.partner : '000'}/product/${hs6}/year/${dataYear}/datatype/reported?format=JSON`,
+          // năm thống kê TRAINS KHÔNG phải ngày hiệu lực pháp lý → để trống ngày hiệu lực, ghi năm dữ liệu
+          effectiveDate: '', dataYear, fetchedAt: todayIso(), updatedAt: todayIso(), verified: false,
         },
       };
     } catch (e) {
@@ -927,7 +951,8 @@ export const TaricSource: OfficialTariffSource = {
     const nonTariff = [...new Set(valid.filter((m) => NONTARIFF.test(m.type)).map((m) => m.type))];
     if (nonTariff.length) notes.push(`Biện pháp phi thuế quan cần kiểm tra: ${nonTariff.join('; ')}.`);
     const chosen = usePref ? best!.d : mfn;
-    if (chosen.pct == null) return { ...base, code, notes: [`Thuế ${chosen.specific} chỉ có phần tuyệt đối – cần tính theo khối lượng / số lượng.`, ...notes], error: 'Thuế dạng tuyệt đối – PortRank chưa tự tính' };
+    if (chosen.pct == null && !chosen.specific) return { ...base, code, notes, error: 'Không đọc được thuế suất trên TARIC' };
+    if (chosen.pct == null) notes.unshift(`Thuế tuyệt đối ${chosen.specific}: tính theo số lượng / khối lượng nhập ở bảng Hàng hoá.`);
     const vat = standardVat(q.importCountry);
     if (vat) notes.push(`VAT nhập khẩu của ${q.importCountry}: thuế suất tiêu chuẩn ${vat.pct}% (${VAT_DATA.source}) – TARIC không chứa VAT quốc gia.`);
     return {
@@ -938,7 +963,8 @@ export const TaricSource: OfficialTariffSource = {
         id: `taric-${q.importCountry}-${code}-${usePref ? origin : '*'}`,
         importCountry: q.importCountry, hs: code, origin: usePref ? origin : '*',
         rateType: usePref ? 'FTA' : 'MFN', fta: usePref ? `EU – ${EU_FTA[best!.m.areaCode] ?? best!.m.area}` : '',
-        dutyPct: chosen.pct, vatPct: vat ? vat.pct : null, otherPct: 0,
+        dutyPct: chosen.pct ?? 0, vatPct: vat ? vat.pct : null, ...(vat && { vatProvisional: true }), otherPct: 0,
+        ...(usePref && { conditions: [`Ưu đãi ${EU_FTA[best!.m.areaCode] ?? best!.m.area}: cần chứng từ xuất xứ (EUR.1 / REX / tự chứng nhận) theo hiệp định`] }),
         ...(additionalPct > 0 && { additionalPct: Math.round(additionalPct * 100) / 100, additionalLabel: addLabels.join(' + ') }),
         ...(chosen.specific && { specificDuty: chosen.specific }),
         source: page, effectiveDate: (usePref ? best!.m.start : mfnM.start) || '', updatedAt: todayIso(), verified: true,
@@ -981,8 +1007,9 @@ export const VnTariffSource: OfficialTariffSource = {
     const notes: string[] = [`Biểu thuế Việt Nam ${file.fileName ? `(${file.fileName}) ` : ''}nạp ngày ${file.importedAt.split('-').reverse().join('/')}.`];
     const o = q.origin && q.origin !== '*' ? q.origin.toUpperCase() : '';
     const prefs = o ? vnPreferences(file, code, o) : [];
-    const best = prefs[0];
-    const usePref = !!best && q.preferFta && best.pct < mfn;
+    const wanted = q.fta ? prefs.find((p) => p.key.toUpperCase() === q.fta!.toUpperCase().replace(/[^A-Z0-9]/g, '') || p.label.toUpperCase().includes(q.fta!.toUpperCase())) : undefined;
+    const best = wanted ?? prefs[0];
+    const usePref = !!best && q.preferFta && best.pct <= mfn;
     if (best && best.pct < mfn && !q.preferFta) notes.push(`Có thuế ưu đãi đặc biệt ${best.pct}% (${best.label}) cho hàng xuất xứ ${o} – tích “Có C/O” để áp dụng.`);
     if (usePref) notes.push(`Đang áp dụng ${best!.label}: ${best!.pct}% – cần C/O mẫu tương ứng.${prefs.length > 1 ? ` Hiệp định khác: ${prefs.slice(1, 4).map((p) => `${p.label} ${p.pct}%`).join(', ')}.` : ''}`);
     if (o && !prefs.length) notes.push(`Không có thuế ưu đãi đặc biệt cho xuất xứ ${o} ở dòng này – áp thuế NK ưu đãi (MFN).`);
@@ -999,7 +1026,9 @@ export const VnTariffSource: OfficialTariffSource = {
         id: `vn-${code}-${usePref ? o : '*'}`,
         importCountry: 'VN', hs: code, origin: usePref ? o : '*',
         rateType: usePref ? 'FTA' : 'MFN', fta: usePref ? best!.label : '',
-        dutyPct: usePref ? best!.pct : mfn, vatPct: vat, otherPct: excise ?? 0,
+        dutyPct: usePref ? best!.pct : mfn, vatPct: vat, ...(vatPct == null && { vatProvisional: true }), otherPct: excise ?? 0,
+        ...(usePref && { conditions: [`${best!.label}: cần C/O mẫu tương ứng${!wanted && prefs.length > 1 ? ` – chưa chọn hiệp định, đang dùng mức thấp nhất trong ${prefs.length} hiệp định` : ''}`] }),
+        unresolved: [...(env ? [`Thuế bảo vệ môi trường (${env}) – thuế tuyệt đối, chưa cộng`] : []), 'Thuế phòng vệ thương mại của Việt Nam – chưa kiểm tra'],
         source: `${file.source}${file.fileName ? ` – ${file.fileName}` : ''}`, effectiveDate: '', updatedAt: file.importedAt, verified: true,
       },
     };

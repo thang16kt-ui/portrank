@@ -1,7 +1,7 @@
 import { findCarrier } from '../data/carriers';
 import { PORTS } from '../data/ports';
 import { stripAccents } from '../data/countries';
-import { rowsToRecords, toIsoDate, toNumber } from '../lib/csv';
+import { numberAmbiguity, parseDate, rowsToRecords, toNumber } from '../lib/csv';
 import type { ContainerType } from '../types';
 
 /** Một dòng báo giá thật của forwarder / hãng tàu (USD / container) */
@@ -90,7 +90,10 @@ const CONT: Record<string, ContainerType> = { '20': '20GP', '20GP': '20GP', '20D
 export const RATE_CSV_HEADER = ['pol', 'pod', 'container', 'freight_usd', 'surcharges_usd', 'valid_from', 'valid_to', 'carrier', 'source'];
 
 /** Đọc bảng báo giá (CSV/Excel đã chuyển thành mảng dòng). Trả về các dòng hợp lệ và danh sách lỗi. */
-export function parseRateRows(rows: string[][]): { entries: RateEntry[]; errors: string[] } {
+/** Giá trị cột container được chấp nhận là "mọi loại" – phải ghi rõ, không suy từ mã lạ */
+const CONT_ANY = new Set(['*', 'ALL', 'ANY', 'MOI', 'TATCA']);
+
+export function parseRateRows(rows: string[][]): { entries: RateEntry[]; errors: string[]; warnings: string[] } {
   const recs = rowsToRecords(rows, {
     pol: ['cang di', 'port of loading', 'origin'],
     pod: ['cang den', 'port of discharge', 'destination'],
@@ -102,26 +105,44 @@ export function parseRateRows(rows: string[][]): { entries: RateEntry[]; errors:
     carrier: ['hang tau', 'line', 'scac'],
     source: ['nguon', 'forwarder'],
   });
-  const entries: RateEntry[] = [], errors: string[] = [];
+  const entries: RateEntry[] = [], errors: string[] = [], warnings: string[] = [];
   recs.forEach((r, i) => {
     const line = i + 2;
     const pol = resolvePortCode(r.pol), pod = resolvePortCode(r.pod);
     const freight = toNumber(r.freight);
-    if (!pol || !pod) return errors.push(`Dòng ${line}: không nhận ra cảng "${!pol ? r.pol ?? '' : r.pod ?? ''}"`);
-    if (!isFinite(freight)) return errors.push(`Dòng ${line}: thiếu cước`);
-    const c = (r.container ?? '').toUpperCase().replace(/[^0-9A-Z]/g, '');
+    if (!pol || !pod) return errors.push(`Dòng ${line}, cột ${!pol ? 'pol' : 'pod'}: không nhận ra cảng "${!pol ? r.pol ?? '' : r.pod ?? ''}"`);
+    if (!isFinite(freight)) return errors.push(`Dòng ${line}, cột freight_usd: thiếu cước`);
+    if (freight < 0) return errors.push(`Dòng ${line}, cột freight_usd: cước âm (${freight}) không hợp lệ`);
+    // container: trống hoặc "*" / "ALL" = mọi loại (khai chủ động); mã lạ (vd. 40TYPO) → lỗi, KHÔNG đổi thành mọi loại
+    const raw = (r.container ?? '').trim();
+    const c = stripAccents(raw).toUpperCase().replace(/[^0-9A-Z*]/g, '');
+    let container: ContainerType | '*';
+    if (!c || CONT_ANY.has(c)) {
+      container = '*';
+      if (!c) warnings.push(`Dòng ${line}: cột container trống – áp cho MỌI loại container`);
+    } else if (CONT[c]) container = CONT[c];
+    else return errors.push(`Dòng ${line}, cột container: không nhận ra loại "${raw}" (dùng 20GP, 40GP, 40HC, 40RF hoặc * cho mọi loại)`);
     const sur = toNumber(r.surcharges);
+    if (isFinite(sur) && sur < 0) return errors.push(`Dòng ${line}, cột surcharges_usd: phụ phí âm (${sur}) không hợp lệ`);
+    const from = parseDate(r.validFrom), to = parseDate(r.validTo);
+    if (from.invalid) return errors.push(`Dòng ${line}, cột valid_from: ngày không có thật "${r.validFrom}"`);
+    if (to.invalid) return errors.push(`Dòng ${line}, cột valid_to: ngày không có thật "${r.validTo}"`);
+    if (from.iso && to.iso && to.iso < from.iso) return errors.push(`Dòng ${line}: valid_to ${to.iso} trước valid_from ${from.iso}`);
+    for (const [k, v] of [['freight_usd', r.freight], ['surcharges_usd', r.surcharges]] as const) {
+      const amb = numberAmbiguity(v);
+      if (amb) warnings.push(`Dòng ${line}, cột ${k}: ${amb} – kiểm tra lại nếu là số thập phân`);
+    }
     entries.push({
       id: `${Date.now().toString(36)}-${i}`,
       pol, pod,
-      container: CONT[c] ?? '*',
+      container,
       freight,
       surcharges: isFinite(sur) ? sur : 0,
-      validFrom: toIsoDate(r.validFrom),
-      validTo: toIsoDate(r.validTo),
+      validFrom: from.iso,
+      validTo: to.iso,
       carrier: findCarrier(r.carrier)?.id ?? '',
       source: r.source ?? '',
     });
   });
-  return { entries, errors };
+  return { entries, errors, warnings };
 }

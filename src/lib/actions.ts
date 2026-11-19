@@ -11,6 +11,7 @@ import { rankOptions, type RankedOption } from './ranking';
 import { trackOf, type Track } from './track';
 import { OFFICIAL_SOURCES } from './tariffSources';
 import { fetchDcsaSchedules } from './dcsa';
+import { CURATED_CHARGES, CURATED_MEASURES, curatedTariffProvider } from '../data/curated';
 
 export function planInputOf(f: FormState): PlanInput | null {
   if (!f.mine || !f.partner) return null;
@@ -18,9 +19,31 @@ export function planInputOf(f: FormState): PlanInput | null {
     role: f.role, mine: f.mine, partner: f.partner, mode: f.mode,
     shipment: { cargo: f.cargo, mode: f.shipMode, container: f.container, quantity: f.quantity, cbm: f.cbm, weightKg: f.weightKg, woodPallet: f.woodPallet },
     goodsValue: f.goodsValue, valueTerm: f.valueTerm, hs: f.hs, origin: f.origin, hasCo: f.hasCo, readyDate: f.readyDate,
+    customsDate: f.customsDate || '', fta: f.hasCo ? f.fta || '' : '', company: f.company || '',
     dutyQty: { units: f.dutyUnits ?? 0, netKg: f.netKg ?? 0, liters: f.dutyLiters ?? 0 },
     radiusKm: f.radiusKm, avoidRedSea: f.avoidRedSea, avoidPanama: f.avoidPanama, carriers: f.carriers,
   };
+}
+
+/**
+ * Dấu vân tay các trường đầu vào ẢNH HƯỞNG PHÉP TÍNH (không gồm Incoterm / trọng số – chỉ xếp hạng lại).
+ * Kết quả gắn với dấu vân tay lúc bấm tính; form đổi → kết quả bị đánh dấu cũ, không cho lưu / copy.
+ */
+export function inputFingerprint(f: FormState): string {
+  const p = (x: FormState['mine']) => (x ? [x.kind, x.country, x.label, x.coord?.map((c) => c.toFixed(4)).join(',')].join('|') : '');
+  return JSON.stringify([
+    f.role, p(f.mine), p(f.partner), f.mode, f.cargo, f.shipMode, f.container, f.quantity, f.cbm, f.weightKg, f.woodPallet, f.goodsValue, f.valueTerm,
+    f.hs.replace(/\D/g, ''), f.origin, f.hasCo, f.hasCo ? f.fta ?? '' : '', f.customsDate ?? '', f.company ?? '', f.dutyUnits, f.netKg, f.dutyLiters, f.readyDate,
+    f.radiusKm, f.avoidRedSea, f.avoidPanama, [...f.carriers].sort(),
+  ]);
+}
+
+/** Kết quả đang hiển thị đã cũ so với form hiện tại */
+export function usePlanStale(): boolean {
+  const key = useAppStore((s) => s.planKey);
+  const form = useAppStore((s) => s.form);
+  const plan = useAppStore((s) => s.plan);
+  return useMemo(() => !!plan && !!key && key !== inputFingerprint(form), [plan, key, form]);
 }
 
 let runSeq = 0;
@@ -34,6 +57,9 @@ export async function runPlan(opts: { keepSelection?: boolean } = {}) {
     return;
   }
   const seq = ++runSeq;
+  // ảnh chụp đầu vào bất biến cho lần tính này
+  const snapshot: FormState = JSON.parse(JSON.stringify(f));
+  const key = inputFingerprint(snapshot);
   app.set({ planning: { done: 0, total: 1 }, planError: null });
   try {
     const [mine, partner] = await Promise.all([resolveCountryCoord(f.mine), resolveCountryCoord(f.partner)]);
@@ -49,13 +75,16 @@ export async function runPlan(opts: { keepSelection?: boolean } = {}) {
       rates: createTableRateProvider(data.rates),
       tariffs: createUserTariffProvider(data.tariffs),
       official: data.officialTariffs ? OFFICIAL_SOURCES : [],
+      curated: data.curatedTariffs ? curatedTariffProvider : undefined,
+      charges: [...data.charges, ...(data.curatedTariffs ? CURATED_CHARGES : [])],
+      measures: [...data.measures, ...(data.curatedTariffs ? CURATED_MEASURES : [])],
       onProgress: (done, total) => seq === runSeq && useAppStore.getState().set({ planning: { done, total } }),
     });
     if (seq !== runSeq) return;
     const cur = useAppStore.getState();
     const keep = opts.keepSelection && cur.selectedKey && plan.options.some((o) => o.key === cur.selectedKey);
     cur.set({
-      plan, planning: null, planRun: cur.planRun + 1,
+      plan, planKey: key, planForm: snapshot, planning: null, planRun: cur.planRun + 1,
       selectedKey: keep ? cur.selectedKey : null, scheduleId: keep ? cur.scheduleId : null,
       planError: plan.options.length ? null : 'Không tìm được phương án tuyến nào cho hai điểm này.',
       portView: null, follow: false, sheetOpen: false,
@@ -76,9 +105,10 @@ export function useRanked(): RankedOption[] {
   const weights = useAppStore((s) => s.weights);
   const basis = useAppStore((s) => s.costBasis);
   const destBySeller = useAppStore((s) => s.destChargesBySeller);
+  const simulated = useDataStore((s) => s.simulatedMetrics);
   return useMemo(
-    () => (plan ? rankOptions(plan.options, term, plan.input.role, weights, basis, { destChargesBySeller: destBySeller }) : []),
-    [plan, term, weights, basis, destBySeller],
+    () => (plan ? rankOptions(plan.options, term, plan.input.role, weights, basis, { destChargesBySeller: destBySeller }, { simulated }) : []),
+    [plan, term, weights, basis, destBySeller, simulated],
   );
 }
 

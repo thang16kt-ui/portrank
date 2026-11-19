@@ -75,3 +75,13 @@ export function ErrorList({ errors }: { errors: string[] }) {
     </div>
   );
 }
+
+export function WarningList({ items, title = 'Cần kiểm tra' }: { items: string[]; title?: string }) {
+  if (!items.length) return null;
+  return (
+    <div className="rounded-lg border border-amber-400/30 bg-amber-500/10 p-2.5 text-[11.5px] text-amber-200">
+      <b>{title} ({items.length}):</b>
+      <ul className="mt-1 list-disc pl-4">{items.slice(0, 8).map((e, i) => <li key={i}>{e}</li>)}{items.length > 8 && <li>…</li>}</ul>
+    </div>
+  );
+}

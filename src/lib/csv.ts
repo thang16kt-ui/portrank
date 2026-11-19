@@ -56,27 +56,66 @@ export function rowsToRecords<F extends string>(rows: string[][], aliases: Recor
   });
 }
 
-/** Chuẩn hoá ngày về YYYY-MM-DD (nhận YYYY-MM-DD, DD/MM/YYYY, DD-MM-YYYY, Date của Excel) */
-export function toIsoDate(v: unknown): string {
-  if (v instanceof Date && !isNaN(+v)) return v.toISOString().slice(0, 10);
-  const s = String(v ?? '').trim();
-  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-  if (m) return `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
-  m = s.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})/);
-  if (m) return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
-  return '';
+/** Ngày có tồn tại trên lịch không (kiểm năm nhuận, số ngày mỗi tháng) */
+export function isRealDate(y: number, m: number, d: number): boolean {
+  if (!(y >= 1900 && y <= 2200 && m >= 1 && m <= 12 && d >= 1)) return false;
+  const dim = [31, (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0 ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][m - 1];
+  return d <= dim;
 }
 
+/**
+ * Đọc ngày: YYYY-MM-DD (có thể kèm giờ/múi giờ "2026-03-01T10:00+07:00"), DD/MM/YYYY, DD-MM-YYYY, Date của Excel.
+ * `invalid` = có giá trị nhưng không phải ngày có thật (2026-02-31, 2026-99-99) → phải báo lỗi, không được coi như để trống.
+ */
+export function parseDate(v: unknown): { iso: string; invalid: boolean; time?: string } {
+  if (v instanceof Date) return isNaN(+v) ? { iso: '', invalid: true } : { iso: v.toISOString().slice(0, 10), invalid: false };
+  const s = String(v ?? '').trim();
+  if (!s) return { iso: '', invalid: false };
+  let y: number, mo: number, d: number, time: string | undefined;
+  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T ](\d{1,2}:\d{2}(?::\d{2})?(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?))?$/);
+  if (m) [y, mo, d, time] = [+m[1], +m[2], +m[3], m[4]];
+  else if ((m = s.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$/))) [y, mo, d] = [+m[3], +m[2], +m[1]];
+  else return { iso: '', invalid: true };
+  if (!isRealDate(y, mo, d)) return { iso: '', invalid: true };
+  return { iso: `${y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`, invalid: false, ...(time && { time }) };
+}
+
+/** Chuẩn hoá ngày về YYYY-MM-DD; '' nếu trống HOẶC không hợp lệ (dùng parseDate để phân biệt) */
+export function toIsoDate(v: unknown): string {
+  return parseDate(v).iso;
+}
+
+/**
+ * Số theo định dạng địa phương (bảng giá cước): "1.234,5" → 1234.5 ; "1,234.5" → 1234.5 ; "2.150" → 2150 (dấu chấm phân cách nghìn).
+ * KHÔNG dùng cho cột thuế suất – xem toDecimal. Trường hợp mơ hồ ("2.150") xem numberAmbiguity để cảnh báo.
+ */
 export const toNumber = (v: unknown): number => {
   const s = String(v ?? '').replace(/[^0-9.,-]/g, '');
   if (!s) return NaN;
-  // "1.234,5" → 1234.5 ; "1,234.5" → 1234.5
-  // "2.150" / "1.234.567" (dấu chấm phân cách hàng nghìn) → số nguyên
   if (/^-?\d{1,3}(\.\d{3})+$/.test(s)) return parseFloat(s.replace(/\./g, ''));
   if (/^-?\d{1,3}(,\d{3})+$/.test(s)) return parseFloat(s.replace(/,/g, ''));
   const norm = s.includes(',') && s.includes('.') ? (s.lastIndexOf(',') > s.lastIndexOf('.') ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, '')) : s.replace(',', '.');
   return parseFloat(norm);
 };
+
+/** "2.150" / "1,234": có thể là số nghìn hoặc số thập phân → trả về lời giải thích cách đã hiểu, để báo cho người nhập */
+export function numberAmbiguity(v: unknown): string | null {
+  const s = String(v ?? '').trim();
+  if (/^-?\d{1,3}([.,])\d{3}$/.test(s)) return `"${s}" được hiểu là ${toNumber(s)} (dấu ${s.includes('.') ? 'chấm' : 'phẩy'} phân cách hàng nghìn)`;
+  return null;
+}
+
+/**
+ * Số thập phân nghiêm ngặt cho cột thuế suất / tỷ lệ (schema A/B/C): dấu chấm thập phân, không có phân cách nghìn.
+ * "0.125" → 0.125 ; "1.234" → 1.234 ; "7,5" → 7.5 (chấp nhận dấu phẩy thập phân khi không có dấu chấm) ; "" → NaN ; "1.234,5" → NaN (mơ hồ)
+ */
+export function toDecimal(v: unknown): number {
+  const s = String(v ?? '').trim().replace(/\s*%$/, '');
+  if (!s) return NaN;
+  if (/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  if (/^-?\d+,\d+$/.test(s)) return parseFloat(s.replace(',', '.'));
+  return NaN;
+}
 
 /** Đọc file CSV hoặc Excel (.xlsx) thành mảng dòng */
 export async function readTableFile(file: File): Promise<string[][]> {
