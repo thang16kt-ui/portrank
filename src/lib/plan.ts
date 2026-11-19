@@ -6,6 +6,7 @@ import { regionOf } from '../data/countries';
 import { roadAvailability } from '../data/landBlocks';
 import type { RateHit, RateProvider } from '../providers/RateProvider';
 import { ServerRoadProvider, roadSourceLabel, type DrivingRoute, type RoadDirections, type RoadProvider } from '../providers/RoadProvider';
+import { roadTransitCountries, transitCountryNames } from './roadCountries';
 import type { TariffEntry, TariffProvider, TariffQuery, TariffResolution } from '../providers/TariffProvider';
 import { autoSourceOf, type OfficialTariffResult, type OfficialTariffSource } from './tariffSources';
 import type { Incoterm, LngLat, Place, Port, Role, RouteResult, ShipmentInput, TransportMode } from '../types';
@@ -44,6 +45,7 @@ export interface PlanInput {
   readyDate: string;
   /** RFC3339 departure time for traffic prediction; empty = depart now. */
   roadDepartureTime?: string;
+  roadVia?: Place;
   radiusKm: number;
   avoidRedSea: boolean;
   avoidPanama: boolean;
@@ -90,6 +92,7 @@ export interface PlanOption {
   roadStraight?: boolean;
   drivingRoute?: DrivingRoute;
   roadDirections?: Omit<RoadDirections, 'routes'>;
+  roadTransitCountries?: string[];
   originInlandKm: number | null;
   destInlandKm: number | null;
   items: CostItem[];
@@ -341,9 +344,10 @@ async function seaOptions(input: PlanInput, seller: Place, buyer: Place, deps: P
 async function roadOptions(input: PlanInput, seller: Place, buyer: Place, deps: PlanDeps, tariff: DutySetup, notes: string[]) {
   const P = PRICING, sh = input.shipment, R = P.road;
   const domestic = seller.country === buyer.country;
-  const directions = await (deps.road ?? ServerRoadProvider).lookup({ origin: seller, destination: buyer, departureTime: input.roadDepartureTime });
+  const directions = await (deps.road ?? ServerRoadProvider).lookup({ origin: seller, destination: buyer, departureTime: input.roadDepartureTime, via: input.roadVia });
   if (!directions.routes.length) throw new Error('Không tìm được tuyến đường ô tô cho hai địa điểm này.');
   const { routes, ...roadDirections } = directions;
+  const transitChecks = directions.provider === 'osrm' ? await Promise.all(routes.map((rt) => roadTransitCountries(rt.path, [seller.country, buyer.country]))) : routes.map(() => [] as string[]);
   const sourceLabel = roadSourceLabel(directions);
   notes.push(directions.provider === 'google'
     ? 'Quãng đường và thời gian lái xe: Google Maps, có xét giao thông tại giờ khởi hành. Kết quả có thể khác ứng dụng Google Maps do giờ đi, điểm ghim và lựa chọn tuyến.'
@@ -351,11 +355,14 @@ async function roadOptions(input: PlanInput, seller: Place, buyer: Place, deps: 
   notes.push('Đây là tuyến ô tô (DRIVE), chưa xác nhận hạn chế chiều cao, tải trọng hay đường cấm xe tải/container.');
   notes.push('Thời gian lái xe chưa gồm nghỉ tài xế, bốc dỡ và làm thủ tục. Giá vận chuyển vẫn là ước tính theo đơn giá/km.');
   if (!domestic) notes.push('Tuyến xuyên biên giới: cửa khẩu, quyền quá cảnh, giờ mở cửa và thời gian chờ cần xác minh trước khi vận chuyển.');
+  if (input.roadVia) notes.push(`Đi qua: ${input.roadVia.label}. Tuyến tính qua điểm đã chọn; không có nghĩa là đã giới hạn tuyến trong một quốc gia.`);
   const perKm = (R.perKm40[regionOf(seller.country)] + R.perKm40[regionOf(buyer.country)]) / 2;
   const cargoF = { dry: 1, reefer: 1.25, dg: 1.3, oog: 1.6 }[sh.cargo];
   const n = contCount(sh);
   const gateFee = sh.mode === 'FCL' ? R.gateFeePerCont * n : Math.max(40, (R.gateFeePerCont * lclWm(sh)) / P.lcl.cbmPer40);
-  const options: PlanOption[] = routes.map((rt) => {
+  const options: PlanOption[] = routes.map((rt, routeIndex) => {
+    const transitCountries = transitChecks[routeIndex];
+    const transitNames = transitCountryNames(transitCountries);
     const km = rt.distanceMeters / 1000;
     const items = blankItems();
     setItem(items, 1, [{ label: 'Bốc hàng lên xe tại kho', amount: warehouseHandling(sh) }]);
@@ -366,7 +373,16 @@ async function roadOptions(input: PlanInput, seller: Place, buyer: Place, deps: 
     setItem(items, 7, domestic ? [] : [{ label: 'Phí cửa khẩu phía nhập', amount: gateFee }]);
     setItem(items, 9, [], { note: 'Chặng đến kho đã nằm trong tuyến đường bộ cửa đến cửa ở khoản 5.' });
     setItem(items, 10, [{ label: 'Dỡ hàng tại kho', amount: warehouseHandling(sh) }]);
+    if (transitCountries.length) {
+      // Same-country endpoints do not prove the actual journey stays inside that country.
+      for (const n of [3, 4, 7] as const) {
+        items[n - 1].amount = null;
+        items[n - 1].lines = [];
+        items[n - 1].note = `Chưa tính thủ tục/cửa khẩu/quá cảnh qua ${transitNames}`;
+      }
+    }
     const fin = finalize(items, input, buyer.country, tariff, domestic);
+    if (transitCountries.length) fin.missing.push(`Chi phí và thời gian quá cảnh ${transitNames}; cần xác nhận cửa khẩu, quyền quá cảnh`);
     const main = rt.durationSeconds / 86400;
     const days: PlanDays = { inlandO: 0, wait: 0, main, handling: 0, inlandD: 0, total: main };
     const key = `road:${rt.id}`;
@@ -374,11 +390,12 @@ async function roadOptions(input: PlanInput, seller: Place, buyer: Place, deps: 
     const title = rt.description || `${domestic ? 'Đường bộ nội địa' : 'Đường bộ'} · ${sourceLabel}`;
     return {
       key, mode: 'road' as const, title, gates: [], roadKm: km, roadStraight: false,
-      drivingRoute: rt, roadDirections,
+      drivingRoute: rt, roadDirections, roadTransitCountries: transitCountries,
       // Google geometry must not leak into the MapLibre sea-map or its animation layers.
       roadPath: directions.provider === 'osrm' ? unwrapLongitudes(rt.path) : undefined,
       originInlandKm: 0, destInlandKm: 0,
-      ...fin, days, cv: coefficientOfVariation(history.map((h) => h.price)) * 0.5, frequency: 0, risk: 0, history, warnings: rt.warnings,
+      ...fin, days, cv: coefficientOfVariation(history.map((h) => h.price)) * 0.5, frequency: 0, risk: 0, history,
+      warnings: [...rt.warnings, ...(transitCountries.length ? [`Tuyến có dấu hiệu đi qua ${transitNames}. Hai đầu cùng nước vẫn có thể phải quá cảnh. Rà soát từ biên giới bản đồ khái quát; cần xác minh lộ trình và cửa khẩu trước khi đi.`] : [])],
     };
   });
   return { options, originPorts: [] as Port[], destPorts: [] as Port[], domestic };

@@ -69,6 +69,29 @@ describe('OSRM demo server boundary', () => {
     expect((await bodyOf('/api/road/routes?origin=181,10&destination=105,21')).status).toBe(400);
     expect(f).not.toHaveBeenCalled();
   });
+  it('validates an optional waypoint and requests both driving legs in the chosen order', async () => {
+    const data = fixture();
+    data.waypoints.push({ distance: 3 });
+    data.routes[0].legs.push({ summary: 'Second leg', steps: [{ mode: 'driving' }] });
+    const f = stub(data);
+    expect((await bodyOf(`${url}&via=181,10`)).status).toBe(400);
+    expect(f).not.toHaveBeenCalled();
+    const result = await bodyOf(`${url}&via=108.2,16.05`);
+    expect(result.status).toBe(200);
+    expect((f.mock.calls[0] as unknown as [string])[0]).toContain('/106.7,10.77;108.2,16.05;105.84,21.03?');
+    expect(result.data.routes[0].description).toBe('Test route → Second leg');
+  });
+  it('does not return the direct cached route for a request with a waypoint', async () => {
+    const f = stub();
+    await bodyOf();
+    await vi.advanceTimersByTimeAsync(1100);
+    const data = fixture();
+    data.waypoints.push({ distance: 0 });
+    data.routes[0].legs.push({ summary: 'Via', steps: [{ mode: 'driving' }] });
+    f.mockImplementation(async () => new Response(JSON.stringify(data)));
+    expect((await bodyOf(`${url}&via=108.2,16.05`)).data.cached).toBe(false);
+    expect(f).toHaveBeenCalledTimes(2);
+  });
   it('filters ferry/train alternatives and keeps a continuous driving route', async () => {
     stub(fixture([route('ferry'), route('driving'), route('train')]));
     const result = await bodyOf();

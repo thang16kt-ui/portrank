@@ -23,7 +23,7 @@ export interface RoadDirections {
 }
 
 export interface RoadProvider {
-  lookup(q: { origin: Place; destination: Place; departureTime?: string }): Promise<RoadDirections>;
+  lookup(q: { origin: Place; destination: Place; departureTime?: string; via?: Place }): Promise<RoadDirections>;
 }
 
 export interface RoadConfig {
@@ -58,11 +58,15 @@ async function request<T>(url: string): Promise<T> {
 export const fetchRoadConfig = () => request<RoadConfig>('/api/road/config');
 
 export const ServerRoadProvider: RoadProvider = {
-  async lookup({ origin, destination, departureTime }) {
+  async lookup({ origin, destination, departureTime, via }) {
     if (origin.kind !== 'address' || destination.kind !== 'address')
       throw new Error('Đường bộ cần thành phố hoặc địa chỉ ở cả hai đầu. Hãy chọn địa điểm cụ thể thay cho tên quốc gia.');
     const q = new URLSearchParams({ origin: origin.coord.join(','), destination: destination.coord.join(',') });
     if (departureTime) q.set('departureTime', departureTime);
+    if (via) {
+      if (via.kind !== 'address') throw new Error('Điểm đi qua phải là thành phố hoặc địa chỉ cụ thể.');
+      q.set('via', via.coord.join(','));
+    }
     return request<RoadDirections>(`/api/road/routes?${q}`);
   },
 };

@@ -6,6 +6,7 @@ import type { Plan } from '../lib/plan';
 import { COMPLETENESS_LABEL } from '../lib/completeness';
 import type { RankedOption } from '../lib/ranking';
 import { roadSourceLabel, roadTrafficLabel } from '../providers/RoadProvider';
+import { transitCountryNames } from '../lib/roadCountries';
 import { useAppStore, type DetailTab } from '../store/useAppStore';
 import IncotermCard, { placeNamesOf } from './IncotermCard';
 
@@ -34,6 +35,7 @@ export function quoteText(plan: Plan, r: RankedOption, term: string): string {
   const lines = [
     `PORTRANK – PHƯƠNG ÁN #${r.rank} (${plan.scopeShort})`,
     `Tuyến: ${plan.seller.label} → ${plan.buyer.label}`,
+    ...(i.roadVia ? [`Đi qua: ${i.roadVia.label}`] : []),
     `${o.mode === 'sea' ? 'Đường biển' : 'Đường bộ'}: ${o.title}${o.route ? ` · ${fmtNm(o.route.distanceNm)}` : o.drivingRoute ? ` · ${fmtDrivingDistance(o.drivingRoute.distanceMeters)}` : o.roadKm != null ? ` · ${fmtKm(o.roadKm)}` : ''}`,
     `Hàng: ${cargo}${i.hs ? ` · HS ${i.hs}` : ''}${i.goodsValue ? ` · trị giá ${usd(i.goodsValue)} (${i.valueTerm})` : ''}`,
     `Điều kiện: ${term} – ${INCOTERMS[term as keyof typeof INCOTERMS].nameVi}`,
@@ -42,7 +44,8 @@ export function quoteText(plan: Plan, r: RankedOption, term: string): string {
     `Phạm vi: ${plan.scopeTitle}`,
     `Bạn trả: ${usd(r.youPay)} · Bên kia trả: ${usd(r.otherPays)} · ${o.completeness === 'complete' ? 'Tổng' : 'Đã tính'} 10 khoản: ${usd(o.total)} (khoảng ${usd(o.low)} – ${usd(o.high)})`,
     `Trạng thái tổng: ${COMPLETENESS_LABEL[o.completeness].label.toUpperCase()}${o.missing.length ? ` – chưa gồm: ${o.missing.slice(0, 6).join('; ')}${o.missing.length > 6 ? '…' : ''}` : ''}`,
-    `Thuế NK + VAT: ${o.duty.status === 'ok' ? `${usd(o.duty.total)}${o.duty.completeness !== 'complete' ? ' (CHƯA ĐỦ)' : ''} (nguồn: ${o.duty.entry!.source}, ${o.duty.entry!.verified ? 'đã xác minh' : 'chưa xác minh'}, cập nhật ${o.duty.entry!.updatedAt}${o.duty.entry!.dataYear ? `, biểu thuế năm ${o.duty.entry!.dataYear}` : ''})` : 'chưa có dữ liệu – CHƯA gồm trong tổng'}`,
+    `Thuế NK + VAT: ${o.duty.status === 'ok' ? `${usd(o.duty.total)}${o.duty.completeness !== 'complete' ? ' (CHƯA ĐỦ)' : ''} (nguồn: ${o.duty.entry!.source}, ${o.duty.entry!.verified ? 'đã xác minh' : 'chưa xác minh'}, cập nhật ${o.duty.entry!.updatedAt}${o.duty.entry!.dataYear ? `, biểu thuế năm ${o.duty.entry!.dataYear}` : ''})` : o.duty.status === 'domestic' ? `hai đầu cùng nước${o.roadTransitCountries?.length ? '; CHƯA tính phí quá cảnh' : '; không phát sinh thuế nhập khẩu tại đích'}` : 'chưa có dữ liệu – CHƯA gồm trong tổng'}`,
+    ...o.warnings,
     ...(o.duty.conditions.length ? [`Điều kiện: ${o.duty.conditions.join('; ')}`] : []),
     ...(o.duty.needInputs.length ? [`Cần nhập: ${o.duty.needInputs.join('; ')}`] : []),
     `Giá cước: ${o.rate ? `${o.rate.label} (chỉ cước biển/phụ phí là giá thật; các khoản khác vẫn ước tính)` : 'ƯỚC TÍNH theo mô hình PortRank – không phải giá thị trường'}`,
@@ -85,6 +88,7 @@ function Overview({ plan, r }: { plan: Plan; r: RankedOption }) {
           <span className={`chip ${cl.cls}`} title={cl.hint}>{cl.label}</span>
         </div>
       </div>
+      {!!o.roadTransitCountries?.length && <p className="mb-2 rounded-md border border-amber-500/50 bg-amber-500/10 p-2 text-[11px] text-amber-500" role="status">Tuyến có thể quá cảnh {transitCountryNames(o.roadTransitCountries)}. Chưa tính đủ phí và thời gian cửa khẩu. Có thể thêm điểm đi qua để đổi lộ trình.</p>}
       <div className="grid grid-cols-2 gap-1.5">
         <Big label={`Bạn trả (${role === 'seller' ? 'người bán' : 'người mua'})`} tone="text-amber-300" value={usd(r.youPay)} sub={<>logistics + thuế · bên kia trả {usd(r.otherPays)}</>} />
         <Big
@@ -107,7 +111,7 @@ function Overview({ plan, r }: { plan: Plan; r: RankedOption }) {
             ) : duty.status === 'no-value' ? (
               <>nhập mã HS và giá trị hàng</>
             ) : duty.status === 'domestic' ? (
-              <>nội địa</>
+              <>{o.roadTransitCountries?.length ? 'hai đầu cùng nước · chưa gồm phí quá cảnh' : 'nội địa'}</>
             ) : (
               <button className="text-sky underline" onClick={() => set({ detailTab: 'duty', detailOpen: true })}>Nhập thuế suất</button>
             )

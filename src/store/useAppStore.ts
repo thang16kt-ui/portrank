@@ -42,6 +42,7 @@ export interface FormState {
   readyDate: string;
   /** Local datetime input; converted to RFC3339 before requesting road directions. Empty = now. */
   roadDepartureTime: string;
+  roadVia?: Place | null;
   priority: Priority;
   radiusKm: number;
   avoidRedSea: boolean;
@@ -108,6 +109,7 @@ export const DEFAULT_FORM: FormState = {
   valueTerm: 'FOB',
   readyDate: today(),
   roadDepartureTime: '',
+  roadVia: null,
   priority: 'balanced',
   radiusKm: 400,
   avoidRedSea: false,

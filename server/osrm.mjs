@@ -17,8 +17,9 @@ function validPath(path) {
     Number.isFinite(p[0]) && Number.isFinite(p[1]) && Math.abs(p[0]) <= 180 && Math.abs(p[1]) <= 90);
 }
 
-export async function handleOsrm(origin, destination) {
-  const coordinates = `${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}`;
+export async function handleOsrm(origin, destination, via = null) {
+  const points = via ? [origin, via, destination] : [origin, destination];
+  const coordinates = points.map((p) => `${p.longitude},${p.latitude}`).join(';');
   const now = Date.now();
   const hit = cache.get(coordinates);
   if (hit && hit.expiresAt > now) return json(200, { ...hit.body, departureTime: new Date(now).toISOString(), cached: true });
@@ -39,13 +40,13 @@ export async function handleOsrm(origin, destination) {
     if (data.code === 'NoRoute' || data.code === 'NoSegment') return json(404, { error: 'Không tìm được đường ô tô giữa hai điểm này. Hãy chọn địa chỉ khác hoặc phương thức khác.' });
     if (!res.ok) return json(502, { error: `OSRM trả về HTTP ${res.status}. Thử lại sau.` });
     if (data.code !== 'Ok' || !Array.isArray(data.routes)) return json(502, { error: 'Nguồn OSRM trả dữ liệu không hợp lệ. Thử lại sau.' });
-    if (!Array.isArray(data.waypoints) || data.waypoints.length !== 2 || data.waypoints.some((w) => !Number.isFinite(w.distance) || w.distance < 0))
+    if (!Array.isArray(data.waypoints) || data.waypoints.length !== points.length || data.waypoints.some((w) => !Number.isFinite(w.distance) || w.distance < 0))
       return json(502, { error: 'OSRM chưa xác định được điểm đầu/cuối trên đường ô tô.' });
     if (data.waypoints.some((w) => w.distance > 5000)) return json(422, { error: 'Điểm chọn cách đường ô tô hơn 5 km. Hãy chọn địa chỉ hoặc ghim gần đường hơn.' });
     let mixedMode = false;
     const routes = data.routes.slice(0, 3).flatMap((r, i) => {
       if (!Number.isFinite(r.distance) || r.distance < 0 || !Number.isFinite(r.duration) || r.duration < 0 || !validPath(r.geometry?.coordinates)) return [];
-      if (!Array.isArray(r.legs) || !r.legs.length || r.legs.some((l) => !Array.isArray(l.steps) || !l.steps.length)) return [];
+      if (!Array.isArray(r.legs) || r.legs.length !== points.length - 1 || r.legs.some((l) => !Array.isArray(l.steps) || !l.steps.length)) return [];
       // This hosted profile cannot exclude ferries in the request. Inspect actual transport modes instead.
       if (r.legs.some((l) => l.steps.some((s) => s.mode !== 'driving'))) { mixedMode = true; return []; }
       const names = r.legs.map((l) => typeof l.summary === 'string' ? l.summary : '').filter(Boolean);

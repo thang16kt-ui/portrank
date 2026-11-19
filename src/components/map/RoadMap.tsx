@@ -5,6 +5,7 @@ import { useRoadConfig } from '../../hooks/useRoadConfig';
 import { useCurrent } from '../../lib/actions';
 import { fmtDrivingDistance, fmtDuration } from '../../lib/format';
 import { unwrapLongitudes } from '../../lib/geo';
+import { transitCountryNames } from '../../lib/roadCountries';
 import { useAppStore } from '../../store/useAppStore';
 import GoogleRoadMap from './GoogleRoadMap';
 
@@ -58,17 +59,27 @@ function OsrmRoadMap() {
         L.circleMarker(point, { radius: 8, color: '#fff', weight: 2, fillColor: i === 0 ? '#0284c7' : '#ea580c', fillOpacity: 1 })
           .bindTooltip(label, { direction: 'top' }).addTo(group);
       });
+      const via = plan?.input.roadVia;
+      if (via) {
+        const target: LatLngTuple = [via.coord[1], via.coord[0]];
+        const nearest = path.reduce((best, p) => (p[0] - target[0]) ** 2 + (p[1] - target[1]) ** 2 < (best[0] - target[0]) ** 2 + (best[1] - target[1]) ** 2 ? p : best, path[0]);
+        const label = document.createElement('span');
+        label.textContent = `Đi qua · ${via.label}`;
+        L.circleMarker(nearest, { radius: 7, color: '#fff', weight: 2, fillColor: '#7c3aed', fillOpacity: 1 }).bindTooltip(label).addTo(group);
+      }
       map.fitBounds(L.latLngBounds(path), { paddingTopLeft: [35, 95], paddingBottomRight: [35, 40], maxZoom: 15 });
     });
     return () => { active = false; remove(); };
-  }, [map, route, plan?.seller.label, plan?.buyer.label]);
+  }, [map, route, plan?.seller.label, plan?.buyer.label, plan?.input.roadVia]);
 
   return <div className="relative isolate z-0 h-full w-full bg-well">
     <div ref={ref} className="h-full w-full" aria-label="Bản đồ đường bộ OpenStreetMap / OSRM" />
     <div className="pointer-events-none absolute left-3 right-3 top-3 z-[500] max-w-md rounded-lg border border-line bg-panel/95 px-3 py-2 text-[12px] text-fg shadow-lg" role="status">
       {route && <div className="font-semibold">{fmtDrivingDistance(route.distanceMeters)} · {fmtDuration(route.durationSeconds)}</div>}
       <div className="font-medium">OpenStreetMap / OSRM · bản thử</div>
+      {route && plan?.input.roadVia && <div className="text-[10.5px]">Qua {plan.input.roadVia.label}</div>}
       <div className="text-[10.5px] text-mute">Ô tô · chưa xét kẹt xe, nghỉ và cửa khẩu</div>
+      {!!option?.roadTransitCountries?.length && <p className="mt-1 font-semibold text-amber-500">Có thể quá cảnh: {transitCountryNames(option.roadTransitCountries)} · chưa tính đủ phí</p>}
       {!route && <p className="mt-1">{planning ? 'Đang tìm tuyến theo đường ô tô…' : error || 'Chọn thành phố/địa chỉ ở hai đầu rồi bấm Tìm tuyến tối ưu.'}</p>}
       {(mapError || tileError) && <p className="mt-1 text-amber-200">{mapError || 'Chưa tải được một số ô bản đồ nền. Tuyến và số liệu vẫn giữ nguyên.'}</p>}
     </div>

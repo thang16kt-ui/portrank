@@ -56,6 +56,7 @@ export default function Sidebar() {
   const [more, setMore] = useState(false);
   const [carrierOpen, setCarrierOpen] = useState(false);
   const [suggest, setSuggest] = useState(false);
+  const [showVia, setShowVia] = useState(false);
   const { config: roadConfig } = useRoadConfig(f.mode === 'road');
 
   const sellerC = f.role === 'seller' ? f.mine?.country : f.partner?.country;
@@ -97,6 +98,10 @@ export default function Sidebar() {
             <input id="road-departure" className="field" type="datetime-local" value={f.roadDepartureTime ?? ''} onChange={(e) => setForm({ roadDepartureTime: e.target.value })} />
             </>}
             <p className="mt-1 text-[10.5px] text-mute">{roadConfig?.provider === 'google' ? 'Google Maps có xét giao thông, giờ đi theo múi giờ thiết bị.' : roadConfig?.provider === 'osrm' ? 'OpenStreetMap / OSRM · bản thử. Thời gian chưa xét kẹt xe và không dự báo theo giờ đi.' : 'Đang kiểm tra nguồn đường bộ.'} Chọn thành phố/địa chỉ ở hai đầu. Tuyến ô tô chưa xét hạn chế xe tải/container.</p>
+            {(roadConfig?.provider === 'osrm' || f.roadVia) && <div className="mt-2 space-y-1">
+              <button className="text-[11px] text-sky underline" onClick={() => { if (showVia || f.roadVia) { setShowVia(false); setForm({ roadVia: null }); } else setShowVia(true); }}>{showVia || f.roadVia ? 'Bỏ điểm đi qua' : 'Thêm điểm đi qua (tuỳ chọn)'}</button>
+              {(showVia || f.roadVia) && <AddressInput label="Đi qua" value={f.roadVia ?? null} onChange={(roadVia) => setForm({ roadVia })} color="#a78bfa" placeholder="VD: Đà Nẵng, Việt Nam" />}
+            </div>}
           </div>
         )}
         <div className={f.mode === 'sea' ? '' : 'opacity-40'}>

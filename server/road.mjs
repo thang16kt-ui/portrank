@@ -43,7 +43,11 @@ export async function handleRoad(url, env = process.env) {
   const origin = point(url.searchParams.get('origin'));
   const destination = point(url.searchParams.get('destination'));
   if (!origin || !destination) return json(400, { error: 'Điểm đi và điểm đến phải có tọa độ hợp lệ (kinh độ,vĩ độ).' });
-  if (env.ROAD_ROUTING_PROVIDER === 'osrm-demo') return handleOsrm(origin, destination);
+  const viaText = url.searchParams.get('via');
+  const via = viaText == null ? null : point(viaText);
+  if (viaText != null && !via) return json(400, { error: 'Điểm đi qua phải có tọa độ hợp lệ (kinh độ,vĩ độ).' });
+  if (env.ROAD_ROUTING_PROVIDER === 'osrm-demo') return handleOsrm(origin, destination, via);
+  if (via) return json(400, { error: 'Điểm đi qua hiện chỉ hỗ trợ ở bản thử OSRM. Hãy bỏ điểm đi qua rồi tính lại.' });
   const departure = url.searchParams.get('departureTime');
   const at = departure ? Date.parse(departure) : Date.now();
   if (departure && (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(departure) || !Number.isFinite(at) || at < Date.now()))

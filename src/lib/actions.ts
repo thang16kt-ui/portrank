@@ -23,6 +23,7 @@ export function planInputOf(f: FormState): PlanInput | null {
     dutyQty: { units: f.dutyUnits ?? 0, netKg: f.netKg ?? 0, liters: f.dutyLiters ?? 0 },
     radiusKm: f.radiusKm, avoidRedSea: f.avoidRedSea, avoidPanama: f.avoidPanama, carriers: f.carriers,
     roadDepartureTime: f.mode === 'road' && f.roadDepartureTime ? new Date(f.roadDepartureTime).toISOString() : undefined,
+    roadVia: f.mode === 'road' ? f.roadVia ?? undefined : undefined,
   };
 }
 
@@ -37,6 +38,7 @@ export function inputFingerprint(f: FormState): string {
     f.hs.replace(/\D/g, ''), f.origin, f.hasCo, f.hasCo ? f.fta ?? '' : '', f.customsDate ?? '', f.company ?? '', f.dutyUnits, f.netKg, f.dutyLiters, f.readyDate,
     f.radiusKm, f.avoidRedSea, f.avoidPanama, [...f.carriers].sort(),
     f.mode === 'road' ? f.roadDepartureTime ?? '' : '',
+    f.mode === 'road' ? p(f.roadVia ?? null) : '',
   ]);
 }
 
