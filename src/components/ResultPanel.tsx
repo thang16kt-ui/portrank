@@ -10,13 +10,14 @@ import { transitCountryNames } from '../lib/roadCountries';
 import { useAppStore, type DetailTab } from '../store/useAppStore';
 import IncotermCard, { placeNamesOf } from './IncotermCard';
 
-const rankCls = (rank: number) => (rank === 1 ? 'bg-[#f59e0b] text-slate-900 shadow-[0_0_10px_rgba(251,191,36,.7)]' : rank <= 3 ? 'bg-[#38bdf8] text-slate-900' : 'bg-slate-600 text-white');
+// hạng 1: cam container; hạng 2–3: xanh nước biển; còn lại: xám
+const rankCls = (rank: number) => (rank === 1 ? 'bg-signal text-white' : rank <= 3 ? 'bg-sky text-white' : 'bg-slate-500 text-white');
 
 function Big({ label, value, sub, tone }: { label: string; value: React.ReactNode; sub?: React.ReactNode; tone?: string }) {
   return (
     <div className="rounded-lg border border-line bg-well px-2.5 py-2">
       <div className="text-[10.5px] font-medium text-mute">{label}</div>
-      <div className={`text-[19px] leading-tight font-bold ${tone ?? 'text-fg'}`}>{value}</div>
+      <div className={`num text-[22px] leading-[1.1] font-bold whitespace-nowrap ${tone ?? 'text-fg'}`}>{value}</div>
       {sub && <div className="mt-0.5 text-[10px] leading-snug text-mute">{sub}</div>}
     </div>
   );
@@ -90,7 +91,7 @@ function Overview({ plan, r }: { plan: Plan; r: RankedOption }) {
       </div>
       {!!o.roadTransitCountries?.length && <p className="mb-2 rounded-md border border-amber-500/50 bg-amber-500/10 p-2 text-[11px] text-amber-500" role="status">Tuyến có thể quá cảnh {transitCountryNames(o.roadTransitCountries)}. Chưa tính đủ phí và thời gian cửa khẩu. Có thể thêm điểm đi qua để đổi lộ trình.</p>}
       <div className="grid grid-cols-2 gap-1.5">
-        <Big label={`Bạn trả (${role === 'seller' ? 'người bán' : 'người mua'})`} tone="text-amber-300" value={usd(r.youPay)} sub={<>logistics + thuế · bên kia trả {usd(r.otherPays)}</>} />
+        <Big label={`Bạn trả (${role === 'seller' ? 'người bán' : 'người mua'})`} tone="text-signal" value={usd(r.youPay)} sub={<>logistics + thuế · bên kia trả {usd(r.otherPays)}</>} />
         <Big
           label={totalLabel(plan, hasValue, complete)}
           value={<>{complete ? '' : '≥ '}{usd(hasValue ? landed : o.total)}</>}
@@ -177,7 +178,7 @@ function Ranking({ ranked }: { ranked: RankedOption[] }) {
               <div className="flex items-center gap-1.5">
                 <span className={`flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-bold ${rankCls(r.rank)}`}>{r.rank}</span>
                 <span className="min-w-0 flex-1 truncate text-[12px] font-medium text-fg" title={o.title}>{o.title}</span>
-                <span className="text-[12px] font-semibold text-amber-200">{usd(basis === 'mine' ? r.youPay : o.total)}</span>
+                <span className="num text-[15px] font-bold text-signal">{usd(basis === 'mine' ? r.youPay : o.total)}</span>
               </div>
               <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 pl-6 text-[10.5px] text-mute">
                 <span>{o.drivingRoute ? fmtDuration(o.drivingRoute.durationSeconds) : fmtDays(o.days.total)}</span>
@@ -231,9 +232,9 @@ export default function ResultPanel() {
   return (
     <div className="flex h-full gap-2.5 overflow-x-auto p-2.5 max-[899px]:h-auto max-[899px]:flex-col max-[899px]:overflow-visible">
       {plan && cur ? (
-        <section className={`${sec} w-[236px] overflow-y-auto`}><Overview plan={plan} r={cur} /></section>
+        <section className={`${sec} w-[256px] overflow-y-auto`}><Overview plan={plan} r={cur} /></section>
       ) : (
-        <section className={`${sec} flex w-[236px] flex-col justify-center text-center text-[12px] leading-relaxed text-mute`}>
+        <section className={`${sec} flex w-[256px] flex-col justify-center text-center text-[12px] leading-relaxed text-mute`}>
           <div className="text-2xl">🧭</div>
           Nhập <b className="text-fg">bên tôi</b> và <b className="text-fg">bên đối tác</b> (quốc gia hoặc địa chỉ) rồi bấm <b className="text-amber-200">Tìm tuyến tối ưu</b>.
           <div className="mt-1 text-[10.5px]">Mọi con số giá là ước tính, trừ khi bạn đã nhập bảng giá thật.</div>
