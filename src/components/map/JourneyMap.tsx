@@ -22,14 +22,14 @@ const latLngs = (leg: JourneyLeg): LatLngTuple[] => unwrapLongitudes(leg.path).m
 export default function JourneyMap() {
   const holder = useRef<HTMLDivElement>(null);
   const controls = useRef<HTMLElement>(null);
-  const [controlsHeight, setControlsHeight] = useState(240);
+  const summary = useRef<HTMLElement>(null);
+  const [controlsHeight, setControlsHeight] = useState(96);
   const [map, setMap] = useState<LeafletMap | null>(null);
   const [inland, setInland] = useState<LegState>({ loading: false });
   const [trafficOn, setTrafficOn] = useState(true);
-  const [summaryOpen, setSummaryOpen] = useState(false);
+  const [summaryOpen, setSummaryOpen] = useState(() => window.innerWidth >= 900);
   const [trafficReady, setTrafficReady] = useState(false);
   const [trafficError, setTrafficError] = useState('');
-  const [trafficAt, setTrafficAt] = useState('');
   const [refresh, setRefresh] = useState(0);
   const [mapError, setMapError] = useState('');
   const [followStages, setFollowStages] = useState(true);
@@ -93,7 +93,7 @@ export default function JourneyMap() {
     let layer: TileLayer | null = L.tileLayer(`/api/traffic/tiles/{z}/{x}/{y}.png?v=${Math.floor(Date.now() / REFRESH_MS)}`, {
       minZoom: 7, maxZoom: 19, maxNativeZoom: 18, opacity: 0.85, updateWhenIdle: true,
       attribution: 'Traffic &copy; TomTom', zIndex: 250,
-    }).on('tileload', () => { setTrafficError(''); setTrafficAt(new Date().toISOString()); })
+    }).on('tileload', () => { setTrafficError(''); })
       .on('tileerror', () => setTrafficError('Chưa tải được màu giao thông ở khung nhìn này.')).addTo(map);
     return () => { layer?.remove(); layer = null; };
   }, [map, trafficReady, trafficOn, refresh]);
@@ -146,8 +146,8 @@ export default function JourneyMap() {
 
   useEffect(() => {
     if (!map || map !== liveMap.current || !stageLeg || !animationReady || !followStages || !leaflet.current) return;
-    map.fitBounds(leaflet.current.latLngBounds(latLngs(stageLeg)), { paddingTopLeft: [35, 55], paddingBottomRight: [35, Math.max(45, Math.min(controlsHeight + 40, map.getSize().y - 110))], maxZoom: 14, animate: false });
-  }, [map, stageLeg, animationReady, followStages, controlsHeight]);
+    map.fitBounds(leaflet.current.latLngBounds(latLngs(stageLeg)), { paddingTopLeft: [summaryOpen && map.getSize().x >= 750 ? (summary.current?.offsetWidth ?? 520) + 30 : 35, 55], paddingBottomRight: [35, Math.max(45, Math.min(controlsHeight + 40, map.getSize().y - 110))], maxZoom: 14, animate: false });
+  }, [map, stageLeg, animationReady, followStages, controlsHeight, summaryOpen]);
 
   useEffect(() => {
     if (!map || map !== liveMap.current || !leaflet.current) return;
@@ -176,11 +176,11 @@ export default function JourneyMap() {
     }
     const signature = `${plan?.seller.coord.join(',')}:${plan?.buyer.coord.join(',')}:${optionKey}:${legs.map((l) => l.id).join(',')}`;
     if (all.length && (!animationReady || !followStages) && (lastFit.current !== signature || !followStages)) {
-      map.fitBounds(L.latLngBounds(all), { paddingTopLeft: [40, 55], paddingBottomRight: [40, Math.max(45, Math.min(controlsHeight + 40, map.getSize().y - 110))], maxZoom: 14 });
+      map.fitBounds(L.latLngBounds(all), { paddingTopLeft: [summaryOpen && map.getSize().x >= 750 ? (summary.current?.offsetWidth ?? 520) + 30 : 40, 55], paddingBottomRight: [40, Math.max(45, Math.min(controlsHeight + 40, map.getSize().y - 110))], maxZoom: 14 });
       lastFit.current = signature;
     }
     return () => { group.remove(); };
-  }, [map, legs, plan, optionKey, animationReady, followStages, road, controlsHeight]);
+  }, [map, legs, plan, optionKey, animationReady, followStages, road, controlsHeight, summaryOpen]);
 
   useEffect(() => { usePlayback.getState().setProgress(0); usePlayback.getState().setPlaying(true); }, [plan, optionKey]);
   useEffect(() => {
@@ -210,11 +210,10 @@ export default function JourneyMap() {
     if (heading) heading.style.transform = `rotateX(48deg) rotateZ(${at.bearing}deg)`;
   }, [map, stage, animationReady]);
 
-  const fetchedAt = legs.filter((l) => l.vehicle === 'truck').map((l) => l.fetchedAt).filter(Boolean).sort().at(-1);
   const source = option?.roadDirections?.provider === 'osrm' ? 'OSRM' : 'TomTom';
   return <div className="relative isolate h-full w-full bg-well">
     <div ref={holder} className="h-full w-full" aria-label="Bản đồ hành trình xe tải và tàu biển" />
-    <section className="journey-summary" aria-label="Thông tin hành trình">
+    <section ref={summary} className="journey-summary" data-expanded={summaryOpen} aria-label="Thông tin hành trình">
       <button className="btn !text-xs" aria-expanded={summaryOpen} aria-controls="journey-summary-details" onClick={() => setSummaryOpen((open) => !open)}>{summaryOpen ? '✕ Ẩn thông tin' : 'ⓘ Thông tin hành trình'}</button>
       <div id="journey-summary-details" hidden={!summaryOpen}>
       <div className="flex items-center justify-between gap-2"><strong>{road ? '🚚 Hành trình đường bộ' : '🚚 Thành phố · 🚢 Cảng · 🚚 Thành phố'}</strong>
@@ -222,32 +221,29 @@ export default function JourneyMap() {
       {road && route && <p className="mt-1 font-semibold">{fmtDrivingDistance(route.distanceMeters)} · {fmtDuration(route.durationSeconds)} · {source}</p>}
       {road && plan?.input.roadVia && <p className="text-xs">Qua {plan.input.roadVia.label}</p>}
       {road && !!option?.roadTransitCountries?.length && <p className="mt-1 text-xs font-semibold text-amber-700">Có thể quá cảnh: {transitCountryNames(option.roadTransitCountries)} · chưa tính đủ phí.</p>}
-      {road && <p className="text-xs">{source === 'OSRM' ? 'Thời gian OSRM chưa xét kẹt xe theo giờ đi.' : 'Thời gian tuyến có xét giao thông.'} Chưa xác nhận hạn chế xe tải/container.</p>}
+      {road && <p className="text-xs">{source === 'OSRM' ? 'Thời gian OSRM chưa xét kẹt xe theo giờ đi.' : 'Giờ đến có tính tình hình giao thông.'} Chưa xác nhận hạn chế xe tải/container.</p>}
       {!option && <p className="mt-1">{planning ? 'Đang tìm tuyến…' : planError || 'Chọn hai thành phố rồi bấm Tìm tuyến tối ưu.'}</p>}
       {inland.loading && <p className="mt-1" role="status">Đang lấy tuyến đường bộ hai đầu cảng…</p>}
       {(inland.error || mapError || trafficError) && <p className="mt-1 text-amber-600" role="status">{inland.error || trafficError || mapError}</p>}
       {missingLeg && !inland.loading && <p className="mt-1 text-amber-600">Chưa đủ tuyến đường bộ để phát trọn hành trình xe–tàu–xe.</p>}
       {!road && plan && option && ((option.pol && option.pol.country !== plan.seller.country) || (option.pod && option.pod.country !== plan.buyer.country)) && <p className="mt-1 text-xs font-semibold text-amber-700">Có chặng xe qua biên giới do chọn cảng nước khác. Cần xác nhận cửa khẩu, quyền quá cảnh và chi phí thủ tục.</p>}
-      <div className="mt-1 flex flex-wrap gap-x-3 text-xs"><span>🟢 Thông thoáng</span><span>🟠 Chậm</span><span>🔴 Kẹt xe</span><span>🔵 Tuyến đã chọn</span></div>
-      <p className="mt-1 text-xs opacity-75">{trafficReady ? 'Giao thông TomTom hiện tại · cập nhật mỗi 2 phút khi mở trang.' : 'Chưa bật dữ liệu giao thông trên máy chủ.'} {fetchedAt && `Tuyến lấy lúc ${new Date(fetchedAt).toLocaleTimeString('vi-VN')}.`}</p>
-      {trafficOn && trafficReady && !trafficError && <p className="text-xs opacity-75">Phóng to mức thành phố để xem màu giao thông.{trafficAt && ` Lớp màu tải lúc ${new Date(trafficAt).toLocaleTimeString('vi-VN')}.`}</p>}
-      {legs.some((l) => l.forecast) && <p className="text-xs font-semibold">ETA theo giờ tương lai là dự báo. Lớp màu nền thể hiện giao thông hiện tại.</p>}
+      {!!legs.length && <SimulationReadout departureTime={departureTime} elapsedSeconds={stage?.elapsedSeconds ?? 0} totalSeconds={animationReady ? stage?.totalSeconds ?? NaN : NaN}
+        legLabel={stage?.leg.label ?? '—'} status={status} estimated={!road} forecast={legs.some((l) => l.forecast)} children={!road ? <p>Giờ đến theo thời lượng các chặng; chưa gồm chờ chuyến và bốc dỡ ở cảng.</p> : undefined} />}
+      <div className="journey-legend mt-1 flex flex-wrap gap-x-3 text-xs" title="Màu giao thông hiện tại"><span>🟢 Thông thoáng</span><span>🟠 Chậm</span><span>🔴 Kẹt xe</span><span>🔵 Tuyến đã chọn</span></div>
+
       </div>
     </section>
     {!!legs.length && <section ref={controls} className="journey-controls" aria-label="Điều khiển mô phỏng hành trình">
-      <SimulationReadout departureTime={departureTime} elapsedSeconds={stage?.elapsedSeconds ?? 0} totalSeconds={animationReady ? stage?.totalSeconds ?? NaN : NaN}
-        legLabel={stage?.leg.label ?? '—'} status={status} estimated={!road} />
-      {inland.error && <p className="mb-2 text-sm text-amber-700" role="status">{inland.error}</p>}
-      <div className="journey-stages">{legs.map((leg, index) => <button key={leg.id} className={`journey-stage ${stage?.index === index ? 'journey-stage-active' : ''}`} disabled={!animationReady}
+
+      <div className="journey-stages">{legs.map((leg, index) => <button key={leg.id} title={`${leg.label} · ${fmtDuration(leg.durationSeconds)}`} className={`journey-stage ${stage?.index === index ? 'journey-stage-active' : ''}`} disabled={!animationReady}
         onClick={() => usePlayback.getState().setProgress(journeyLegProgress(legs, index))}>
         {leg.vehicle === 'truck' ? '🚚' : '🚢'} {leg.label} · {fmtDuration(leg.durationSeconds)}{leg.vehicle === 'ship' && ' (ước tính)'}</button>)}</div>
-      <div className="flex items-center gap-3"><button className="btn" disabled={!animationReady} aria-label={playing ? 'Tạm dừng hành trình' : 'Phát hành trình'} onClick={() => { const p = usePlayback.getState(); if (p.progress >= 1) p.setProgress(0); p.setPlaying(!p.playing); }}>{playing ? '⏸' : '▶'}</button>
+      <div className="journey-playback"><button className="btn" disabled={!animationReady} aria-label={playing ? 'Tạm dừng hành trình' : 'Phát hành trình'} onClick={() => { const p = usePlayback.getState(); if (p.progress >= 1) p.setProgress(0); p.setPlaying(!p.playing); }}>{playing ? '⏸' : '▶'}</button>
         <input aria-label="Tiến độ hành trình" type="range" min="0" max="1000" value={Math.round(progress * 1000)} disabled={!animationReady} onChange={(e) => usePlayback.getState().setProgress(+e.target.value / 1000)} className="min-w-0 flex-1" />
         <button className="btn !text-xs" aria-pressed={followStages} onClick={() => setFollowStages((v) => !v)}>{followStages ? 'Theo chặng' : 'Toàn cảnh'}</button>
         <select aria-label="Tốc độ mô phỏng" className="field !w-auto !py-1" value={speed} onChange={(e) => usePlayback.getState().setSpeed(+e.target.value as Speed)}>{PLAYBACK_SPEEDS.map((s) => <option key={s} value={s}>×{s}</option>)}</select>
       </div>
-      <p className="mt-1 text-xs opacity-75">{road ? 'Giờ đến theo thời gian tuyến từ nguồn đường bộ.' : 'Giờ đến theo thời lượng các chặng; chưa gồm chờ chuyến và bốc dỡ ở cảng.'} Tốc độ xem không thay đổi giờ đến.</p>
-      <p className="text-xs opacity-75">{legs.some((l) => l.forecast) ? 'Giờ đi tương lai: ETA dự báo; màu giao thông hiện tại không phải bản đồ dự báo từng đoạn.' : 'Màu trống: chưa có dữ liệu giao thông đoạn này.'}</p>
+
     </section>}
   </div>;
 }

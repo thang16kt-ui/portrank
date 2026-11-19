@@ -5,7 +5,7 @@
 1. Chọn địa chỉ đi/đến và phương thức đường bộ hoặc đường biển.
 2. Nhập **Ngày, giờ khởi hành**, hoặc bấm **Đi ngay** để dùng thời điểm lấy tuyến.
 3. Bấm **Tìm tuyến tối ưu**. Đổi giờ hoặc địa chỉ sau đó sẽ hiện nhắc tính lại kết quả.
-4. Thanh điều khiển hiện giờ mô phỏng, chặng đang đi, giờ đến dự kiến và trạng thái.
+4. Mở **Thông tin hành trình** để xem giờ mô phỏng, chặng đang đi, giờ đến dự kiến và trạng thái. Trên bản đồ chỉ giữ thanh chọn chặng và điều khiển phát/dừng, tiến độ, theo chặng, tốc độ. Giờ tương lai có nhãn **Dự báo**; ghi chú giới hạn nằm ở tooltip nhãn, không tạo đoạn văn dài.
 5. Phát/dừng, kéo tiến độ hoặc chọn tốc độ xem. Bấm một chặng để nhảy tới đầu chặng đó.
 
 Giờ nhập và giờ hiển thị dùng múi giờ thiết bị, ghi rõ trên giao diện. Yêu cầu API chuyển thành ISO 8601 có múi giờ. Không chấp nhận ngày không hợp lệ hoặc giờ đã qua.
@@ -38,3 +38,7 @@ Không thêm số tài xế, biến thời gian nghỉ hoặc lịch đổi lái
 - Vùng nhìn bản đồ chừa khoảng theo chiều cao thực tế của thanh điều khiển để tránh che vị trí xe/tàu.
 
 Khóa API là cấu hình của máy chủ. Không có khóa Google/TomTom trong thay đổi này.
+
+## Bố cục mô phỏng
+
+Giờ mô phỏng nằm trong hộp Thông tin hành trình có thể thu gọn, chia hai cột; mở mặc định trên màn hình rộng. Thanh điều khiển sát đáy bản đồ chỉ có chọn chặng, phát/dừng, tiến độ, theo chặng và tốc độ. Bỏ ba dòng cập nhật/phóng to/giải thích dự báo dài; nhãn Dự báo và tooltip giữ đúng ý nghĩa nguồn dữ liệu. Bản đồ chừa khoảng bên cạnh hộp thông tin khi mở để nhìn được xe/tuyến. Bảng chi phí và xếp hạng tuyến giữ bố cục hiện có.

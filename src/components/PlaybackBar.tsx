@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { Track } from '../lib/track';
 import { PLAYBACK_SPEEDS, useAppStore, usePlayback, type Speed } from '../store/useAppStore';
 import { useCurrent } from '../lib/actions';
@@ -8,15 +9,11 @@ export default function PlaybackBar({ track }: { track: Track }) {
   const progress = usePlayback((s) => s.progress);
   const playing = usePlayback((s) => s.playing);
   const speed = usePlayback((s) => s.speed);
-  const plan = useAppStore((s) => s.plan);
-  const current = useCurrent();
   const { setProgress, setPlaying, setSpeed } = usePlayback.getState();
   const day = progress * track.total;
   const stop = track.stops.find((s) => day >= s.arrive && day <= s.depart);
   return (
     <div className="legacy-simulation rounded-xl border border-line bg-panel/95 px-3 py-2 shadow-lg backdrop-blur">
-      <SimulationReadout departureTime={plan?.input.roadDepartureTime ?? plan?.calculatedAt} elapsedSeconds={day * 86400} totalSeconds={track.total * 86400}
-        legLabel={current?.option.title ?? 'Chặng biển'} estimated status={progress >= 1 ? 'Đã đến nơi' : !playing ? 'Tạm dừng mô phỏng' : stop ? `Đang dừng tại ${stop.name}` : 'Đang đi biển'} />
       <div className="flex items-center gap-3">
       <button
         className="btn h-8 w-8 !p-0 text-sm"
@@ -44,7 +41,27 @@ export default function PlaybackBar({ track }: { track: Track }) {
         {PLAYBACK_SPEEDS.map((s) => <option key={s} value={s}>×{s}</option>)}
       </select>
       </div>
-      <p className="mt-1 text-xs text-mute">Giờ đến chỉ tính chặng biển; chưa gồm xe hai đầu, chờ chuyến và bốc dỡ.</p>
     </div>
   );
+}
+
+/** Information stays separate from the compact playback controls in the world map too. */
+export function SeaSimulationSummary({ track }: { track: Track }) {
+  const [open, setOpen] = useState(false);
+  const plan = useAppStore((s) => s.plan);
+  const current = useCurrent();
+  const progress = usePlayback((s) => s.progress);
+  const playing = usePlayback((s) => s.playing);
+  const day = progress * track.total;
+  const stop = track.stops.find((s) => day >= s.arrive && day <= s.depart);
+  return <section className="journey-summary pointer-events-auto !top-14" data-expanded={open} aria-label="Thông tin hành trình">
+    <button className="btn !text-xs" aria-expanded={open} aria-controls="sea-simulation-details" onClick={() => setOpen((value) => !value)}>{open ? '✕ Ẩn thông tin' : 'ⓘ Thông tin hành trình'}</button>
+    <div id="sea-simulation-details" hidden={!open}>
+      <strong>🚢 Hành trình đường biển</strong>
+      <SimulationReadout departureTime={plan?.input.roadDepartureTime ?? plan?.calculatedAt} elapsedSeconds={day * 86400} totalSeconds={track.total * 86400}
+        legLabel={current?.option.title ?? 'Chặng biển'} estimated status={progress >= 1 ? 'Đã đến nơi' : !playing ? 'Tạm dừng mô phỏng' : stop ? `Đang dừng tại ${stop.name}` : 'Đang đi biển'}>
+        <p>Giờ đến chỉ tính chặng biển; chưa gồm xe hai đầu, chờ chuyến và bốc dỡ.</p>
+      </SimulationReadout>
+    </div>
+  </section>;
 }

@@ -4,7 +4,6 @@ import { fmtDrivingDistance, fmtDuration } from '../../lib/format';
 import { fetchRoadConfig, type RoadConfig } from '../../providers/RoadProvider';
 import { PLAYBACK_SPEEDS, useAppStore, usePlayback, type Speed } from '../../store/useAppStore';
 import { journeyPosition, journeyStatus, TRAFFIC_COLORS, type JourneyLeg } from '../../lib/journey';
-import { formatSimulationTime } from '../../lib/simulation';
 import SimulationReadout from '../SimulationReadout';
 import { truckModelMarkup } from './truckModel';
 
@@ -85,13 +84,14 @@ export default function GoogleRoadMap() {
   const speed = usePlayback((s) => s.speed);
   const ref = useRef<HTMLDivElement>(null);
   const controls = useRef<HTMLElement>(null);
-  const [controlsHeight, setControlsHeight] = useState(220);
+  const summary = useRef<HTMLElement>(null);
+  const [controlsHeight, setControlsHeight] = useState(96);
   const truck = useRef<TruckOverlay | null>(null);
   const [config, setConfig] = useState<RoadConfig | null>(null);
   const [mapState, setMapState] = useState<{ map: MapInstance; maps: MapsLibrary } | null>(null);
   const [mapError, setMapError] = useState('');
   const [attempt, setAttempt] = useState(0);
-  const [summaryOpen, setSummaryOpen] = useState(false);
+  const [summaryOpen, setSummaryOpen] = useState(() => window.innerWidth >= 900);
   // Google geometry and traffic must only appear on the Google map.
   const option = current?.option.mode === 'road' && current.option.roadDirections?.provider === 'google' ? current.option : null;
   const route = option?.drivingRoute;
@@ -101,7 +101,6 @@ export default function GoogleRoadMap() {
     durationSeconds: route.durationSeconds, road: route, forecast: directions?.trafficMode === 'forecast',
   } : null, [route, plan?.seller.label, plan?.buyer.label, directions?.trafficMode]);
   const position = useMemo(() => leg ? journeyPosition(leg, progress) : null, [leg, progress]);
-  const departure = Date.parse(directions?.departureTime ?? '');
   const status = leg ? journeyStatus(leg, progress, playing, progress >= 1) : 'Chưa có hành trình';
   const mapsUrl = plan ? `https://www.google.com/maps/dir/?${new URLSearchParams({ api: '1', origin: `${plan.seller.coord[1]},${plan.seller.coord[0]}`, destination: `${plan.buyer.coord[1]},${plan.buyer.coord[0]}`, travelmode: 'driving', avoid: 'ferries' })}` : '';
 
@@ -151,9 +150,9 @@ export default function GoogleRoadMap() {
     if (!mapState || !route || !ref.current) return;
     const bounds = new mapState.maps.LatLngBounds();
     route.path.forEach(([lng, lat]) => bounds.extend({ lat, lng }));
-    mapState.map.fitBounds(bounds, { top: 60, left: 40, right: 40,
+    mapState.map.fitBounds(bounds, { top: 60, left: summaryOpen && ref.current.clientWidth >= 750 ? (summary.current?.offsetWidth ?? 520) + 30 : 40, right: 40,
       bottom: Math.max(45, Math.min(controlsHeight + 40, ref.current.clientHeight - 110)) });
-  }, [mapState, route, controlsHeight]);
+  }, [mapState, route, controlsHeight, summaryOpen]);
 
   useEffect(() => {
     if (position && truck.current) truck.current.update({ lat: position.coord[1], lng: position.coord[0] }, position.bearing);
@@ -187,27 +186,27 @@ export default function GoogleRoadMap() {
     </div>}
     {!message && !route && <div className="journey-summary" role="status">{planning ? 'Đang tìm tuyến…' : 'Chọn hai địa chỉ, ngày giờ khởi hành rồi bấm Tìm tuyến tối ưu.'}</div>}
     {route && <>
-      <section className="journey-summary" aria-label="Thông tin hành trình">
+      <section ref={summary} className="journey-summary" data-expanded={summaryOpen} aria-label="Thông tin hành trình">
         <button className="btn !text-xs" aria-expanded={summaryOpen} aria-controls="google-journey-details" onClick={() => setSummaryOpen((v) => !v)}>{summaryOpen ? '✕ Ẩn thông tin' : 'ⓘ Thông tin hành trình'}</button>
         <div id="google-journey-details" hidden={!summaryOpen}>
-          <p>{fmtDrivingDistance(route.distanceMeters)} · {fmtDuration(route.durationSeconds)}</p>
-          <p className="text-xs">Xanh: thông thoáng · Vàng: chậm · Đỏ: đông · Xám: chưa có dữ liệu.</p>
-          <p className="text-xs">Google Routes · giờ đi {formatSimulationTime(departure)} · {directions?.trafficMode === 'forecast' ? 'yêu cầu theo giờ khởi hành đã chọn' : 'yêu cầu đi ngay'}.</p>
-          <p className="text-xs">Màu giao thông do Google cung cấp trên tuyến này; không tự tạo khi thiếu dữ liệu.</p>
+          <p className="font-semibold">🚚 Hành trình đường bộ</p>
+          <p className="mt-1 font-semibold">{fmtDrivingDistance(route.distanceMeters)} · {fmtDuration(route.durationSeconds)} · Google Routes</p>
+          <p className="text-xs">Giờ đến có tính tình hình giao thông. Chưa xác nhận hạn chế xe tải/container.</p>
+          <SimulationReadout departureTime={directions?.departureTime} elapsedSeconds={progress * route.durationSeconds} totalSeconds={route.durationSeconds}
+            legLabel={leg?.label ?? '—'} status={status} forecast={leg?.forecast} />
+          <p className="journey-legend text-xs" title="Màu giao thông do Google cung cấp">🟢 Thông thoáng · 🟠 Chậm · 🔴 Kẹt xe · ⚪ Chưa có dữ liệu</p>
         </div>
       </section>
       <section ref={controls} className="journey-controls" aria-label="Điều khiển mô phỏng hành trình">
-        <SimulationReadout departureTime={directions?.departureTime} elapsedSeconds={progress * route.durationSeconds} totalSeconds={route.durationSeconds}
-          legLabel={leg?.label ?? '—'} status={status} />
-        <div className="flex items-center gap-3">
+
+        <div className="journey-stages"><span className="journey-stage journey-stage-active" title={leg?.label}>🚚 {leg?.label} · {fmtDuration(route.durationSeconds)}</span></div>
+        <div className="journey-playback">
           <button className="btn" aria-label={playing ? 'Tạm dừng hành trình' : 'Phát hành trình'} onClick={() => {
             const state = usePlayback.getState(); if (state.progress >= 1) state.setProgress(0); state.setPlaying(!state.playing);
           }}>{playing ? '⏸' : '▶'}</button>
           <input aria-label="Tiến độ hành trình" type="range" min="0" max="1000" value={Math.round(progress * 1000)} onChange={(e) => usePlayback.getState().setProgress(+e.target.value / 1000)} className="min-w-0 flex-1" />
           <select aria-label="Tốc độ mô phỏng" className="field !w-auto !py-1" value={speed} onChange={(e) => usePlayback.getState().setSpeed(+e.target.value as Speed)}>{PLAYBACK_SPEEDS.map((s) => <option key={s} value={s}>×{s}</option>)}</select>
         </div>
-        <p className="mt-1 text-xs opacity-75">Tốc độ xem không thay đổi giờ đến. Chuyển động minh họa; chưa xác nhận hạn chế xe tải.</p>
-        {leg?.forecast && <p className="text-xs opacity-75">ETA theo giờ tương lai; chưa xác nhận màu giao thông là dự báo tại từng thời điểm xe đi qua.</p>}
       </section>
     </>}
   </div>;

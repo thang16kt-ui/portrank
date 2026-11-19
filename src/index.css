@@ -184,17 +184,32 @@ a { color: var(--color-sky); }
 :root[data-ui="light"] .toast-pop { box-shadow: 0 6px 20px rgba(15,23,42,.18); }
 /* Door-to-door playback stays readable over either light OSM tiles or dark map themes. */
 .journey-summary,.journey-controls{position:absolute;z-index:500;color:#172033;background:rgba(255,255,255,.96);border:1px solid #cbd5e1;border-radius:12px;box-shadow:0 4px 20px #0f172a20;padding:12px;font-size:14px;line-height:1.45}
-.journey-summary{left:12px;top:12px;max-width:min(560px,calc(100% - 24px));max-height:42%;overflow:auto}
-.journey-controls{left:12px;right:12px;bottom:25px;max-height:calc(100% - 80px);overflow:auto}
-.simulation-readout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px 16px;margin-bottom:10px;font-size:14px;line-height:1.35}
+.journey-summary{left:12px;top:12px;max-width:min(520px,calc(100% - 24px));max-height:calc(100% - 140px);overflow:auto}
+.journey-summary[data-expanded="true"]{width:min(520px,calc(100% - 24px))}
+.journey-summary>button{margin-bottom:6px}
+.journey-controls{left:12px;right:12px;bottom:25px;max-height:calc(100% - 80px);overflow:auto;padding:8px 10px}
+.journey-playback{display:flex;align-items:center;gap:12px}
+.journey-playback .btn{flex-shrink:0}
+.journey-playback input[type="range"]{accent-color:#2563eb;min-height:24px}
+/* The clock lives in the collapsible journey information, never in the playback controls. */
+.simulation-panel{margin-top:10px;padding-top:10px;border-top:1px solid #e2e8f0;font-size:14px;line-height:1.4}
+.simulation-readout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"clock arrival" "leg status";gap:10px 16px;font-size:14px;line-height:1.35}
+.simulation-clock{grid-area:clock}.simulation-arrival{grid-area:arrival}.simulation-leg{grid-area:leg}.simulation-status{grid-area:status}
 .simulation-readout>div{display:flex;flex-direction:column;min-width:0}
-.simulation-readout>div>span{font-size:12px;opacity:.75}
+.simulation-readout>div>span{font-size:14px;opacity:.75}
 .simulation-readout strong{font-weight:650;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
-.simulation-readout .simulation-clock strong{color:#1d4ed8}
-.simulation-readout small{grid-column:1/-1;font-size:12px;opacity:.75}
-.simulation-readout .simulation-stale{grid-column:1/-1;margin:0;padding:6px 8px;border-radius:6px;background:#fef3c7;color:#92400e;font-size:13px}
+.simulation-readout .simulation-clock strong{color:#1d4ed8;font-size:16px}
+.simulation-forecast{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:6px;background:#dbeafe;color:#1e40af;font-size:12px;font-weight:500;vertical-align:middle}
+.simulation-meta{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;margin-top:8px;font-size:12px;opacity:.85}
+.simulation-meta small{font-size:12px}
+.simulation-meta details{max-width:100%;font-size:13px}
+.simulation-meta summary{cursor:pointer}
+.simulation-notes{max-height:80px;overflow:auto;margin-top:6px;font-size:13px;line-height:1.45}
+.simulation-stale{margin:0 0 8px;padding:6px 8px;border-radius:6px;background:#fef3c7;color:#92400e;font-size:14px}
+.journey-legend{margin-top:10px!important;padding-top:8px;border-top:1px solid #e2e8f0}
+@media(max-width:599px){.simulation-readout{gap:8px 12px}.journey-playback{gap:6px}.journey-playback .btn{padding:6px 8px}}
 .legacy-simulation{max-height:calc(52vh - 70px);overflow:auto}
-.legacy-simulation .simulation-clock strong{color:var(--color-sky,#38bdf8)}
+.legacy-simulation .simulation-clock strong{color:var(--color-sky)}
 .journey-stages{display:flex;gap:8px;overflow-x:auto;margin-bottom:8px;padding:2px;scrollbar-width:thin}
 .journey-stages .journey-stage{flex-shrink:0;max-width:340px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .journey-summary .btn,.journey-controls .btn,.journey-controls .field{color:#172033;background:#f1f5f9;border-color:#cbd5e1}
