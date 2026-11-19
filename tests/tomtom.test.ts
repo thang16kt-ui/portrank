@@ -99,7 +99,7 @@ describe('truck–ship–truck playback', () => {
     const legs = [origin, sea, destination];
     expect(journeyStage(legs, 0)?.leg.vehicle).toBe('truck');
     expect(journeyStage(legs, 0.5)?.leg.vehicle).toBe('ship');
-    expect(journeyStage(legs, 0.99)?.leg.id).toBe('destination');
+    expect(journeyStage(legs, 1 - 50 / 10300)?.leg.id).toBe('destination');
     for (const l of legs) { expect(journeyPosition(l, 0).coord).toEqual(l.path[0]); expect(journeyPosition(l, 1).coord).toEqual(l.path.at(-1)); }
     expect(journeyStage([], 0)).toBeNull();
   });

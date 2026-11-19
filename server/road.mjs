@@ -2,7 +2,7 @@
 import { handleOsrm } from './osrm.mjs';
 import { handleTomTomRoad } from './tomtom.mjs';
 const ENDPOINT = 'https://routes.googleapis.com/directions/v2:computeRoutes';
-const FIELD_MASK = 'routes.distanceMeters,routes.duration,routes.staticDuration,routes.polyline.geoJsonLinestring,routes.description,routes.warnings';
+const FIELD_MASK = 'routes.distanceMeters,routes.duration,routes.staticDuration,routes.polyline.geoJsonLinestring,routes.description,routes.warnings,routes.travelAdvisory.speedReadingIntervals';
 const requestStarts = [];
 let activeRequests = 0;
 
@@ -24,6 +24,23 @@ function seconds(value) {
   return Number.isFinite(n) ? n : null;
 }
 
+/** Indexes refer to the exact returned polyline; absent start means zero (proto3). */
+export function googleTrafficSections(intervals, pointCount) {
+  if (!Array.isArray(intervals)) return [];
+  const categories = { NORMAL: 'normal', SLOW: 'slow', TRAFFIC_JAM: 'jam' };
+  const out = [];
+  let previousEnd = 0;
+  for (const interval of intervals) {
+    if (!interval || typeof interval !== 'object') continue;
+    const start = interval.startPolylinePointIndex ?? 0, end = interval.endPolylinePointIndex;
+    const severity = Object.hasOwn(categories, interval.speed) ? categories[interval.speed] : null;
+    if (!severity || !Number.isInteger(start) || !Number.isInteger(end) || start < previousEnd || start < 0 || end <= start || end >= pointCount) continue;
+    out.push({ startIndex: start, endIndex: end, severity, speedKmh: null, delaySeconds: null });
+    previousEnd = end;
+  }
+  return out;
+}
+
 export function roadConfig(env = process.env) {
   if (env.ROAD_ROUTING_PROVIDER === 'tomtom') return {
     configured: !!env.TOMTOM_API_KEY?.trim(), provider: 'tomtom', profile: 'DRIVE', trafficAware: true, browserKey: '',
@@ -36,6 +53,7 @@ export function roadConfig(env = process.env) {
     provider: 'google',
     profile: 'DRIVE',
     trafficAware: true,
+    inlandProvider: env.TOMTOM_API_KEY?.trim() ? 'tomtom' : undefined,
     // This is a separate, public browser key restricted to Maps JavaScript API + allowed referrers.
     browserKey: env.GOOGLE_MAPS_BROWSER_KEY?.trim() || '',
   };
@@ -50,6 +68,9 @@ export async function handleRoad(url, env = process.env) {
   const viaText = url.searchParams.get('via');
   const via = viaText == null ? null : point(viaText);
   if (viaText != null && !via) return json(400, { error: 'Điểm đi qua phải có tọa độ hợp lệ (kinh độ,vĩ độ).' });
+  // Keep sea-mode inland paths on TomTom/OSM when switching road mode to Google.
+  // The client cannot choose an arbitrary upstream, credential or URL.
+  if (url.searchParams.get('context') === 'inland') return handleTomTomRoad(url, env, origin, destination, via);
   if (env.ROAD_ROUTING_PROVIDER === 'osrm-demo') return handleOsrm(origin, destination, via);
   if (env.ROAD_ROUTING_PROVIDER === 'tomtom') return handleTomTomRoad(url, env, origin, destination, via);
   if (via) return json(400, { error: 'Điểm đi qua hiện chỉ hỗ trợ ở bản thử OSRM. Hãy bỏ điểm đi qua rồi tính lại.' });
@@ -76,6 +97,7 @@ export async function handleRoad(url, env = process.env) {
       body: JSON.stringify({
         origin: { location: { latLng: origin } }, destination: { location: { latLng: destination } },
         travelMode: 'DRIVE', routingPreference: 'TRAFFIC_AWARE_OPTIMAL', ...(departure ? { departureTime } : {}),
+        extraComputations: ['TRAFFIC_ON_POLYLINE'],
         computeAlternativeRoutes: true, polylineEncoding: 'GEO_JSON_LINESTRING', polylineQuality: 'HIGH_QUALITY',
         routeModifiers: { avoidFerries: true }, languageCode: 'vi', units: 'METRIC',
       }),
@@ -92,16 +114,17 @@ export async function handleRoad(url, env = process.env) {
       const durationSeconds = seconds(r.duration), staticDurationSeconds = seconds(r.staticDuration);
       const path = r.polyline?.geoJsonLinestring?.coordinates;
       if (!Number.isFinite(r.distanceMeters) || r.distanceMeters < 0 || durationSeconds === null ||
-        !Array.isArray(path) || path.length < 2 || path.some((p) => !Array.isArray(p) || p.length < 2 ||
+        !Array.isArray(path) || path.length < 2 || path.length > 120000 || path.some((p) => !Array.isArray(p) || p.length < 2 ||
           !Number.isFinite(p[0]) || !Number.isFinite(p[1]) || Math.abs(p[0]) > 180 || Math.abs(p[1]) > 90)) return [];
       return [{
         id: `google-road-${i}`, description: typeof r.description === 'string' ? r.description : '',
         distanceMeters: r.distanceMeters, durationSeconds, staticDurationSeconds,
         path: path.map((p) => [p[0], p[1]]), warnings: Array.isArray(r.warnings) ? r.warnings.filter((s) => typeof s === 'string') : [],
+        trafficSections: googleTrafficSections(r.travelAdvisory?.speedReadingIntervals, path.length),
       }];
     });
     if (!routes.length) return json(404, { error: 'Google Maps không trả về tuyến ô tô cho hai điểm này. Kiểm tra địa chỉ hoặc chọn phương thức khác.' });
-    return json(200, { provider: 'google', profile: 'DRIVE', trafficAware: true, fetchedAt: new Date().toISOString(), departureTime, routes });
+    return json(200, { provider: 'google', profile: 'DRIVE', trafficAware: true, trafficMode: departure ? 'forecast' : 'live', fetchedAt: new Date().toISOString(), departureTime, routes });
   } catch (e) {
     return json(502, { error: e.name === 'AbortError' ? 'Google Routes quá thời gian chờ. Thử lại.' : 'Không kết nối được Google Routes. Thử lại sau.' });
   } finally {

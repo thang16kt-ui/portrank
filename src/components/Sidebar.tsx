@@ -14,6 +14,7 @@ import { useAppStore } from '../store/useAppStore';
 import type { CargoType, ContainerType, Incoterm, Priority, TransportMode } from '../types';
 import AddressInput from './AddressInput';
 import HsInput from './HsInput';
+import { deviceTimeZone, minimumDeparture } from '../lib/simulation';
 
 const SELLER_C = '#38bdf8', BUYER_C = '#fb923c';
 
@@ -91,12 +92,16 @@ export default function Sidebar() {
         </div>
         <AddressInput label="Bên tôi" value={f.mine} onChange={(mine) => setForm({ mine })} color={f.role === 'seller' ? SELLER_C : BUYER_C} placeholder="VD: Bình Dương, Việt Nam – hoặc Việt Nam" />
         <AddressInput label="Bên đối tác" value={f.partner} onChange={(partner) => setForm({ partner })} color={f.role === 'seller' ? BUYER_C : SELLER_C} placeholder="VD: Munich, Đức – hoặc Đức" />
+        <div>
+          <label className="lbl" htmlFor="road-departure">Ngày, giờ khởi hành</label>
+          <div className="flex items-center gap-2">
+            <input id="road-departure" className="field min-w-0" type="datetime-local" min={minimumDeparture()} value={f.roadDepartureTime ?? ''} onChange={(e) => setForm({ roadDepartureTime: e.target.value })} />
+            <button className="btn shrink-0" onClick={() => setForm({ roadDepartureTime: '' })}>Đi ngay</button>
+          </div>
+          <p className="mt-1 text-xs text-mute">{f.roadDepartureTime ? 'Giờ đã chọn' : 'Để trống = đi ngay'} · múi giờ {deviceTimeZone()}. Bấm Tìm tuyến tối ưu để áp dụng.</p>
+        </div>
         {f.mode === 'road' && (
           <div>
-            {roadConfig?.trafficAware && <>
-            <label className="lbl" htmlFor="road-departure">Giờ khởi hành (để trống = đi ngay)</label>
-            <input id="road-departure" className="field" type="datetime-local" value={f.roadDepartureTime ?? ''} onChange={(e) => setForm({ roadDepartureTime: e.target.value })} />
-            </>}
             <p className="mt-1 text-[10.5px] text-mute">{roadConfig?.provider === 'tomtom' ? 'TomTom có xét giao thông. Giờ tương lai là dự báo; giờ đi theo múi giờ thiết bị.' : roadConfig?.provider === 'google' ? 'Google Maps có xét giao thông, giờ đi theo múi giờ thiết bị.' : roadConfig?.provider === 'osrm' ? 'OpenStreetMap / OSRM · bản thử. Thời gian chưa xét kẹt xe và không dự báo theo giờ đi.' : 'Đang kiểm tra nguồn đường bộ.'} Chọn thành phố/địa chỉ ở hai đầu. Tuyến ô tô chưa xét hạn chế xe tải/container.</p>
             {(roadConfig?.provider === 'osrm' || roadConfig?.provider === 'tomtom' || f.roadVia) && <div className="mt-2 space-y-1">
               <button className="text-[11px] text-sky underline" onClick={() => { if (showVia || f.roadVia) { setShowVia(false); setForm({ roadVia: null }); } else setShowVia(true); }}>{showVia || f.roadVia ? 'Bỏ điểm đi qua' : 'Thêm điểm đi qua (tuỳ chọn)'}</button>

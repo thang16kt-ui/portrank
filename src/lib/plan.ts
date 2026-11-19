@@ -43,7 +43,7 @@ export interface PlanInput {
   origin: string;
   hasCo: boolean;
   readyDate: string;
-  /** RFC3339 departure time for traffic prediction; empty = depart now. */
+  /** RFC3339 journey departure time (road or truck–ship–truck); empty = depart now. */
   roadDepartureTime?: string;
   roadVia?: Place;
   radiusKm: number;
@@ -117,6 +117,8 @@ export interface PlanOption {
 }
 
 export interface Plan {
+  /** Fixed baseline for depart-now simulations, including older saved plans. */
+  calculatedAt?: string;
   input: PlanInput;
   seller: Place;
   buyer: Place;
@@ -404,6 +406,7 @@ async function roadOptions(input: PlanInput, seller: Place, buyer: Place, deps: 
 
 /** Tính toàn bộ phương án cho một lần bấm "Tìm tuyến tối ưu" */
 export async function buildPlan(input: PlanInput, deps: PlanDeps): Promise<Plan> {
+  const calculatedAt = new Date().toISOString();
   const seller = sellerOf(input), buyer = buyerOf(input);
   const notes: string[] = [];
   const mode = input.mode;
@@ -416,5 +419,5 @@ export async function buildPlan(input: PlanInput, deps: PlanDeps): Promise<Plan>
   if (!input.customsDate && setup.entry) notes.push(`Ngày tính thuế: giả định = ngày hàng sẵn sàng (${date}). Nhập "Ngày khai hải quan dự kiến" nếu khác.`);
   const res = mode === 'sea' ? await seaOptions({ ...input, mode }, seller, buyer, deps, setup, notes) : await roadOptions({ ...input, mode }, seller, buyer, deps, setup, notes);
   const scope = scopeTitle(seller, buyer, mode);
-  return { input: { ...input, mode }, seller, buyer, notes, scopeTitle: scope.title, scopeShort: scope.short, tariffSource, customsDate: date, ...res };
+  return { input: { ...input, mode }, calculatedAt, seller, buyer, notes, scopeTitle: scope.title, scopeShort: scope.short, tariffSource, customsDate: date, ...res };
 }

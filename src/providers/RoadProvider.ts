@@ -3,7 +3,7 @@ import type { LngLat, Place } from '../types';
 export interface TrafficSection {
   startIndex: number;
   endIndex: number;
-  severity: 'slow' | 'jam' | 'severe' | 'closed';
+  severity: 'normal' | 'slow' | 'jam' | 'severe' | 'closed';
   speedKmh: number | null;
   delaySeconds: number | null;
 }
@@ -34,7 +34,7 @@ export interface RoadDirections {
 }
 
 export interface RoadProvider {
-  lookup(q: { origin: Place; destination: Place; departureTime?: string; via?: Place }): Promise<RoadDirections>;
+  lookup(q: { origin: Place; destination: Place; departureTime?: string; via?: Place; context?: 'inland' }): Promise<RoadDirections>;
 }
 
 export interface RoadConfig {
@@ -44,6 +44,7 @@ export interface RoadConfig {
   trafficAware: boolean;
   demo?: boolean;
   browserKey: string;
+  inlandProvider?: 'tomtom';
 }
 
 const NOT_CONFIGURED = 'Chưa bật dịch vụ đường bộ trên máy chủ. Bản chạy tĩnh cần chuyển sang Web Service để tính tuyến.';
@@ -69,11 +70,12 @@ async function request<T>(url: string): Promise<T> {
 export const fetchRoadConfig = () => request<RoadConfig>('/api/road/config');
 
 export const ServerRoadProvider: RoadProvider = {
-  async lookup({ origin, destination, departureTime, via }) {
+  async lookup({ origin, destination, departureTime, via, context }) {
     if (origin.kind !== 'address' || destination.kind !== 'address')
       throw new Error('Đường bộ cần thành phố hoặc địa chỉ ở cả hai đầu. Hãy chọn địa điểm cụ thể thay cho tên quốc gia.');
     const q = new URLSearchParams({ origin: origin.coord.join(','), destination: destination.coord.join(',') });
     if (departureTime) q.set('departureTime', departureTime);
+    if (context) q.set('context', context);
     if (via) {
       if (via.kind !== 'address') throw new Error('Điểm đi qua phải là thành phố hoặc địa chỉ cụ thể.');
       q.set('via', via.coord.join(','));

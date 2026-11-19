@@ -185,7 +185,18 @@ a { color: var(--color-sky); }
 /* Door-to-door playback stays readable over either light OSM tiles or dark map themes. */
 .journey-summary,.journey-controls{position:absolute;z-index:500;color:#172033;background:rgba(255,255,255,.96);border:1px solid #cbd5e1;border-radius:12px;box-shadow:0 4px 20px #0f172a20;padding:12px;font-size:14px;line-height:1.45}
 .journey-summary{left:12px;top:12px;max-width:min(560px,calc(100% - 24px));max-height:42%;overflow:auto}
-.journey-controls{left:12px;right:12px;bottom:25px}
+.journey-controls{left:12px;right:12px;bottom:25px;max-height:calc(100% - 80px);overflow:auto}
+.simulation-readout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px 16px;margin-bottom:10px;font-size:14px;line-height:1.35}
+.simulation-readout>div{display:flex;flex-direction:column;min-width:0}
+.simulation-readout>div>span{font-size:12px;opacity:.75}
+.simulation-readout strong{font-weight:650;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.simulation-readout .simulation-clock strong{color:#1d4ed8}
+.simulation-readout small{grid-column:1/-1;font-size:12px;opacity:.75}
+.simulation-readout .simulation-stale{grid-column:1/-1;margin:0;padding:6px 8px;border-radius:6px;background:#fef3c7;color:#92400e;font-size:13px}
+.legacy-simulation{max-height:calc(52vh - 70px);overflow:auto}
+.legacy-simulation .simulation-clock strong{color:var(--color-sky,#38bdf8)}
+.journey-stages{display:flex;gap:8px;overflow-x:auto;margin-bottom:8px;padding:2px;scrollbar-width:thin}
+.journey-stages .journey-stage{flex-shrink:0;max-width:340px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .journey-summary .btn,.journey-controls .btn,.journey-controls .field{color:#172033;background:#f1f5f9;border-color:#cbd5e1}
 .journey-stage{padding:5px 9px;background:#e2e8f0;border-radius:7px;font-size:12px;text-align:left;max-width:100%}
 .journey-stage-active{background:#dbeafe;box-shadow:inset 0 0 0 2px #2563eb;color:#1e3a8a}

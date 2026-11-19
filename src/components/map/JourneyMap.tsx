@@ -4,14 +4,17 @@ import 'leaflet/dist/leaflet.css';
 import { useCurrent, useSchedule } from '../../lib/actions';
 import { fmtDrivingDistance, fmtDuration } from '../../lib/format';
 import { unwrapLongitudes } from '../../lib/geo';
-import { journeyPosition, journeyStage, TRAFFIC_COLORS, type JourneyLeg } from '../../lib/journey';
+import { journeyLegProgress, journeyPosition, journeyStage, journeyStatus, TRAFFIC_COLORS, type JourneyLeg } from '../../lib/journey';
+import { loadInlandJourney } from '../../lib/journeyRouting';
+import { transitCountryNames } from '../../lib/roadCountries';
+import SimulationReadout from '../SimulationReadout';
 import { getTrack } from '../../lib/actions';
 import { ServerRoadProvider, type RoadDirections } from '../../providers/RoadProvider';
 import { PLAYBACK_SPEEDS, useAppStore, usePlayback, type Speed } from '../../store/useAppStore';
 import type { Place, Port } from '../../types';
 import { truckModelMarkup } from './truckModel';
 
-type LegState = { origin?: RoadDirections; destination?: RoadDirections; error?: string; loading: boolean };
+type LegState = { origin?: RoadDirections; destination?: RoadDirections; departureTime?: string; error?: string; loading: boolean };
 const REFRESH_MS = 120000;
 const toPort = (p: Port): Place => ({ kind: 'address', coord: p.coord, label: p.name, country: p.country, countryName: p.countryName });
 const latLngs = (leg: JourneyLeg): LatLngTuple[] => unwrapLongitudes(leg.path).map(([lng, lat]) => [lat, lng]);
@@ -20,13 +23,11 @@ export default function JourneyMap() {
   const holder = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<LeafletMap | null>(null);
   const [inland, setInland] = useState<LegState>({ loading: false });
-  const [roadLive, setRoadLive] = useState<RoadDirections | null>(null);
   const [trafficOn, setTrafficOn] = useState(true);
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [trafficReady, setTrafficReady] = useState(false);
   const [trafficError, setTrafficError] = useState('');
   const [trafficAt, setTrafficAt] = useState('');
-  const [routeError, setRouteError] = useState('');
   const [refresh, setRefresh] = useState(0);
   const [mapError, setMapError] = useState('');
   const [followStages, setFollowStages] = useState(true);
@@ -38,7 +39,9 @@ export default function JourneyMap() {
   const option = current?.option;
   const road = option?.mode === 'road';
   const optionKey = option?.key;
-  const route = roadLive?.routes.find((r) => r.id === option?.drivingRoute?.id) ?? option?.drivingRoute;
+  const route = option?.drivingRoute;
+  const sea = useMemo(() => option && !road ? getTrack(option, schedule) : null, [option, road, schedule]);
+  const calculatedAt = useMemo(() => plan?.calculatedAt ?? new Date().toISOString(), [plan]);
   const progress = usePlayback((s) => s.progress);
   const playing = usePlayback((s) => s.playing);
   const speed = usePlayback((s) => s.speed);
@@ -95,52 +98,38 @@ export default function JourneyMap() {
 
   useEffect(() => {
     let alive = true;
-    setRoadLive(null); setRouteError('');
     if (!plan || !option || road || !trafficReady) { setInland({ loading: false }); return; }
     const { seller, buyer } = plan;
     const pol = option.pol, pod = option.pod;
     if (!pol || !pod) return;
     setInland({ loading: true });
-    const lookup = async (a: Place, b: Place) => ServerRoadProvider.lookup({ origin: a, destination: b });
-    Promise.allSettled([
-      seller.kind === 'address' ? lookup(seller, toPort(pol)) : Promise.resolve(undefined),
-      buyer.kind === 'address' ? lookup(toPort(pod), buyer) : Promise.resolve(undefined),
-    ]).then(([a, b]) => {
-      if (!alive) return;
-      // Do not let Google-only geometry enter this OSM map after a provider configuration change.
-      const result = (r: PromiseSettledResult<RoadDirections | undefined>) => r.status === 'fulfilled' && r.value?.provider !== 'google' ? r.value : undefined;
-      const errors = [a, b].flatMap((r) => r.status === 'rejected' ? [(r.reason as Error).message] : []);
-      setInland({ origin: result(a), destination: result(b), loading: false, error: errors.join(' ') || undefined });
-    });
+    loadInlandJourney({ seller, buyer, pol: toPort(pol), pod: toPort(pod), seaSeconds: sea ? sea.total * 86400 : NaN,
+      departureTime: plan.input.roadDepartureTime, calculatedAt }, ServerRoadProvider.lookup)
+      .then((result) => { if (alive) setInland({ ...result, loading: false }); })
+      .catch((error: Error) => { if (alive) setInland({ loading: false, error: error.message }); });
     return () => { alive = false; };
-  }, [plan, optionKey, road, trafficReady, refresh]);
-
-  useEffect(() => {
-    if (!road || !plan || option?.roadDirections?.provider !== 'tomtom' || !refresh || plan.input.roadDepartureTime) return;
-    let alive = true;
-    ServerRoadProvider.lookup({ origin: plan.seller, destination: plan.buyer, via: plan.input.roadVia }).then((r) => {
-      if (alive && r.provider === 'tomtom') { setRoadLive(r); setRouteError(''); }
-    }).catch((e: Error) => { if (alive) setRouteError(`Chưa cập nhật được tuyến: ${e.message}`); });
-    return () => { alive = false; };
-  }, [road, plan, optionKey, refresh, option?.roadDirections?.provider]);
+  }, [plan, option, road, trafficReady, sea, calculatedAt]);
 
   const legs = useMemo<JourneyLeg[]>(() => {
     if (!plan || !option) return [];
     if (road) return route && option.roadDirections?.provider !== 'google' ? [{ id: 'road', label: `${plan.seller.label} → ${plan.buyer.label}`, vehicle: 'truck', path: route.path,
-      durationSeconds: route.durationSeconds, road: route, fetchedAt: roadLive?.fetchedAt ?? option.roadDirections?.fetchedAt,
+      durationSeconds: route.durationSeconds, road: route, fetchedAt: option.roadDirections?.fetchedAt,
       forecast: option.roadDirections?.trafficMode === 'forecast' }] : [];
     const out: JourneyLeg[] = [];
     const first = inland.origin?.routes[0], last = inland.destination?.routes[0];
-    if (first) out.push({ id: 'origin', label: `Thành phố đi → ${option.pol?.name}`, vehicle: 'truck', path: first.path, durationSeconds: first.durationSeconds, road: first, fetchedAt: inland.origin?.fetchedAt });
-    const sea = getTrack(option, schedule);
-    if (sea) out.push({ id: 'sea', label: `${option.pol?.name} → ${option.pod?.name}`, vehicle: 'ship', path: sea.coords, durationSeconds: sea.total * 86400 });
-    if (last) out.push({ id: 'destination', label: `${option.pod?.name} → thành phố đến`, vehicle: 'truck', path: last.path, durationSeconds: last.durationSeconds, road: last, fetchedAt: inland.destination?.fetchedAt });
+    if (first) out.push({ id: 'origin', label: `${plan.seller.label} → ${option.pol?.name}`, vehicle: 'truck', path: first.path, durationSeconds: first.durationSeconds, road: first, fetchedAt: inland.origin?.fetchedAt, forecast: inland.origin?.trafficMode === 'forecast' });
+    if (sea) out.push({ id: 'sea', label: `${option.pol?.name} → ${option.pod?.name}`, vehicle: 'ship', path: sea.coords, durationSeconds: sea.total * 86400, track: sea });
+    if (last) out.push({ id: 'destination', label: `${option.pod?.name} → ${plan.buyer.label}`, vehicle: 'truck', path: last.path, durationSeconds: last.durationSeconds, road: last, fetchedAt: inland.destination?.fetchedAt, forecast: inland.destination?.trafficMode === 'forecast' });
     return out;
-  }, [plan, option, road, route, roadLive, inland, schedule]);
+  }, [plan, option, road, route, inland, sea]);
 
   const missingLeg = !road && !!plan && ((plan.seller.kind === 'address' && !inland.origin) || (plan.buyer.kind === 'address' && !inland.destination));
   const animationReady = !!legs.length && !missingLeg && !inland.loading;
   const stage = journeyStage(legs, progress);
+  const departureTime = road ? plan?.input.roadDepartureTime ?? option?.roadDirections?.departureTime ?? calculatedAt
+    : inland.departureTime ?? plan?.input.roadDepartureTime ?? calculatedAt;
+  const status = !animationReady ? inland.loading ? 'Đang lấy tuyến đường bộ…' : 'Chưa đủ dữ liệu hành trình'
+    : stage ? journeyStatus(stage.leg, stage.progress, playing, progress >= 1) : 'Chưa có hành trình';
   const lastFit = useRef('');
   const stageLeg = stage?.leg;
 
@@ -167,13 +156,20 @@ export default function JourneyMap() {
         L.circleMarker(p, { radius: 6, weight: 2, color: '#fff', fillColor: leg.vehicle === 'ship' ? '#0891b2' : '#2563eb', fillOpacity: 1 }).bindTooltip(label).addTo(group);
       });
     });
+    if (road && plan?.input.roadVia && legs[0]) {
+      const via = plan.input.roadVia, path = latLngs(legs[0]);
+      const distance = (p: LatLngTuple) => (p[0] - via.coord[1]) ** 2 + (p[1] - via.coord[0]) ** 2;
+      const point = path.reduce((best, p) => distance(p) < distance(best) ? p : best, path[0]);
+      const label = document.createElement('span'); label.textContent = `Đi qua · ${via.label}`;
+      L.circleMarker(point, { radius: 7, weight: 2, color: '#fff', fillColor: '#7c3aed', fillOpacity: 1 }).bindTooltip(label).addTo(group);
+    }
     const signature = `${plan?.seller.coord.join(',')}:${plan?.buyer.coord.join(',')}:${optionKey}:${legs.map((l) => l.id).join(',')}`;
     if (all.length && (!animationReady || !followStages) && (lastFit.current !== signature || !followStages)) {
       map.fitBounds(L.latLngBounds(all), { paddingTopLeft: [40, 145], paddingBottomRight: [40, 110], maxZoom: 14 });
       lastFit.current = signature;
     }
     return () => { group.remove(); };
-  }, [map, legs, plan, optionKey, animationReady, followStages]);
+  }, [map, legs, plan, optionKey, animationReady, followStages, road]);
 
   useEffect(() => { usePlayback.getState().setProgress(0); usePlayback.getState().setPlaying(true); }, [plan, optionKey]);
   useEffect(() => {
@@ -213,10 +209,12 @@ export default function JourneyMap() {
       <div className="flex items-center justify-between gap-2"><strong>{road ? '🚚 Hành trình đường bộ' : '🚚 Thành phố · 🚢 Cảng · 🚚 Thành phố'}</strong>
         {trafficReady && <button className="btn !text-xs" aria-pressed={trafficOn} onClick={() => setTrafficOn((on) => !on)}>{trafficOn ? 'Ẩn giao thông' : 'Hiện giao thông'}</button>}</div>
       {road && route && <p className="mt-1 font-semibold">{fmtDrivingDistance(route.distanceMeters)} · {fmtDuration(route.durationSeconds)} · {source}</p>}
-      {road && roadLive && <p className="mt-1 text-xs">ETA trên bản đồ vừa cập nhật. Bấm Tìm tuyến tối ưu để tính lại báo giá theo tuyến mới nhất.</p>}
+      {road && plan?.input.roadVia && <p className="text-xs">Qua {plan.input.roadVia.label}</p>}
+      {road && !!option?.roadTransitCountries?.length && <p className="mt-1 text-xs font-semibold text-amber-700">Có thể quá cảnh: {transitCountryNames(option.roadTransitCountries)} · chưa tính đủ phí.</p>}
+      {road && <p className="text-xs">{source === 'OSRM' ? 'Thời gian OSRM chưa xét kẹt xe theo giờ đi.' : 'Thời gian tuyến có xét giao thông.'} Chưa xác nhận hạn chế xe tải/container.</p>}
       {!option && <p className="mt-1">{planning ? 'Đang tìm tuyến…' : planError || 'Chọn hai thành phố rồi bấm Tìm tuyến tối ưu.'}</p>}
       {inland.loading && <p className="mt-1" role="status">Đang lấy tuyến đường bộ hai đầu cảng…</p>}
-      {(inland.error || routeError || mapError || trafficError) && <p className="mt-1 text-amber-600" role="status">{inland.error || routeError || trafficError || mapError}</p>}
+      {(inland.error || mapError || trafficError) && <p className="mt-1 text-amber-600" role="status">{inland.error || trafficError || mapError}</p>}
       {missingLeg && !inland.loading && <p className="mt-1 text-amber-600">Chưa đủ tuyến đường bộ để phát trọn hành trình xe–tàu–xe.</p>}
       {!road && plan && option && ((option.pol && option.pol.country !== plan.seller.country) || (option.pod && option.pod.country !== plan.buyer.country)) && <p className="mt-1 text-xs font-semibold text-amber-700">Có chặng xe qua biên giới do chọn cảng nước khác. Cần xác nhận cửa khẩu, quyền quá cảnh và chi phí thủ tục.</p>}
       <div className="mt-1 flex flex-wrap gap-x-3 text-xs"><span>🟢 Thông thoáng</span><span>🟠 Chậm</span><span>🔴 Kẹt xe</span><span>🔵 Tuyến đã chọn</span></div>
@@ -226,15 +224,19 @@ export default function JourneyMap() {
       </div>
     </section>
     {!!legs.length && <section className="journey-controls" aria-label="Điều khiển mô phỏng hành trình">
-      <div className="mb-2 flex flex-wrap gap-2">{legs.map((leg, index) => <button key={leg.id} className={`journey-stage ${stage?.index === index ? 'journey-stage-active' : ''}`}
-        onClick={() => { const weight = (l: JourneyLeg) => l.vehicle === 'ship' ? 2.5 : 1; const sum = legs.reduce((n, l) => n + weight(l), 0); usePlayback.getState().setProgress((legs.slice(0, index).reduce((n, l) => n + weight(l), 0) + 0.001) / sum); }}>
+      <SimulationReadout departureTime={departureTime} elapsedSeconds={stage?.elapsedSeconds ?? 0} totalSeconds={animationReady ? stage?.totalSeconds ?? NaN : NaN}
+        legLabel={stage?.leg.label ?? '—'} status={status} estimated={!road} />
+      {inland.error && <p className="mb-2 text-sm text-amber-700" role="status">{inland.error}</p>}
+      <div className="journey-stages">{legs.map((leg, index) => <button key={leg.id} className={`journey-stage ${stage?.index === index ? 'journey-stage-active' : ''}`} disabled={!animationReady}
+        onClick={() => usePlayback.getState().setProgress(journeyLegProgress(legs, index))}>
         {leg.vehicle === 'truck' ? '🚚' : '🚢'} {leg.label} · {fmtDuration(leg.durationSeconds)}{leg.vehicle === 'ship' && ' (ước tính)'}</button>)}</div>
       <div className="flex items-center gap-3"><button className="btn" disabled={!animationReady} aria-label={playing ? 'Tạm dừng hành trình' : 'Phát hành trình'} onClick={() => { const p = usePlayback.getState(); if (p.progress >= 1) p.setProgress(0); p.setPlaying(!p.playing); }}>{playing ? '⏸' : '▶'}</button>
         <input aria-label="Tiến độ hành trình" type="range" min="0" max="1000" value={Math.round(progress * 1000)} disabled={!animationReady} onChange={(e) => usePlayback.getState().setProgress(+e.target.value / 1000)} className="min-w-0 flex-1" />
         <button className="btn !text-xs" aria-pressed={followStages} onClick={() => setFollowStages((v) => !v)}>{followStages ? 'Theo chặng' : 'Toàn cảnh'}</button>
         <select aria-label="Tốc độ mô phỏng" className="field !w-auto !py-1" value={speed} onChange={(e) => usePlayback.getState().setSpeed(+e.target.value as Speed)}>{PLAYBACK_SPEEDS.map((s) => <option key={s} value={s}>×{s}</option>)}</select>
       </div>
-      <p className="mt-1 text-xs opacity-75">Mô phỏng tăng tốc · dữ liệu giao thông thực. Tuyến ô tô chưa xác nhận hạn chế xe tải; màu trống là chưa có thông tin.</p>
+      <p className="mt-1 text-xs opacity-75">{road ? 'Giờ đến theo thời gian tuyến từ nguồn đường bộ.' : 'Giờ đến theo thời lượng các chặng; chưa gồm chờ chuyến và bốc dỡ ở cảng.'} Tốc độ xem không thay đổi giờ đến.</p>
+      <p className="text-xs opacity-75">{legs.some((l) => l.forecast) ? 'Giờ đi tương lai: ETA dự báo; màu giao thông hiện tại không phải bản đồ dự báo từng đoạn.' : 'Màu trống: chưa có dữ liệu giao thông đoạn này.'}</p>
     </section>}
   </div>;
 }

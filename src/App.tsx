@@ -29,7 +29,7 @@ function Planner() {
   const [journeyView, setJourneyView] = useState(true);
   const cityPair = useAppStore((s) => (s.plan?.seller ?? s.form.mine)?.kind === 'address' && (s.plan?.buyer ?? s.form.partner)?.kind === 'address');
   const { config } = useRoadConfig();
-  const canShowJourney = mode === 'sea' && cityPair && config?.provider === 'tomtom' && config.configured && !portView;
+  const canShowJourney = mode === 'sea' && cityPair && (config?.inlandProvider ?? config?.provider) === 'tomtom' && config?.configured && !portView;
   const hidePanel = collapsed || !!portView;
   return (
     <div className="flex min-h-0 flex-1 max-[899px]:block max-[899px]:overflow-y-auto">
