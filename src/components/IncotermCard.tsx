@@ -5,6 +5,7 @@ import type { Plan, PlanOption } from '../lib/plan';
 import { useAppStore } from '../store/useAppStore';
 import type { Incoterm, Role, TransportMode } from '../types';
 import IncotermDiagram, { BUYER_COLOR, IncotermLegend, SELLER_COLOR } from './IncotermDiagram';
+import Icon from './Icon';
 
 /** Tên địa điểm thật của tuyến đang chọn (để chèn vào sơ đồ) */
 export function placeNamesOf(plan: Plan | null, o: PlanOption | null): PlaceNames | undefined {
@@ -69,7 +70,7 @@ export function IncotermStrip({ term, mode, option, role, destBySeller }: { term
           })}
         </div>
       </div>
-      <p className="mt-1 text-[10px] text-mute">Ô có viền trắng = khoản <b className="text-fg">bạn</b> trả. {GROUP_C.includes(term) && 'Phí cảng đến (khoản 7) ở nhóm C phụ thuộc hợp đồng vận tải – mặc định tính cho người mua (đổi trong Bảng chi phí).'}</p>
+      <p className="mt-1.5 text-[11.5px] leading-snug text-mute">Ô có viền trắng = khoản <b className="text-fg">bạn</b> trả. {GROUP_C.includes(term) && 'Phí cảng đến (khoản 7) ở nhóm C phụ thuộc hợp đồng vận tải – mặc định tính cho người mua (đổi trong Bảng chi phí).'}</p>
     </div>
   );
 }
@@ -88,46 +89,46 @@ export default function IncotermCard({ plan, option }: { plan: Plan | null; opti
   const curMode = option?.mode ?? mode;
   return (
     <div className="flex h-full min-w-0 flex-col">
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
+      <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
+        <div className="min-w-[160px] flex-1">
           <div className="flex items-baseline gap-2">
-            <span className="text-xl leading-none font-bold text-amber-300">{term}</span>
-            <span className="truncate text-[13px] font-semibold text-fg">{place}</span>
+            <span className="text-[22px] leading-none font-bold tracking-tight text-amber-300">{term}</span>
+            <span className="text-[12.5px] font-medium text-mute">{def.nameVi}</span>
           </div>
-          <div className="text-[11px] text-mute">{def.nameVi} <span className="opacity-70">· ({placeKind})</span></div>
+          {place && <div className="mt-1 truncate text-[13.5px] font-semibold text-fg" title={place}>{place} <span className="font-normal text-mute">· {placeKind}</span></div>}
         </div>
         <div className="flex shrink-0 gap-1.5">
-          <button className="btn !px-2 !py-1 !text-[11px]" onClick={() => set({ explainerOpen: true })}>▶ Xem giải thích</button>
-          <button className="btn !px-2 !py-1 !text-[11px]" onClick={() => set({ allTermsOpen: true })} title="So sánh các điều kiện">⊞ So sánh</button>
+          <button className="btn !min-h-[30px] !px-2.5 !py-1 !text-[12px]" onClick={() => set({ explainerOpen: true })}><Icon name="play" size={12} /> Giải thích</button>
+          <button className="btn !min-h-[30px] !px-2.5 !py-1 !text-[12px]" onClick={() => set({ allTermsOpen: true })} title="So sánh các điều kiện"><Icon name="swap" size={13} /> So sánh</button>
         </div>
       </div>
-      <div className="mt-1.5 rounded-lg border border-line bg-well px-2 pt-2 pb-1">
+      <div className="mt-2.5 rounded-xl border border-line bg-well px-2 pt-2 pb-1">
         <IncotermDiagram term={term} mode={curMode} />
         <IncotermLegend />
       </div>
-      <dl className="mt-2 space-y-1 text-[11.5px] leading-snug">
-        <div className="flex gap-2"><dt className="w-[122px] shrink-0 text-mute">Thông quan xuất</dt><dd>{who(def.exportClearance)}</dd></div>
+      <dl className="mt-3 space-y-1.5 text-[12.5px] leading-snug">
+        <div className="flex gap-2"><dt className="w-[118px] shrink-0 text-mute">Thông quan xuất</dt><dd>{who(def.exportClearance)}</dd></div>
         <div className="flex gap-2">
-          <dt className="w-[122px] shrink-0 text-mute">Bảo hiểm</dt>
+          <dt className="w-[118px] shrink-0 text-mute">Bảo hiểm</dt>
           <dd>{def.insurance.by === 'seller' ? <>{who('seller')} mua – {def.insurance.level}</> : <span className="text-fg">Không bắt buộc – bên chịu rủi ro tự quyết định</span>}</dd>
         </div>
-        <div className="flex gap-2"><dt className="w-[122px] shrink-0 text-mute">Thông quan nhập, thuế</dt><dd>{who(def.importClearance)}</dd></div>
-        <div className="rounded-md border border-rose-400/25 bg-rose-500/5 px-2 py-1.5">
+        <div className="flex gap-2"><dt className="w-[118px] shrink-0 text-mute">Thông quan nhập, thuế</dt><dd>{who(def.importClearance)}</dd></div>
+        <div className="rounded-lg border border-rose-400/25 bg-rose-500/5 px-2.5 py-2">
           <dt className="flex items-center gap-1.5 font-semibold text-rose-200">
             <svg width="11" height="14" viewBox="-2 -19 15 23"><path d="M0 2V-17" stroke="#fff" strokeWidth={1.8} /><path d="M0.8 -17h10l-2.6 3.4 2.6 3.4h-10z" fill="#f43f5e" /></svg>
             Rủi ro chuyển giao khi nào
           </dt>
           <dd className="mt-0.5 text-fg">{riskTransferText(term, curMode, names)}</dd>
-          <dd className="mt-0.5 text-[10.5px] text-mute">Từ thời điểm này, hàng hư hỏng hoặc mất mát do người mua chịu.</dd>
-          {GROUP_C.includes(term) && <dd className="mt-0.5 text-[10.5px] text-amber-200">⚠️ Điểm chuyển rủi ro sớm hơn điểm người bán hết trả cước.</dd>}
+          <dd className="mt-1 text-[11.5px] text-mute">Từ thời điểm này, hàng hư hỏng hoặc mất mát do người mua chịu.</dd>
+          {GROUP_C.includes(term) && <dd className="mt-1 text-[11.5px] text-amber-200">Lưu ý: điểm chuyển rủi ro sớm hơn điểm người bán hết trả cước.</dd>}
         </div>
         <p className="text-fg">{def.summary}</p>
       </dl>
-      <div className="mt-2">
-        <div className="mb-0.5 text-[11px] font-semibold text-mute">Ai trả khoản nào</div>
+      <div className="mt-3">
+        <div className="mb-1 text-[12px] font-semibold text-label">Ai trả khoản nào</div>
         <IncotermStrip term={term} mode={curMode} option={option} role={role} destBySeller={destBySeller} />
       </div>
-      <p className="mt-1 text-[9.5px] text-mute/80">Theo Incoterms® 2020 của ICC. Sơ đồ do PortRank tự thiết kế để minh họa; khi ký hợp đồng hãy đối chiếu văn bản gốc của ICC.</p>
+      <p className="mt-2 text-[11px] leading-snug text-mute">Theo Incoterms® 2020 của ICC. Sơ đồ do PortRank tự thiết kế để minh họa; khi ký hợp đồng hãy đối chiếu văn bản gốc của ICC.</p>
     </div>
   );
 }

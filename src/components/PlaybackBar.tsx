@@ -1,3 +1,4 @@
+import Icon from './Icon';
 import { useState } from 'react';
 import type { Track } from '../lib/track';
 import { PLAYBACK_SPEEDS, useAppStore, usePlayback, type Speed } from '../store/useAppStore';
@@ -29,7 +30,7 @@ export default function PlaybackBar({ track }: { track: Track }) {
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-2 text-xs">
           <span className="truncate font-semibold text-fg">
-            {track.vehicle === 'truck' ? '🚚' : '🚢'} Ngày {day.toFixed(1)} / {track.total.toFixed(1)}
+            <Icon name={track.vehicle === 'truck' ? 'truck' : 'ship'} size={14} /> Ngày {day.toFixed(1)} / {track.total.toFixed(1)}
             <span className="ml-1 font-normal text-mute"> · {track.estimated ? 'ước tính' : 'thời lượng theo lịch tàu'}</span>
             {stop && <span className="ml-2 font-normal text-pink-300">Đang dừng tại {stop.name}</span>}
           </span>
@@ -55,9 +56,9 @@ export function SeaSimulationSummary({ track }: { track: Track }) {
   const day = progress * track.total;
   const stop = track.stops.find((s) => day >= s.arrive && day <= s.depart);
   return <section className="journey-summary pointer-events-auto !top-14" data-expanded={open} aria-label="Thông tin hành trình">
-    <button className="btn !text-xs" aria-expanded={open} aria-controls="sea-simulation-details" onClick={() => setOpen((value) => !value)}>{open ? '✕ Ẩn thông tin' : 'ⓘ Thông tin hành trình'}</button>
+    <button className="btn !text-xs" aria-expanded={open} aria-controls="sea-simulation-details" onClick={() => setOpen((value) => !value)}><Icon name={open ? 'x' : 'info'} size={14} />{open ? 'Ẩn thông tin' : 'Thông tin hành trình'}</button>
     <div id="sea-simulation-details" hidden={!open}>
-      <strong>🚢 Hành trình đường biển</strong>
+      <strong className="journey-title"><Icon name="ship" size={17} /> Hành trình đường biển</strong>
       <SimulationReadout departureTime={plan?.input.roadDepartureTime ?? plan?.calculatedAt} elapsedSeconds={day * 86400} totalSeconds={track.total * 86400}
         legLabel={current?.option.title ?? 'Chặng biển'} estimated status={progress >= 1 ? 'Đã đến nơi' : !playing ? 'Tạm dừng mô phỏng' : stop ? `Đang dừng tại ${stop.name}` : 'Đang đi biển'}>
         <p>Giờ đến chỉ tính chặng biển; chưa gồm xe hai đầu, chờ chuyến và bốc dỡ.</p>
