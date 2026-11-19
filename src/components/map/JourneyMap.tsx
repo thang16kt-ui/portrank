@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import Icon from '../Icon';
 import type { Map as LeafletMap, LayerGroup, Marker, LatLngTuple, TileLayer } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useCurrent, useSchedule } from '../../lib/actions';
@@ -218,31 +219,40 @@ export default function JourneyMap() {
   return <div className="relative isolate h-full w-full bg-well">
     <div ref={holder} className="h-full w-full" aria-label="Bản đồ hành trình xe tải và tàu biển" />
     <section ref={summary} className="journey-summary" data-expanded={summaryOpen} aria-label="Thông tin hành trình">
-      <button className="btn !text-xs" aria-expanded={summaryOpen} aria-controls="journey-summary-details" onClick={() => setSummaryOpen((open) => !open)}>{summaryOpen ? '✕ Ẩn thông tin' : 'ⓘ Thông tin hành trình'}</button>
+      {!summaryOpen && <button className="journey-pill" aria-expanded={false} aria-controls="journey-summary-details" onClick={() => setSummaryOpen(true)}><Icon name="info" size={14} />Thông tin hành trình</button>}
       <div id="journey-summary-details" hidden={!summaryOpen}>
-      <div className="flex items-center justify-between gap-2"><strong>{road ? '🚚 Hành trình đường bộ' : '🚚 Thành phố · 🚢 Cảng · 🚚 Thành phố'}</strong>
-        {trafficReady && <button className="btn !text-xs" aria-pressed={trafficOn} onClick={() => setTrafficOn((on) => !on)}>{trafficOn ? 'Ẩn giao thông' : 'Hiện giao thông'}</button>}</div>
-      {road && route && <p className="mt-1 font-semibold">{fmtDrivingDistance(route.distanceMeters)} · {fmtDuration(route.durationSeconds)} · {source}</p>}
-      {road && plan?.input.roadVia && <p className="text-xs">Qua {plan.input.roadVia.label}</p>}
-      {road && !!option?.roadTransitCountries?.length && <p className="mt-1 text-xs font-semibold text-amber-700">Có thể quá cảnh: {transitCountryNames(option.roadTransitCountries)} · chưa tính đủ phí.</p>}
-      {road && <p className="text-xs">{source === 'OSRM' ? 'Thời gian OSRM chưa xét kẹt xe theo giờ đi.' : 'Giờ đến có tính tình hình giao thông.'} Chưa xác nhận hạn chế xe tải/container.</p>}
-      {!option && <p className="mt-1">{planning ? 'Đang tìm tuyến…' : planError || 'Chọn hai thành phố rồi bấm Tìm tuyến tối ưu.'}</p>}
-      {inland.loading && <p className="mt-1" role="status">Đang lấy tuyến đường bộ hai đầu cảng…</p>}
-      {(inland.error || mapError || trafficError) && <p className="mt-1 text-amber-600" role="status">{inland.error || trafficError || mapError}</p>}
-      {missingLeg && !inland.loading && <p className="mt-1 text-amber-600">Chưa đủ tuyến đường bộ để phát trọn hành trình xe–tàu–xe.</p>}
-      {!road && plan && option && ((option.pol && option.pol.country !== plan.seller.country) || (option.pod && option.pod.country !== plan.buyer.country)) && <p className="mt-1 text-xs font-semibold text-amber-700">Có chặng xe qua biên giới do chọn cảng nước khác. Cần xác nhận cửa khẩu, quyền quá cảnh và chi phí thủ tục.</p>}
+      <div className="journey-head">
+        <strong className="journey-title">{road ? <><Icon name="truck" size={15} /> Đường bộ</> : <><Icon name="truck" size={15} /><span aria-hidden="true">·</span><Icon name="ship" size={15} /><span aria-hidden="true">·</span><Icon name="truck" size={15} /></>}</strong>
+        {!!legs.length && <span className="journey-status" title={status}>{status.replace(' · chưa xác nhận dự báo từng đoạn', '')}</span>}
+        <div className="flex shrink-0 items-center gap-1">
+          {trafficReady && <button className="journey-mini" aria-pressed={trafficOn} onClick={() => setTrafficOn((on) => !on)}>{trafficOn ? 'Ẩn giao thông' : 'Giao thông'}</button>}
+          <button className="journey-close" aria-expanded={true} aria-controls="journey-summary-details" aria-label="Thu gọn thông tin hành trình" title="Thu gọn" onClick={() => setSummaryOpen(false)}><Icon name="x" size={15} /></button>
+        </div>
+      </div>
+      {road && route && <p className="journey-strong">{fmtDrivingDistance(route.distanceMeters)} · {fmtDuration(route.durationSeconds)} · {source}</p>}
+      {road && plan?.input.roadVia && <p className="journey-note">Qua {plan.input.roadVia.label}</p>}
+      {!option && <p className="journey-note">{planning ? 'Đang tìm tuyến…' : planError || 'Chọn hai điểm rồi bấm Tìm tuyến tối ưu.'}</p>}
+      {inland.loading && <p className="journey-note" role="status">Đang lấy tuyến đường bộ hai đầu cảng…</p>}
+      {(() => {
+        const warns = [
+          road && option?.roadTransitCountries?.length ? `Có thể quá cảnh ${transitCountryNames(option.roadTransitCountries)} – chưa tính đủ phí.` : '',
+          inland.error || trafficError || mapError || '',
+          missingLeg && !inland.loading ? 'Chưa đủ tuyến đường bộ để phát trọn hành trình.' : '',
+          !road && plan && option && ((option.pol && option.pol.country !== plan.seller.country) || (option.pod && option.pod.country !== plan.buyer.country)) ? 'Có chặng xe qua biên giới – cần xác nhận cửa khẩu và phí.' : '',
+        ].filter(Boolean);
+        return warns.length ? <div className="journey-warn" role="status" title={warns.join('\n')}><Icon name="alert" size={13} /><span>{warns[0]}{warns.length > 1 && <b> +{warns.length - 1}</b>}</span></div> : null;
+      })()}
       {!!legs.length && <SimulationReadout departureTime={departureTime} elapsedSeconds={stage?.elapsedSeconds ?? 0} totalSeconds={animationReady ? stage?.totalSeconds ?? NaN : NaN}
-        legLabel={stage?.leg.label ?? '—'} status={status} estimated={!road} forecast={legs.some((l) => l.forecast)} children={!road ? <p>Giờ đến theo thời lượng các chặng; chưa gồm chờ chuyến và bốc dỡ ở cảng.</p> : undefined} />}
-      <div className="journey-legend mt-1 flex flex-wrap gap-x-3 text-xs" title="Màu giao thông hiện tại"><span>🟢 Thông thoáng</span><span>🟠 Chậm</span><span>🔴 Kẹt xe</span><span>🔵 Tuyến đã chọn</span></div>
-
+        legLabel={stage?.leg.label ?? '—'} status={status} estimated={!road} forecast={legs.some((l) => l.forecast)} compact children={<>{!road && <p>Giờ đến theo thời lượng các chặng; chưa gồm chờ chuyến và bốc dỡ ở cảng.</p>}{road && <p>{source === 'OSRM' ? 'Thời gian OSRM chưa xét kẹt xe theo giờ đi.' : 'Giờ đến có tính tình hình giao thông.'} Chưa xác nhận hạn chế xe tải/container.</p>}</>} />}
+      <div className="journey-legend" title="Màu giao thông hiện tại"><span><i className="legend-dot" style={{ background: '#16a34a' }} />Thông thoáng</span><span><i className="legend-dot" style={{ background: '#f97316' }} />Chậm</span><span><i className="legend-dot" style={{ background: '#dc2626' }} />Kẹt xe</span><span><i className="legend-dot" style={{ background: '#1d63d6' }} />Tuyến chọn</span></div>
       </div>
     </section>
     {!!legs.length && <section ref={controls} className="journey-controls" aria-label="Điều khiển mô phỏng hành trình">
 
       <div className="journey-stages">{legs.map((leg, index) => <button key={leg.id} title={`${leg.label} · ${fmtDuration(leg.durationSeconds)}`} className={`journey-stage ${stage?.index === index ? 'journey-stage-active' : ''}`} disabled={!animationReady}
         onClick={() => usePlayback.getState().setProgress(journeyLegProgress(legs, index))}>
-        {leg.vehicle === 'truck' ? '🚚' : '🚢'} {leg.label} · {fmtDuration(leg.durationSeconds)}{leg.vehicle === 'ship' && ' (ước tính)'}</button>)}</div>
-      <div className="journey-playback"><button className="btn" disabled={!animationReady} aria-label={playing ? 'Tạm dừng hành trình' : 'Phát hành trình'} onClick={() => { const p = usePlayback.getState(); if (p.progress >= 1) p.setProgress(0); p.setPlaying(!p.playing); }}>{playing ? '⏸' : '▶'}</button>
+        <Icon name={leg.vehicle === 'truck' ? 'truck' : 'ship'} size={14} /> <span className="truncate">{leg.label} · {fmtDuration(leg.durationSeconds)}{leg.vehicle === 'ship' && ' (ước tính)'}</span></button>)}</div>
+      <div className="journey-playback"><button className="btn" disabled={!animationReady} aria-label={playing ? 'Tạm dừng hành trình' : 'Phát hành trình'} onClick={() => { const p = usePlayback.getState(); if (p.progress >= 1) p.setProgress(0); p.setPlaying(!p.playing); }}><Icon name={playing ? 'pause' : 'play'} size={15} /></button>
         <input aria-label="Tiến độ hành trình" type="range" min="0" max="1000" value={Math.round(progress * 1000)} disabled={!animationReady} onChange={(e) => usePlayback.getState().setProgress(+e.target.value / 1000)} className="min-w-0 flex-1" />
         <button className="btn !text-xs" aria-pressed={followStages} onClick={() => setFollowStages((v) => !v)}>{followStages ? 'Theo chặng' : 'Toàn cảnh'}</button>
         <select aria-label="Tốc độ mô phỏng" className="field !w-auto !py-1" value={speed} onChange={(e) => usePlayback.getState().setSpeed(+e.target.value as Speed)}>{PLAYBACK_SPEEDS.map((s) => <option key={s} value={s}>×{s}</option>)}</select>

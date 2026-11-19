@@ -9,15 +9,16 @@ import { roadSourceLabel, roadTrafficLabel } from '../providers/RoadProvider';
 import { transitCountryNames } from '../lib/roadCountries';
 import { useAppStore, type DetailTab } from '../store/useAppStore';
 import IncotermCard, { placeNamesOf } from './IncotermCard';
+import Icon, { type IconName } from './Icon';
 
 const rankCls = (rank: number) => (rank === 1 ? 'bg-[#f59e0b] text-slate-900 shadow-[0_0_10px_rgba(251,191,36,.7)]' : rank <= 3 ? 'bg-[#38bdf8] text-slate-900' : 'bg-slate-600 text-white');
 
 function Big({ label, value, sub, tone }: { label: string; value: React.ReactNode; sub?: React.ReactNode; tone?: string }) {
   return (
-    <div className="rounded-lg border border-line bg-well px-2.5 py-2">
-      <div className="text-[10.5px] font-medium text-mute">{label}</div>
-      <div className={`text-[19px] leading-tight font-bold ${tone ?? 'text-fg'}`}>{value}</div>
-      {sub && <div className="mt-0.5 text-[10px] leading-snug text-mute">{sub}</div>}
+    <div className="rounded-xl border border-line bg-panel2 px-3 py-2.5">
+      <div className="text-[12px] leading-snug font-medium text-mute">{label}</div>
+      <div className={`num mt-0.5 text-[21px] leading-tight font-bold tracking-tight ${tone ?? 'text-fg'}`}>{value}</div>
+      {sub && <div className="mt-1 text-[11.5px] leading-snug text-mute">{sub}</div>}
     </div>
   );
 }
@@ -73,23 +74,23 @@ function Overview({ plan, r }: { plan: Plan; r: RankedOption }) {
   return (
     <div className="flex h-full flex-col">
       {stale && (
-        <div className="mb-1.5 rounded-md border border-amber-400/40 bg-amber-500/10 px-2 py-1 text-[10.5px] text-amber-200" role="status">
-          ⚠ Đầu vào đã đổi – kết quả dưới đây là của lần tính trước. <button className="font-semibold underline" onClick={() => runPlan({ keepSelection: true })}>Tính lại</button>
+        <div className="hint-warn mb-2" role="status">
+          <Icon name="alert" size={15} /><span>Đầu vào đã đổi – kết quả dưới đây là của lần tính trước. <button className="font-semibold underline" onClick={() => runPlan({ keepSelection: true })}>Tính lại</button></span>
         </div>
       )}
-      <div className="mb-1.5">
-        <div className="flex items-center gap-1.5">
-          <span className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold ${rankCls(r.rank)}`}>#{r.rank}</span>
-          <span className="truncate text-[13px] font-semibold text-fg" title={o.title}>{o.title}</span>
+      <div className="mb-2.5">
+        <div className="flex items-start gap-2">
+          <span className={`mt-px flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full px-1.5 text-[12px] font-bold ${rankCls(r.rank)}`}>#{r.rank}</span>
+          <span className="line-clamp-2 text-[14.5px] leading-snug font-semibold text-fg" title={o.title}>{o.title}</span>
         </div>
-        <div className="mt-0.5 flex flex-wrap items-center gap-1 text-[10.5px] text-mute">
+        <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[12px] text-mute">
           <span>{plan.scopeTitle}</span>
           {o.rate ? <span className="chip chip-real" title={`${o.rate.label} – chỉ cước biển là giá thật`}>Cước thật</span> : <span className="chip chip-est">Ước tính ±12%</span>}
           <span className={`chip ${cl.cls}`} title={cl.hint}>{cl.label}</span>
         </div>
       </div>
-      {!!o.roadTransitCountries?.length && <p className="mb-2 rounded-md border border-amber-500/50 bg-amber-500/10 p-2 text-[11px] text-amber-500" role="status">Tuyến có thể quá cảnh {transitCountryNames(o.roadTransitCountries)}. Chưa tính đủ phí và thời gian cửa khẩu. Có thể thêm điểm đi qua để đổi lộ trình.</p>}
-      <div className="grid grid-cols-2 gap-1.5">
+      {!!o.roadTransitCountries?.length && <p className="hint-warn mb-2" role="status">Tuyến có thể quá cảnh {transitCountryNames(o.roadTransitCountries)}. Chưa tính đủ phí và thời gian cửa khẩu. Có thể thêm điểm đi qua để đổi lộ trình.</p>}
+      <div className="grid grid-cols-2 gap-2">
         <Big label={`Bạn trả (${role === 'seller' ? 'người bán' : 'người mua'})`} tone="text-amber-300" value={usd(r.youPay)} sub={<>logistics + thuế · bên kia trả {usd(r.otherPays)}</>} />
         <Big
           label={totalLabel(plan, hasValue, complete)}
@@ -118,10 +119,10 @@ function Overview({ plan, r }: { plan: Plan; r: RankedOption }) {
           }
         />
       </div>
-      <div className="mt-1.5 flex gap-1.5">
-        <button className="btn flex-1 !text-[11px]" disabled={stale} title={stale ? 'Đầu vào đã đổi – tính lại trước khi copy' : undefined} onClick={() => navigator.clipboard.writeText(quoteText(plan, r, term)).then(() => showToast('Đã copy báo giá'), () => showToast('Không copy được'))}>📋 Copy báo giá</button>
+      <div className="mt-2.5 flex gap-2">
+        <button className="btn flex-1" disabled={stale} title={stale ? 'Đầu vào đã đổi – tính lại trước khi copy' : undefined} onClick={() => navigator.clipboard.writeText(quoteText(plan, r, term)).then(() => showToast('Đã copy báo giá'), () => showToast('Không copy được'))}><Icon name="clipboard" size={15} /> Copy báo giá</button>
         <button
-          className="btn flex-1 !text-[11px]"
+          className="btn flex-1"
           disabled={stale || !planForm}
           title={stale ? 'Đầu vào đã đổi – tính lại trước khi lưu' : undefined}
           onClick={() => {
@@ -130,18 +131,18 @@ function Overview({ plan, r }: { plan: Plan; r: RankedOption }) {
             showToast('Đã lưu phương án');
           }}
         >
-          💾 Lưu
+          <Icon name="save" size={15} /> Lưu
         </button>
       </div>
       {!complete && o.missing.length > 0 && (
-        <ul className="mt-1.5 space-y-0.5 text-[10px] leading-snug text-amber-200/90">
+        <ul className="mt-2.5 space-y-1 text-[12px] leading-snug text-amber-200">
           {[...duty.needInputs.map((n) => `Cần nhập: ${n}`), ...o.missing].slice(0, 5).map((m, i) => <li key={i}>• {m}</li>)}
           {o.missing.length + duty.needInputs.length > 5 && <li>… xem tab Thuế nhập khẩu</li>}
         </ul>
       )}
-      {plan.notes.length > 0 && <ul className="mt-1.5 space-y-0.5 text-[10px] leading-snug text-mute">{plan.notes.map((n, i) => <li key={i}>ℹ️ {n}</li>)}</ul>}
-      {o.warnings.length > 0 && <ul className="mt-1.5 text-[10px] text-amber-200">{o.warnings.map((n, i) => <li key={i}>{n}</li>)}</ul>}
-      {o.roadDirections && <p className="mt-1 text-[10px] text-mute">{o.roadDirections.trafficAware ? `Khởi hành ${new Date(o.roadDirections.departureTime).toLocaleString('vi-VN')} · ` : 'Không dự báo theo giờ đi · '}lấy dữ liệu {new Date(o.roadDirections.fetchedAt).toLocaleString('vi-VN')}{o.roadDirections.cached ? ' · dùng lại dữ liệu trong 5 phút' : ''}</p>}
+      {plan.notes.length > 0 && <ul className="mt-2 space-y-1 text-[12px] leading-snug text-mute">{plan.notes.map((n, i) => <li key={i} className="flex gap-1.5"><Icon name="info" size={13} className="mt-0.5" /><span>{n}</span></li>)}</ul>}
+      {o.warnings.length > 0 && <ul className="mt-2 space-y-1 text-[12px] leading-snug text-amber-200">{o.warnings.map((n, i) => <li key={i}>{n}</li>)}</ul>}
+      {o.roadDirections && <p className="mt-2 text-[11.5px] text-mute">{o.roadDirections.trafficAware ? `Khởi hành ${new Date(o.roadDirections.departureTime).toLocaleString('vi-VN')} · ` : 'Không dự báo theo giờ đi · '}lấy dữ liệu {new Date(o.roadDirections.fetchedAt).toLocaleString('vi-VN')}{o.roadDirections.cached ? ' · dùng lại dữ liệu trong 5 phút' : ''}</p>}
     </div>
   );
 }
@@ -154,14 +155,14 @@ function Ranking({ ranked }: { ranked: RankedOption[] }) {
   const select = useAppStore((s) => s.select);
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="mb-1.5 flex items-center justify-between gap-2">
-        <span className="text-[12px] font-semibold text-fg">Xếp hạng tuyến <span className="font-normal text-mute">({ranked.length})</span></span>
-        <div className="flex overflow-hidden rounded-md border border-line text-[10.5px]">
-          <button className={`px-1.5 py-0.5 ${basis === 'mine' ? 'bg-gold/20 text-amber-200' : 'text-mute'}`} onClick={() => set({ costBasis: 'mine' })} title="Xếp theo phần bạn phải trả theo Incoterm đang chọn">Phần tôi trả</button>
-          <button className={`px-1.5 py-0.5 ${basis === 'total' ? 'bg-gold/20 text-amber-200' : 'text-mute'}`} onClick={() => set({ costBasis: 'total' })}>Tổng</button>
+      <div className="mb-2.5 flex items-center justify-between gap-2">
+        <h3 className="text-[14px] font-semibold text-fg">Xếp hạng tuyến <span className="font-normal text-mute">({ranked.length})</span></h3>
+        <div className="seg !p-0.5 [&>button]:!min-h-[26px] [&>button]:!px-2 [&>button]:!text-[12px]" role="group" aria-label="Xếp theo">
+          <button type="button" aria-pressed={basis === 'mine'} onClick={() => set({ costBasis: 'mine' })} title="Xếp theo phần bạn phải trả theo Incoterm đang chọn">Phần tôi trả</button>
+          <button type="button" aria-pressed={basis === 'total'} onClick={() => set({ costBasis: 'total' })}>Tổng</button>
         </div>
       </div>
-      <div className="min-h-0 flex-1 space-y-1 overflow-y-auto pr-0.5">
+      <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-1">
         {ranked.map((r) => {
           const o = r.option;
           const on = selectedKey === o.key, hov = hoverKey === o.key;
@@ -172,14 +173,15 @@ function Ranking({ ranked }: { ranked: RankedOption[] }) {
               onMouseEnter={() => set({ hoverKey: o.key })}
               onMouseLeave={() => set({ hoverKey: null })}
               onClick={() => select(on ? null : o.key)}
-              className={`block w-full rounded-lg border px-2 py-1.5 text-left transition ${on ? 'border-gold bg-gold/10' : hov ? 'border-sky/60 bg-sky/5' : 'border-line bg-well hover:border-line-strong'}`}
+              aria-pressed={on}
+              className={`block w-full rounded-xl border px-3 py-2.5 text-left transition-colors ${on ? 'border-gold bg-gold/10 shadow-[inset_0_0_0_1px_var(--color-gold)]' : hov ? 'border-sky/60 bg-sky/5' : 'border-line bg-panel2 hover:border-line-strong'}`}
             >
-              <div className="flex items-center gap-1.5">
-                <span className={`flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-bold ${rankCls(r.rank)}`}>{r.rank}</span>
-                <span className="min-w-0 flex-1 truncate text-[12px] font-medium text-fg" title={o.title}>{o.title}</span>
-                <span className="text-[12px] font-semibold text-amber-200">{usd(basis === 'mine' ? r.youPay : o.total)}</span>
+              <div className="flex items-center gap-2">
+                <span className={`flex h-[22px] min-w-[22px] items-center justify-center rounded-full px-1 text-[11.5px] font-bold ${rankCls(r.rank)}`}>{r.rank}</span>
+                <span className="min-w-0 flex-1 truncate text-[13.5px] font-semibold text-fg" title={o.title}>{o.title}</span>
+                <span className="num text-[14px] font-bold text-amber-200">{usd(basis === 'mine' ? r.youPay : o.total)}</span>
               </div>
-              <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 pl-6 text-[10.5px] text-mute">
+              <div className="num mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 pl-[30px] text-[12px] text-mute">
                 <span>{o.drivingRoute ? fmtDuration(o.drivingRoute.durationSeconds) : fmtDays(o.days.total)}</span>
                 {o.drivingRoute && <span>{fmtDrivingDistance(o.drivingRoute.distanceMeters)}</span>}
                 <span>tổng {usd(o.total)}</span>
@@ -196,12 +198,12 @@ function Ranking({ ranked }: { ranked: RankedOption[] }) {
   );
 }
 
-const DETAILS: { tab: DetailTab; icon: string; label: string; seaOnly?: boolean }[] = [
-  { tab: 'cost', icon: '📋', label: 'Bảng chi phí' },
-  { tab: 'duty', icon: '🧾', label: 'Thuế nhập khẩu' },
-  { tab: 'rules', icon: '✅', label: 'Điều kiện, chứng từ' },
-  { tab: 'history', icon: '📈', label: 'Biến động giá' },
-  { tab: 'schedule', icon: '🚢', label: 'Hãng tàu & lộ trình', seaOnly: true },
+const DETAILS: { tab: DetailTab; icon: IconName; label: string; seaOnly?: boolean }[] = [
+  { tab: 'cost', icon: 'table', label: 'Bảng chi phí' },
+  { tab: 'duty', icon: 'receipt', label: 'Thuế nhập khẩu' },
+  { tab: 'rules', icon: 'checkCircle', label: 'Điều kiện, chứng từ' },
+  { tab: 'history', icon: 'trending', label: 'Biến động giá' },
+  { tab: 'schedule', icon: 'ship', label: 'Hãng tàu & lộ trình', seaOnly: true },
 ];
 
 function Details({ mode }: { mode: 'sea' | 'road' }) {
@@ -210,11 +212,11 @@ function Details({ mode }: { mode: 'sea' | 'road' }) {
   const open = useAppStore((s) => s.detailOpen);
   return (
     <div className="flex h-full flex-col">
-      <div className="mb-1.5 text-[12px] font-semibold text-fg">Xem chi tiết</div>
+      <h3 className="mb-2.5 text-[14px] font-semibold text-fg">Xem chi tiết</h3>
       <div className="space-y-1.5">
         {DETAILS.filter((d) => !d.seaOnly || mode === 'sea').map((d) => (
-          <button key={d.tab} className={`btn w-full !justify-start !gap-1.5 !px-2 !py-1.5 !text-[11.5px] !whitespace-normal !text-left ${open && tab === d.tab ? 'btn-on' : ''}`} onClick={() => set({ detailTab: d.tab, detailOpen: !(open && tab === d.tab) })}>
-            <span>{d.icon}</span> {d.label}
+          <button key={d.tab} aria-pressed={open && tab === d.tab} className={`btn w-full !justify-start !gap-2 !px-2 !py-2 !text-[12.5px] !leading-snug !whitespace-normal !text-left ${open && tab === d.tab ? 'btn-on' : ''}`} onClick={() => set({ detailTab: d.tab, detailOpen: !(open && tab === d.tab) })}>
+            <Icon name={d.icon} size={16} className="text-mute" /> {d.label}
           </button>
         ))}
       </div>
@@ -227,25 +229,26 @@ export default function ResultPanel() {
   const plan = useAppStore((s) => s.plan);
   const ranked = useRanked();
   const cur = useCurrent();
-  const sec = 'card shrink-0 p-2.5 max-[899px]:w-full max-[899px]:!h-auto';
+  const sec = 'card shrink-0 p-3 max-[899px]:w-full max-[899px]:!h-auto';
   return (
     <div className="flex h-full gap-2.5 overflow-x-auto p-2.5 max-[899px]:h-auto max-[899px]:flex-col max-[899px]:overflow-visible">
       {plan && cur ? (
-        <section className={`${sec} w-[236px] overflow-y-auto`}><Overview plan={plan} r={cur} /></section>
+        <section className={`${sec} w-[264px] overflow-y-auto`}><Overview plan={plan} r={cur} /></section>
       ) : (
-        <section className={`${sec} flex w-[236px] flex-col justify-center text-center text-[12px] leading-relaxed text-mute`}>
-          <div className="text-2xl">🧭</div>
-          Nhập <b className="text-fg">bên tôi</b> và <b className="text-fg">bên đối tác</b> (quốc gia hoặc địa chỉ) rồi bấm <b className="text-amber-200">Tìm tuyến tối ưu</b>.
-          <div className="mt-1 text-[10.5px]">Mọi con số giá là ước tính, trừ khi bạn đã nhập bảng giá thật.</div>
+        <section className={`${sec} flex w-[264px] flex-col items-center justify-center !px-5 text-center`}>
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-sky/10 text-sky"><Icon name="compass" size={26} strokeWidth={1.8} /></div>
+          <h3 className="text-[15px] font-semibold text-fg">Bắt đầu lập kế hoạch</h3>
+          <p className="mt-1.5 text-[13px] leading-relaxed text-mute">Nhập <b className="font-semibold text-fg">bên tôi</b> và <b className="font-semibold text-fg">bên đối tác</b> (quốc gia hoặc địa chỉ), rồi bấm <b className="font-semibold text-sky">Tìm tuyến tối ưu</b>.</p>
+          <p className="mt-3 text-[12px] leading-snug text-mute">Mọi con số giá là ước tính, trừ khi bạn đã nhập bảng giá thật.</p>
         </section>
       )}
-      <section className={`${sec} min-w-[350px] flex-1 overflow-y-auto max-[899px]:min-w-0`}>
+      <section className={`${sec} min-w-[300px] flex-1 overflow-y-auto max-[899px]:min-w-0`}>
         <IncotermCard plan={plan} option={cur?.option ?? null} />
       </section>
       {plan && cur && (
         <>
-          <section className={`${sec} w-[264px] max-[899px]:max-h-[320px]`}><Ranking ranked={ranked} /></section>
-          <section className={`${sec} w-[150px]`}><Details mode={cur.option.mode} /></section>
+          <section className={`${sec} w-[300px] max-[899px]:max-h-[360px]`}><Ranking ranked={ranked} /></section>
+          <section className={`${sec} w-[156px]`}><Details mode={cur.option.mode} /></section>
         </>
       )}
     </div>

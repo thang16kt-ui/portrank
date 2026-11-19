@@ -13,6 +13,7 @@ import { suggestIncoterm } from '../lib/incoterm';
 import { useAppStore } from '../store/useAppStore';
 import type { CargoType, ContainerType, Incoterm, Priority, TransportMode } from '../types';
 import AddressInput from './AddressInput';
+import Icon from './Icon';
 import HsInput from './HsInput';
 import { deviceTimeZone, minimumDeparture } from '../lib/simulation';
 
@@ -20,21 +21,21 @@ const SELLER_C = '#38bdf8', BUYER_C = '#fb923c';
 
 function Block({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
   return (
-    <section className="card px-3 py-2.5">
-      <h2 className="mb-2 flex items-center gap-2 text-[13px] font-semibold text-fg">
-        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gold/20 text-[11px] text-amber-200">{n}</span>
+    <section className="card px-4 pt-3.5 pb-4">
+      <h2 className="mb-3 flex items-center gap-2.5 text-[15px] font-semibold text-fg">
+        <span className="step-num">{n}</span>
         {title}
       </h2>
-      <div className="space-y-2">{children}</div>
+      <div className="space-y-3">{children}</div>
     </section>
   );
 }
 
 function Seg<T extends string>({ value, options, onChange }: { value: T; options: { v: T; label: string }[]; onChange: (v: T) => void }) {
   return (
-    <div className="flex overflow-hidden rounded-lg border border-line">
+    <div className="seg" role="group">
       {options.map((o) => (
-        <button key={o.v} onClick={() => onChange(o.v)} className={`flex-1 px-2 py-1.5 text-xs font-medium transition ${value === o.v ? 'bg-gold/20 text-amber-200' : 'bg-well text-mute hover:text-fg'}`}>
+        <button key={o.v} type="button" aria-pressed={value === o.v} onClick={() => onChange(o.v)}>
           {o.label}
         </button>
       ))}
@@ -84,11 +85,11 @@ export default function Sidebar() {
 
   return (
     <div className="flex h-full flex-col">
-    <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto p-2.5">
+    <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3">
       <Block n={1} title="Tuyến">
-        <div className="flex items-center gap-2">
-          <label className="lbl !mb-0 shrink-0">Tôi là</label>
-          <div className="flex-1"><Seg value={f.role} onChange={(role) => setForm({ role })} options={[{ v: 'buyer', label: 'Người mua (nhập)' }, { v: 'seller', label: 'Người bán (xuất)' }]} /></div>
+        <div>
+          <span className="lbl">Tôi là</span>
+          <div><Seg value={f.role} onChange={(role) => setForm({ role })} options={[{ v: 'buyer', label: 'Người mua (nhập)' }, { v: 'seller', label: 'Người bán (xuất)' }]} /></div>
         </div>
         <AddressInput label="Bên tôi" value={f.mine} onChange={(mine) => setForm({ mine })} color={f.role === 'seller' ? SELLER_C : BUYER_C} placeholder="VD: Bình Dương, Việt Nam – hoặc Việt Nam" />
         <AddressInput label="Bên đối tác" value={f.partner} onChange={(partner) => setForm({ partner })} color={f.role === 'seller' ? BUYER_C : SELLER_C} placeholder="VD: Munich, Đức – hoặc Đức" />
@@ -98,13 +99,13 @@ export default function Sidebar() {
             <input id="road-departure" className="field min-w-0" type="datetime-local" min={minimumDeparture()} value={f.roadDepartureTime ?? ''} onChange={(e) => setForm({ roadDepartureTime: e.target.value })} />
             <button className="btn shrink-0" onClick={() => setForm({ roadDepartureTime: '' })}>Đi ngay</button>
           </div>
-          <p className="mt-1 text-xs text-mute">{f.roadDepartureTime ? 'Giờ đã chọn' : 'Để trống = đi ngay'} · múi giờ {deviceTimeZone()}. Bấm Tìm tuyến tối ưu để áp dụng.</p>
+          <p className="hint mt-1.5">{f.roadDepartureTime ? 'Giờ đã chọn' : 'Để trống = đi ngay'} · múi giờ {deviceTimeZone()}. Bấm Tìm tuyến tối ưu để áp dụng.</p>
         </div>
         {f.mode === 'road' && (
           <div>
-            <p className="mt-1 text-[10.5px] text-mute">{roadConfig?.provider === 'tomtom' ? 'TomTom có xét giao thông. Giờ tương lai là dự báo; giờ đi theo múi giờ thiết bị.' : roadConfig?.provider === 'google' ? 'Google Maps có xét giao thông, giờ đi theo múi giờ thiết bị.' : roadConfig?.provider === 'osrm' ? 'OpenStreetMap / OSRM · bản thử. Thời gian chưa xét kẹt xe và không dự báo theo giờ đi.' : 'Đang kiểm tra nguồn đường bộ.'} Chọn thành phố/địa chỉ ở hai đầu. Tuyến ô tô chưa xét hạn chế xe tải/container.</p>
+            <p className="hint">{roadConfig?.provider === 'tomtom' ? 'TomTom có xét giao thông. Giờ tương lai là dự báo; giờ đi theo múi giờ thiết bị.' : roadConfig?.provider === 'google' ? 'Google Maps có xét giao thông, giờ đi theo múi giờ thiết bị.' : roadConfig?.provider === 'osrm' ? 'OpenStreetMap / OSRM · bản thử. Thời gian chưa xét kẹt xe và không dự báo theo giờ đi.' : 'Đang kiểm tra nguồn đường bộ.'} Chọn thành phố/địa chỉ ở hai đầu. Tuyến ô tô chưa xét hạn chế xe tải/container.</p>
             {(roadConfig?.provider === 'osrm' || roadConfig?.provider === 'tomtom' || f.roadVia) && <div className="mt-2 space-y-1">
-              <button className="text-[11px] text-sky underline" onClick={() => { if (showVia || f.roadVia) { setShowVia(false); setForm({ roadVia: null }); } else setShowVia(true); }}>{showVia || f.roadVia ? 'Bỏ điểm đi qua' : 'Thêm điểm đi qua (tuỳ chọn)'}</button>
+              <button className="text-[12.5px] font-medium text-sky underline-offset-2 hover:underline" onClick={() => { if (showVia || f.roadVia) { setShowVia(false); setForm({ roadVia: null }); } else setShowVia(true); }}>{showVia || f.roadVia ? 'Bỏ điểm đi qua' : 'Thêm điểm đi qua (tuỳ chọn)'}</button>
               {(showVia || f.roadVia) && <AddressInput label="Đi qua" value={f.roadVia ?? null} onChange={(roadVia) => setForm({ roadVia })} color="#a78bfa" placeholder="VD: Đà Nẵng, Việt Nam" />}
             </div>}
           </div>
@@ -113,13 +114,13 @@ export default function Sidebar() {
           <label className="lbl">Hãng tàu {f.mode !== 'sea' && '(chỉ với Đường biển)'}</label>
           <button disabled={f.mode !== 'sea'} onClick={() => setCarrierOpen(!carrierOpen)} className="field flex items-center justify-between text-left">
             <span className="truncate">{f.carriers.length ? f.carriers.map((id) => CARRIERS.find((c) => c.id === id)?.name).join(', ') : 'Tất cả hãng'}</span>
-            <span className="text-mute">{carrierOpen ? '▴' : '▾'}</span>
+            <Icon name={carrierOpen ? 'chevronUp' : 'chevronDown'} className="text-mute" />
           </button>
           {carrierOpen && f.mode === 'sea' && (
-            <div className="mt-1.5 flex flex-wrap gap-1.5">
-              <button className={`btn !px-2 !py-0.5 !text-[11px] ${!f.carriers.length ? 'btn-on' : ''}`} onClick={() => setForm({ carriers: [] })}>Tất cả hãng</button>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              <button className={`btn !min-h-[30px] !px-2.5 !py-1 !text-[12px] ${!f.carriers.length ? 'btn-on' : ''}`} onClick={() => setForm({ carriers: [] })}>Tất cả hãng</button>
               {CARRIERS.map((c) => (
-                <button key={c.id} title={`${c.scac} · ${c.alliance} (${c.allianceAsOf}, chưa xác minh)`} className={`btn !px-2 !py-0.5 !text-[11px] ${f.carriers.includes(c.id) ? 'btn-on' : ''}`} onClick={() => toggleCarrier(c.id)}>
+                <button key={c.id} title={`${c.scac} · ${c.alliance} (${c.allianceAsOf}, chưa xác minh)`} className={`btn !min-h-[30px] !px-2.5 !py-1 !text-[12px] ${f.carriers.includes(c.id) ? 'btn-on' : ''}`} onClick={() => toggleCarrier(c.id)}>
                   {c.name}
                 </button>
               ))}
@@ -196,18 +197,18 @@ export default function Sidebar() {
             <input type="number" min={0} className="field" placeholder="Lít" title="Thể tích (lít) – đồ uống, hoá chất lỏng" value={f.dutyLiters || ''} onChange={(e) => setForm({ dutyLiters: Math.max(0, +e.target.value || 0) })} />
           </div>
         </div>
-        <div className="rounded-md border border-line/60 p-2">
-          <label className="flex items-center gap-2 text-xs text-fg">
-            <input type="checkbox" checked={f.hasCo} onChange={(e) => setForm({ hasCo: e.target.checked })} /> Có C/O / chứng từ xuất xứ (xét thuế ưu đãi FTA)
+        <div className="rounded-xl border border-line bg-panel2 p-3">
+          <label className="flex cursor-pointer items-start gap-2.5 text-[13px] leading-snug font-medium text-fg">
+            <input type="checkbox" className="mt-0.5 h-4 w-4 shrink-0" checked={f.hasCo} onChange={(e) => setForm({ hasCo: e.target.checked })} /> Có C/O / chứng từ xuất xứ (xét thuế ưu đãi FTA)
           </label>
           {f.hasCo && (
-            <div className="mt-1.5">
+            <div className="mt-2.5">
               <label className="lbl">Hiệp định áp dụng <span className="font-normal text-mute">(mỗi C/O chỉ dùng cho hiệp định của nó)</span></label>
               <input className="field" list="fta-list" placeholder="Chưa chọn = mức thấp nhất, có điều kiện" value={f.fta} onChange={(e) => setForm({ fta: e.target.value })} />
               <datalist id="fta-list">{ftaChoices.map((x) => <option key={x} value={x} />)}</datalist>
             </div>
           )}
-          {!f.hasCo && <div className="mt-1 text-[10.5px] text-mute">Đang tính thuế MFN; mức ưu đãi (nếu có) hiện ở tab Thuế nhập khẩu.</div>}
+          {!f.hasCo && <div className="hint mt-1.5 pl-[26px]">Đang tính thuế MFN; mức ưu đãi (nếu có) hiện ở tab Thuế nhập khẩu.</div>}
         </div>
       </Block>
 
@@ -215,26 +216,26 @@ export default function Sidebar() {
         <div>
           <label className="lbl">Phương thức vận tải</label>
           <div className="grid grid-cols-2 gap-2">
-            <button onClick={() => pickMode('sea')} className={`btn !py-2 !text-[13px] ${f.mode === 'sea' ? 'btn-on' : ''}`}>🚢 Đường biển</button>
-            <button onClick={() => road.ok && pickMode('road')} disabled={!road.ok} title={road.reason} className={`btn !py-2 !text-[13px] ${f.mode === 'road' ? 'btn-on' : ''}`}>🚚 Đường bộ</button>
+            <button onClick={() => pickMode('sea')} aria-pressed={f.mode === 'sea'} className={`btn !min-h-[42px] !text-[14px] ${f.mode === 'sea' ? 'btn-on' : ''}`}><Icon name="ship" size={18} /> Đường biển</button>
+            <button onClick={() => road.ok && pickMode('road')} disabled={!road.ok} title={road.reason} aria-pressed={f.mode === 'road'} className={`btn !min-h-[42px] !text-[14px] ${f.mode === 'road' ? 'btn-on' : ''}`}><Icon name="truck" size={18} /> Đường bộ</button>
           </div>
-          {!road.ok && f.mine && f.partner && <p className="mt-1 text-[10.5px] text-mute">Đường bộ không dùng được: {road.reason}.</p>}
+          {!road.ok && f.mine && f.partner && <p className="hint mt-1.5">Đường bộ không dùng được: {road.reason}.</p>}
         </div>
         <div>
-          <div className="mb-1 flex items-center justify-between">
+          <div className="mb-1.5 flex items-center justify-between">
             <label className="lbl !mb-0">Điều kiện (Incoterms® 2020)</label>
-            <button className="text-[11px] text-sky hover:underline" onClick={() => setSuggest(!suggest)}>✨ Gợi ý cho tôi</button>
+            <button className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-[12.5px] font-medium text-sky hover:bg-sky/10" aria-expanded={suggest} onClick={() => setSuggest(!suggest)}><Icon name="sparkles" size={14} /> Gợi ý cho tôi</button>
           </div>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="grid grid-cols-4 gap-1.5">
             {terms.map((t) => (
-              <button key={t} onClick={() => pickTerm(t)} title={INCOTERMS[t].nameVi} className={`btn w-[50px] !gap-0.5 !px-0 !py-1.5 !text-[12.5px] !font-semibold ${f.term === t ? 'btn-on' : ''}`}>
-                {t}{f.mode === 'sea' && INCOTERMS[t].group === 'sea' && <span className="text-[10px] opacity-70" title="Chỉ dùng cho đường biển và thủy nội địa">⚓</span>}
+              <button key={t} onClick={() => pickTerm(t)} title={INCOTERMS[t].nameVi} aria-pressed={f.term === t} className={`btn !min-h-[36px] !gap-1 !px-0 !text-[13px] !font-semibold ${f.term === t ? 'btn-on' : ''}`}>
+                {t}{f.mode === 'sea' && INCOTERMS[t].group === 'sea' && <span className="opacity-60" title="Chỉ dùng cho đường biển và thủy nội địa"><Icon name="anchor" size={12} /></span>}
               </button>
             ))}
           </div>
           {suggest && (
-            <div className="mt-2 rounded-lg border border-line bg-well p-2 text-[11.5px]">
-              <div className="mb-1.5 text-mute">Ai sẽ book vận tải chặng chính?</div>
+            <div className="mt-2 rounded-xl border border-line bg-panel2 p-3 text-[13px]">
+              <div className="mb-2 font-medium text-fg">Ai sẽ book vận tải chặng chính?</div>
               <div className="flex gap-1.5">
                 {[true, false].map((iBook) => {
                   const sg = suggestIncoterm(f.role, iBook, f.cargo, f.mode);
@@ -248,19 +249,19 @@ export default function Sidebar() {
               </div>
             </div>
           )}
-          {notice && <p className="mt-1.5 rounded bg-sky/10 px-2 py-1 text-[11px] text-cyan-200">ℹ️ {notice}</p>}
-          {seaOnlyWarn && <p className="mt-1.5 rounded bg-gold/10 px-2 py-1 text-[11px] text-amber-200">⚠️ ICC khuyến nghị dùng FCA / CPT / CIP cho hàng container.</p>}
-          {needAddr && <p className="mt-1.5 rounded bg-gold/10 px-2 py-1 text-[11px] text-amber-200">⚠️ Nhập địa chỉ cụ thể để tính đủ chi phí nội địa cho điều kiện này.</p>}
+          {notice && <p className="hint-info mt-2"><Icon name="info" size={15} /><span>{notice}</span></p>}
+          {seaOnlyWarn && <p className="hint-warn mt-2"><Icon name="alert" size={15} /><span>ICC khuyến nghị dùng FCA / CPT / CIP cho hàng container.</span></p>}
+          {needAddr && <p className="hint-warn mt-2"><Icon name="alert" size={15} /><span>Nhập địa chỉ cụ thể để tính đủ chi phí nội địa cho điều kiện này.</span></p>}
         </div>
       </Block>
 
       <section className="card">
-        <button className="flex w-full items-center justify-between px-3 py-2 text-[12.5px] font-medium text-mute hover:text-fg" onClick={() => setMore(!more)}>
-          <span>Tùy chọn thêm</span>
-          <span>{more ? '▴' : '▾'}</span>
+        <button className="flex min-h-[44px] w-full items-center justify-between rounded-[14px] px-4 py-2.5 text-[14px] font-semibold text-fg hover:bg-panel2" aria-expanded={more} onClick={() => setMore(!more)}>
+          <span>Tùy chọn thêm <span className="ml-1 text-[12.5px] font-normal text-mute">ngày, xuất xứ, ưu tiên…</span></span>
+          <Icon name={more ? 'chevronUp' : 'chevronDown'} className="text-mute" />
         </button>
         {more && (
-          <div className="space-y-2.5 border-t border-line p-3">
+          <div className="space-y-3.5 border-t border-line px-4 pt-3.5 pb-4">
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="lbl">Ngày hàng sẵn sàng</label>
@@ -287,16 +288,16 @@ export default function Sidebar() {
             <div>
               <label className="lbl">Ưu tiên</label>
               <Seg value={f.priority} onChange={(p) => setPriority(p as Priority)} options={(Object.keys(PRIORITY_LABEL) as Priority[]).map((v) => ({ v, label: PRIORITY_LABEL[v] }))} />
-              <div className="mt-2 space-y-1">
+              <div className="mt-2.5 space-y-1.5">
                 {(Object.keys(weights) as (keyof Weights)[]).map((k) => (
-                  <div key={k} className={`flex items-center gap-2 text-[11px] text-mute ${!simulated && SIMULATED_CRITERIA.includes(k) ? 'opacity-50' : ''}`} title={!simulated && SIMULATED_CRITERIA.includes(k) ? 'Chưa có dữ liệu thật – tiêu chí này không được tính điểm' : undefined}>
-                    <span className="w-20 shrink-0">{CRITERIA_LABEL[k]}{!simulated && SIMULATED_CRITERIA.includes(k) ? ' *' : ''}</span>
+                  <div key={k} className={`flex items-center gap-2.5 text-[12.5px] text-label ${!simulated && SIMULATED_CRITERIA.includes(k) ? 'opacity-50' : ''}`} title={!simulated && SIMULATED_CRITERIA.includes(k) ? 'Chưa có dữ liệu thật – tiêu chí này không được tính điểm' : undefined}>
+                    <span className="w-24 shrink-0">{CRITERIA_LABEL[k]}{!simulated && SIMULATED_CRITERIA.includes(k) ? ' *' : ''}</span>
                     <input type="range" min={0} max={100} value={weights[k]} onChange={(e) => setWeight(k, +e.target.value)} className="h-1 flex-1" />
-                    <span className="w-7 text-right text-fg">{weights[k]}</span>
+                    <span className="num w-8 text-right font-semibold text-fg">{weights[k]}</span>
                   </div>
                 ))}
-                <label className="flex items-center gap-2 pt-1 text-[11px] text-mute">
-                  <input type="checkbox" checked={simulated} onChange={(e) => setSimulated(e.target.checked)} /> Chế độ demo: cho dữ liệu MÔ PHỎNG (ổn định giá, tần suất tàu *) tham gia xếp hạng
+                <label className="flex cursor-pointer items-start gap-2 pt-1.5 text-[12px] leading-snug text-mute">
+                  <input type="checkbox" className="mt-0.5 h-4 w-4 shrink-0" checked={simulated} onChange={(e) => setSimulated(e.target.checked)} /> Chế độ demo: cho dữ liệu MÔ PHỎNG (ổn định giá, tần suất tàu *) tham gia xếp hạng
                 </label>
               </div>
             </div>
@@ -304,24 +305,25 @@ export default function Sidebar() {
               <label className="lbl">Bán kính tìm cảng (chỉ với nhánh Địa chỉ): {f.radiusKm} km</label>
               <input type="range" min={100} max={1000} step={50} value={f.radiusKm} onChange={(e) => setForm({ radiusKm: +e.target.value })} className="w-full" />
             </div>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-fg">
-              <label className="flex items-center gap-2"><input type="checkbox" checked={f.avoidRedSea} onChange={(e) => setForm({ avoidRedSea: e.target.checked })} /> Tránh Biển Đỏ</label>
-              <label className="flex items-center gap-2"><input type="checkbox" checked={f.avoidPanama} onChange={(e) => setForm({ avoidPanama: e.target.checked })} /> Tránh kênh Panama</label>
-              <label className="flex items-center gap-2"><input type="checkbox" checked={f.woodPallet} onChange={(e) => setForm({ woodPallet: e.target.checked })} /> Có pallet / bao bì gỗ</label>
+            <div className="flex flex-col gap-2 text-[13px] text-fg">
+              <label className="flex cursor-pointer items-center gap-2.5"><input type="checkbox" className="h-4 w-4" checked={f.avoidRedSea} onChange={(e) => setForm({ avoidRedSea: e.target.checked })} /> Tránh Biển Đỏ</label>
+              <label className="flex cursor-pointer items-center gap-2.5"><input type="checkbox" className="h-4 w-4" checked={f.avoidPanama} onChange={(e) => setForm({ avoidPanama: e.target.checked })} /> Tránh kênh Panama</label>
+              <label className="flex cursor-pointer items-center gap-2.5"><input type="checkbox" className="h-4 w-4" checked={f.woodPallet} onChange={(e) => setForm({ woodPallet: e.target.checked })} /> Có pallet / bao bì gỗ</label>
             </div>
           </div>
         )}
       </section>
 
-      {planError && <p className="rounded-lg bg-red-500/10 px-3 py-2 text-xs text-red-200">{planError}</p>}
+      {planError && <p className="flex items-start gap-2 rounded-xl border border-red-500/25 bg-red-500/10 px-3 py-2.5 text-[13px] text-red-200" role="alert"><Icon name="alert" size={16} className="mt-0.5" /><span>{planError}</span></p>}
     </div>
-    <div className="shrink-0 border-t border-line bg-panel p-2.5">
+    <div className="shrink-0 border-t border-line bg-panel p-3">
       <button
         onClick={() => runPlan()}
         disabled={!!planning}
-        className="w-full rounded-xl btn-primary px-4 py-3 text-sm font-bold transition disabled:opacity-60"
+        aria-busy={!!planning}
+        className="btn-primary flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-[15px] font-semibold disabled:opacity-70"
       >
-        {planning ? `Đang tính… ${planning.total > 1 ? `${planning.done}/${planning.total}` : ''}` : '🔎 Tìm tuyến tối ưu'}
+        {planning ? <><Icon name="loader" size={18} className="animate-spin" /> Đang tính… {planning.total > 1 ? `${planning.done}/${planning.total}` : ''}</> : <><Icon name="search" size={18} strokeWidth={2.4} /> Tìm tuyến tối ưu</>}
       </button>
     </div>
     </div>
