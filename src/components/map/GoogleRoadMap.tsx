@@ -9,7 +9,7 @@ import SimulationReadout from '../SimulationReadout';
 import { truckModelMarkup } from './truckModel';
 
 type LatLng = { lat: number; lng: number };
-type MapInstance = { fitBounds(bounds: unknown, padding: number): void };
+type MapInstance = { fitBounds(bounds: unknown, padding: number | { top: number; bottom: number; left: number; right: number }): void };
 type MapOverlay = { setMap(map: MapInstance | null): void };
 type TruckOverlay = MapOverlay & { update(position: LatLng, heading: number): void };
 type OverlayBase = MapOverlay & {
@@ -84,6 +84,8 @@ export default function GoogleRoadMap() {
   const playing = usePlayback((s) => s.playing);
   const speed = usePlayback((s) => s.speed);
   const ref = useRef<HTMLDivElement>(null);
+  const controls = useRef<HTMLElement>(null);
+  const [controlsHeight, setControlsHeight] = useState(220);
   const truck = useRef<TruckOverlay | null>(null);
   const [config, setConfig] = useState<RoadConfig | null>(null);
   const [mapState, setMapState] = useState<{ map: MapInstance; maps: MapsLibrary } | null>(null);
@@ -102,6 +104,15 @@ export default function GoogleRoadMap() {
   const departure = Date.parse(directions?.departureTime ?? '');
   const status = leg ? journeyStatus(leg, progress, playing, progress >= 1) : 'Chưa có hành trình';
   const mapsUrl = plan ? `https://www.google.com/maps/dir/?${new URLSearchParams({ api: '1', origin: `${plan.seller.coord[1]},${plan.seller.coord[0]}`, destination: `${plan.buyer.coord[1]},${plan.buyer.coord[0]}`, travelmode: 'driving', avoid: 'ferries' })}` : '';
+
+  useEffect(() => {
+    if (!controls.current) return;
+    const element = controls.current;
+    const update = () => setControlsHeight(element.getBoundingClientRect().height);
+    const observer = new ResizeObserver(update);
+    observer.observe(element); update();
+    return () => observer.disconnect();
+  }, [route]);
 
   useEffect(() => {
     let active = true;
@@ -133,9 +144,16 @@ export default function GoogleRoadMap() {
     overlays.push(new maps.Marker({ map, position: path[0], label: 'A', title: plan?.seller.label }));
     overlays.push(new maps.Marker({ map, position: path.at(-1), label: 'B', title: plan?.buyer.label }));
     const vehicle = makeTruck(maps); vehicle.update(path[0], 0); vehicle.setMap(map); truck.current = vehicle;
-    const bounds = new maps.LatLngBounds(); path.forEach((p) => bounds.extend(p)); map.fitBounds(bounds, 90);
     return () => { overlays.forEach((o) => o.setMap(null)); vehicle.setMap(null); if (truck.current === vehicle) truck.current = null; };
   }, [mapState, route, plan?.seller.label, plan?.buyer.label]);
+
+  useEffect(() => {
+    if (!mapState || !route || !ref.current) return;
+    const bounds = new mapState.maps.LatLngBounds();
+    route.path.forEach(([lng, lat]) => bounds.extend({ lat, lng }));
+    mapState.map.fitBounds(bounds, { top: 60, left: 40, right: 40,
+      bottom: Math.max(45, Math.min(controlsHeight + 40, ref.current.clientHeight - 110)) });
+  }, [mapState, route, controlsHeight]);
 
   useEffect(() => {
     if (position && truck.current) truck.current.update({ lat: position.coord[1], lng: position.coord[0] }, position.bearing);
@@ -178,7 +196,7 @@ export default function GoogleRoadMap() {
           <p className="text-xs">Màu giao thông do Google cung cấp trên tuyến này; không tự tạo khi thiếu dữ liệu.</p>
         </div>
       </section>
-      <section className="journey-controls" aria-label="Điều khiển mô phỏng hành trình">
+      <section ref={controls} className="journey-controls" aria-label="Điều khiển mô phỏng hành trình">
         <SimulationReadout departureTime={directions?.departureTime} elapsedSeconds={progress * route.durationSeconds} totalSeconds={route.durationSeconds}
           legLabel={leg?.label ?? '—'} status={status} />
         <div className="flex items-center gap-3">

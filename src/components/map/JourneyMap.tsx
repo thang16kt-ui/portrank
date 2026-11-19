@@ -21,6 +21,8 @@ const latLngs = (leg: JourneyLeg): LatLngTuple[] => unwrapLongitudes(leg.path).m
 
 export default function JourneyMap() {
   const holder = useRef<HTMLDivElement>(null);
+  const controls = useRef<HTMLElement>(null);
+  const [controlsHeight, setControlsHeight] = useState(240);
   const [map, setMap] = useState<LeafletMap | null>(null);
   const [inland, setInland] = useState<LegState>({ loading: false });
   const [trafficOn, setTrafficOn] = useState(true);
@@ -134,9 +136,18 @@ export default function JourneyMap() {
   const stageLeg = stage?.leg;
 
   useEffect(() => {
+    if (!controls.current) return;
+    const element = controls.current;
+    const update = () => setControlsHeight(element.getBoundingClientRect().height);
+    const observer = new ResizeObserver(update);
+    observer.observe(element); update();
+    return () => observer.disconnect();
+  }, [legs.length]);
+
+  useEffect(() => {
     if (!map || map !== liveMap.current || !stageLeg || !animationReady || !followStages || !leaflet.current) return;
-    map.fitBounds(leaflet.current.latLngBounds(latLngs(stageLeg)), { paddingTopLeft: [35, summaryOpen ? 150 : 55], paddingBottomRight: [35, 145], maxZoom: 14, animate: false });
-  }, [map, stageLeg, animationReady, followStages, summaryOpen]);
+    map.fitBounds(leaflet.current.latLngBounds(latLngs(stageLeg)), { paddingTopLeft: [35, 55], paddingBottomRight: [35, Math.max(45, Math.min(controlsHeight + 40, map.getSize().y - 110))], maxZoom: 14, animate: false });
+  }, [map, stageLeg, animationReady, followStages, controlsHeight]);
 
   useEffect(() => {
     if (!map || map !== liveMap.current || !leaflet.current) return;
@@ -165,11 +176,11 @@ export default function JourneyMap() {
     }
     const signature = `${plan?.seller.coord.join(',')}:${plan?.buyer.coord.join(',')}:${optionKey}:${legs.map((l) => l.id).join(',')}`;
     if (all.length && (!animationReady || !followStages) && (lastFit.current !== signature || !followStages)) {
-      map.fitBounds(L.latLngBounds(all), { paddingTopLeft: [40, 145], paddingBottomRight: [40, 110], maxZoom: 14 });
+      map.fitBounds(L.latLngBounds(all), { paddingTopLeft: [40, 55], paddingBottomRight: [40, Math.max(45, Math.min(controlsHeight + 40, map.getSize().y - 110))], maxZoom: 14 });
       lastFit.current = signature;
     }
     return () => { group.remove(); };
-  }, [map, legs, plan, optionKey, animationReady, followStages, road]);
+  }, [map, legs, plan, optionKey, animationReady, followStages, road, controlsHeight]);
 
   useEffect(() => { usePlayback.getState().setProgress(0); usePlayback.getState().setPlaying(true); }, [plan, optionKey]);
   useEffect(() => {
@@ -223,7 +234,7 @@ export default function JourneyMap() {
       {legs.some((l) => l.forecast) && <p className="text-xs font-semibold">ETA theo giờ tương lai là dự báo. Lớp màu nền thể hiện giao thông hiện tại.</p>}
       </div>
     </section>
-    {!!legs.length && <section className="journey-controls" aria-label="Điều khiển mô phỏng hành trình">
+    {!!legs.length && <section ref={controls} className="journey-controls" aria-label="Điều khiển mô phỏng hành trình">
       <SimulationReadout departureTime={departureTime} elapsedSeconds={stage?.elapsedSeconds ?? 0} totalSeconds={animationReady ? stage?.totalSeconds ?? NaN : NaN}
         legLabel={stage?.leg.label ?? '—'} status={status} estimated={!road} />
       {inland.error && <p className="mb-2 text-sm text-amber-700" role="status">{inland.error}</p>}

@@ -34,6 +34,7 @@ Không thêm số tài xế, biến thời gian nghỉ hoặc lịch đổi lái
 - `npm test` và `npm run build`.
 - Toàn bộ 306 kiểm thử qua. Sau lần rà cuối, 25 kiểm thử liên quan thời gian/TomTom/Google traffic được chạy lại và qua.
 - API công khai của bản PortRank hiện có trả HTTP 200 với `trafficMode: forecast`, giữ đúng giờ khởi hành tương lai gửi lên. Đây là kiểm tra kết nối/giờ đi, không phải xác minh độ chính xác dự báo từng đoạn đường.
-- Chưa xác minh giao diện bằng trình duyệt: bản thử nội bộ không mở được trong môi trường trình duyệt hiện tại. Chưa triển khai lên Render.
+- Đã triển khai và kiểm tra trên web: nhập giờ tương lai, nhắc tính lại khi đổi đầu vào, phát/dừng, kéo 50%/100%, đổi tốc độ và chuyển ba chặng. Giờ đến không đổi theo tốc độ xem.
+- Vùng nhìn bản đồ chừa khoảng theo chiều cao thực tế của thanh điều khiển để tránh che vị trí xe/tàu.
 
 Khóa API là cấu hình của máy chủ. Không có khóa Google/TomTom trong thay đổi này.
