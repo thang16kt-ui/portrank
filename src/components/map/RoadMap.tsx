@@ -8,6 +8,8 @@ import { unwrapLongitudes } from '../../lib/geo';
 import { transitCountryNames } from '../../lib/roadCountries';
 import { useAppStore } from '../../store/useAppStore';
 import GoogleRoadMap from './GoogleRoadMap';
+import JourneyMap from './JourneyMap';
+import MapBoundary from './MapBoundary';
 
 function OsrmRoadMap() {
   const ref = useRef<HTMLDivElement>(null);
@@ -91,6 +93,7 @@ export default function RoadMap() {
   const { config, error, retry } = useRoadConfig();
   const provider = current?.option.roadDirections?.provider ?? config?.provider;
   if (provider === 'google') return <GoogleRoadMap />;
+  if (provider === 'tomtom') return <MapBoundary webgl={false}><JourneyMap /></MapBoundary>;
   if (provider === 'osrm') return <OsrmRoadMap />;
   return <div className="flex h-full items-center justify-center bg-well p-6 text-center text-[13px] text-mute" role="status">
     <div>{error || 'Đang kết nối nguồn đường bộ…'}{error && <button className="btn mx-auto mt-3 block" onClick={retry}>Thử lại kết nối</button>}</div>

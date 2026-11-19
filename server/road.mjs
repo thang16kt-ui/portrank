@@ -1,5 +1,6 @@
 /** Road routing providers stay behind the PortRank server. Google keys never reach OSRM. */
 import { handleOsrm } from './osrm.mjs';
+import { handleTomTomRoad } from './tomtom.mjs';
 const ENDPOINT = 'https://routes.googleapis.com/directions/v2:computeRoutes';
 const FIELD_MASK = 'routes.distanceMeters,routes.duration,routes.staticDuration,routes.polyline.geoJsonLinestring,routes.description,routes.warnings';
 const requestStarts = [];
@@ -24,6 +25,9 @@ function seconds(value) {
 }
 
 export function roadConfig(env = process.env) {
+  if (env.ROAD_ROUTING_PROVIDER === 'tomtom') return {
+    configured: !!env.TOMTOM_API_KEY?.trim(), provider: 'tomtom', profile: 'DRIVE', trafficAware: true, browserKey: '',
+  };
   if (env.ROAD_ROUTING_PROVIDER === 'osrm-demo') return {
     configured: true, provider: 'osrm', profile: 'DRIVE', trafficAware: false, demo: true, browserKey: '',
   };
@@ -47,6 +51,7 @@ export async function handleRoad(url, env = process.env) {
   const via = viaText == null ? null : point(viaText);
   if (viaText != null && !via) return json(400, { error: 'Điểm đi qua phải có tọa độ hợp lệ (kinh độ,vĩ độ).' });
   if (env.ROAD_ROUTING_PROVIDER === 'osrm-demo') return handleOsrm(origin, destination, via);
+  if (env.ROAD_ROUTING_PROVIDER === 'tomtom') return handleTomTomRoad(url, env, origin, destination, via);
   if (via) return json(400, { error: 'Điểm đi qua hiện chỉ hỗ trợ ở bản thử OSRM. Hãy bỏ điểm đi qua rồi tính lại.' });
   const departure = url.searchParams.get('departureTime');
   const at = departure ? Date.parse(departure) : Date.now();

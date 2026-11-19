@@ -93,12 +93,12 @@ export default function Sidebar() {
         <AddressInput label="Bên đối tác" value={f.partner} onChange={(partner) => setForm({ partner })} color={f.role === 'seller' ? BUYER_C : SELLER_C} placeholder="VD: Munich, Đức – hoặc Đức" />
         {f.mode === 'road' && (
           <div>
-            {roadConfig?.provider === 'google' && <>
+            {roadConfig?.trafficAware && <>
             <label className="lbl" htmlFor="road-departure">Giờ khởi hành (để trống = đi ngay)</label>
             <input id="road-departure" className="field" type="datetime-local" value={f.roadDepartureTime ?? ''} onChange={(e) => setForm({ roadDepartureTime: e.target.value })} />
             </>}
-            <p className="mt-1 text-[10.5px] text-mute">{roadConfig?.provider === 'google' ? 'Google Maps có xét giao thông, giờ đi theo múi giờ thiết bị.' : roadConfig?.provider === 'osrm' ? 'OpenStreetMap / OSRM · bản thử. Thời gian chưa xét kẹt xe và không dự báo theo giờ đi.' : 'Đang kiểm tra nguồn đường bộ.'} Chọn thành phố/địa chỉ ở hai đầu. Tuyến ô tô chưa xét hạn chế xe tải/container.</p>
-            {(roadConfig?.provider === 'osrm' || f.roadVia) && <div className="mt-2 space-y-1">
+            <p className="mt-1 text-[10.5px] text-mute">{roadConfig?.provider === 'tomtom' ? 'TomTom có xét giao thông. Giờ tương lai là dự báo; giờ đi theo múi giờ thiết bị.' : roadConfig?.provider === 'google' ? 'Google Maps có xét giao thông, giờ đi theo múi giờ thiết bị.' : roadConfig?.provider === 'osrm' ? 'OpenStreetMap / OSRM · bản thử. Thời gian chưa xét kẹt xe và không dự báo theo giờ đi.' : 'Đang kiểm tra nguồn đường bộ.'} Chọn thành phố/địa chỉ ở hai đầu. Tuyến ô tô chưa xét hạn chế xe tải/container.</p>
+            {(roadConfig?.provider === 'osrm' || roadConfig?.provider === 'tomtom' || f.roadVia) && <div className="mt-2 space-y-1">
               <button className="text-[11px] text-sky underline" onClick={() => { if (showVia || f.roadVia) { setShowVia(false); setForm({ roadVia: null }); } else setShowVia(true); }}>{showVia || f.roadVia ? 'Bỏ điểm đi qua' : 'Thêm điểm đi qua (tuỳ chọn)'}</button>
               {(showVia || f.roadVia) && <AddressInput label="Đi qua" value={f.roadVia ?? null} onChange={(roadVia) => setForm({ roadVia })} color="#a78bfa" placeholder="VD: Đà Nẵng, Việt Nam" />}
             </div>}

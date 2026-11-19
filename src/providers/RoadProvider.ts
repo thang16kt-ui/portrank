@@ -1,5 +1,13 @@
 import type { LngLat, Place } from '../types';
 
+export interface TrafficSection {
+  startIndex: number;
+  endIndex: number;
+  severity: 'slow' | 'jam' | 'severe' | 'closed';
+  speedKmh: number | null;
+  delaySeconds: number | null;
+}
+
 export interface DrivingRoute {
   id: string;
   description: string;
@@ -9,12 +17,15 @@ export interface DrivingRoute {
   /** Geometry from the route provider. Google geometry must only be shown on Google Maps. */
   path: LngLat[];
   warnings: string[];
+  trafficSections?: TrafficSection[];
+  trafficDelaySeconds?: number | null;
 }
 
 export interface RoadDirections {
-  provider: 'google' | 'osrm';
+  provider: 'google' | 'osrm' | 'tomtom';
   profile: 'DRIVE';
   trafficAware: boolean;
+  trafficMode?: 'live' | 'forecast';
   demo?: boolean;
   cached?: boolean;
   fetchedAt: string;
@@ -28,7 +39,7 @@ export interface RoadProvider {
 
 export interface RoadConfig {
   configured: boolean;
-  provider: 'google' | 'osrm';
+  provider: 'google' | 'osrm' | 'tomtom';
   profile: 'DRIVE';
   trafficAware: boolean;
   demo?: boolean;
@@ -72,6 +83,6 @@ export const ServerRoadProvider: RoadProvider = {
 };
 
 export const roadSourceLabel = (directions?: Pick<RoadDirections, 'provider'>) =>
-  directions?.provider === 'google' ? 'Google Maps' : directions?.provider === 'osrm' ? 'OpenStreetMap / OSRM' : 'Nguồn đường bộ';
+  directions?.provider === 'google' ? 'Google Maps' : directions?.provider === 'osrm' ? 'OpenStreetMap / OSRM' : directions?.provider === 'tomtom' ? 'TomTom Traffic' : 'Nguồn đường bộ';
 export const roadTrafficLabel = (directions?: Pick<RoadDirections, 'trafficAware'>) =>
   directions?.trafficAware ? 'có xét giao thông' : 'chưa xét kẹt xe';

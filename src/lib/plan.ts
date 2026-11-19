@@ -347,10 +347,11 @@ async function roadOptions(input: PlanInput, seller: Place, buyer: Place, deps: 
   const directions = await (deps.road ?? ServerRoadProvider).lookup({ origin: seller, destination: buyer, departureTime: input.roadDepartureTime, via: input.roadVia });
   if (!directions.routes.length) throw new Error('Không tìm được tuyến đường ô tô cho hai địa điểm này.');
   const { routes, ...roadDirections } = directions;
-  const transitChecks = directions.provider === 'osrm' ? await Promise.all(routes.map((rt) => roadTransitCountries(rt.path, [seller.country, buyer.country]))) : routes.map(() => [] as string[]);
+  const transitChecks = directions.provider !== 'google' ? await Promise.all(routes.map((rt) => roadTransitCountries(rt.path, [seller.country, buyer.country]))) : routes.map(() => [] as string[]);
   const sourceLabel = roadSourceLabel(directions);
   notes.push(directions.provider === 'google'
     ? 'Quãng đường và thời gian lái xe: Google Maps, có xét giao thông tại giờ khởi hành. Kết quả có thể khác ứng dụng Google Maps do giờ đi, điểm ghim và lựa chọn tuyến.'
+    : directions.provider === 'tomtom' ? 'Quãng đường và thời gian lái xe: TomTom, có xét giao thông. Đi ngay dùng dữ liệu hiện tại; chọn giờ tương lai dùng dự báo.'
     : 'Quãng đường và thời gian lái xe: OpenStreetMap / OSRM, theo mạng đường ô tô. Thời gian chưa xét kẹt xe hoặc giờ khởi hành. Nguồn demo dành cho chạy thử, có giới hạn và có thể tạm gián đoạn.');
   notes.push('Đây là tuyến ô tô (DRIVE), chưa xác nhận hạn chế chiều cao, tải trọng hay đường cấm xe tải/container.');
   notes.push('Thời gian lái xe chưa gồm nghỉ tài xế, bốc dỡ và làm thủ tục. Giá vận chuyển vẫn là ước tính theo đơn giá/km.');
@@ -392,7 +393,7 @@ async function roadOptions(input: PlanInput, seller: Place, buyer: Place, deps: 
       key, mode: 'road' as const, title, gates: [], roadKm: km, roadStraight: false,
       drivingRoute: rt, roadDirections, roadTransitCountries: transitCountries,
       // Google geometry must not leak into the MapLibre sea-map or its animation layers.
-      roadPath: directions.provider === 'osrm' ? unwrapLongitudes(rt.path) : undefined,
+      roadPath: directions.provider !== 'google' ? unwrapLongitudes(rt.path) : undefined,
       originInlandKm: 0, destInlandKm: 0,
       ...fin, days, cv: coefficientOfVariation(history.map((h) => h.price)) * 0.5, frequency: 0, risk: 0, history,
       warnings: [...rt.warnings, ...(transitCountries.length ? [`Tuyến có dấu hiệu đi qua ${transitNames}. Hai đầu cùng nước vẫn có thể phải quá cảnh. Rà soát từ biên giới bản đồ khái quát; cần xác minh lộ trình và cửa khẩu trước khi đi.`] : [])],

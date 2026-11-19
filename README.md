@@ -31,7 +31,7 @@ npm install
 npm run dev        # http://localhost:5173
 ```
 
-Bản đường biển không cần API key. **Bản thử đường bộ dùng OpenStreetMap / OSRM**, trả km, thời gian và tọa độ theo mạng đường ô tô, không cần key; thời gian chưa xét kẹt xe. Cần backend Node với `ROAD_ROUTING_PROVIDER=osrm-demo`. Có thể chuyển sang Google Routes khi có key/billing. Xem [hướng dẫn đường bộ](docs/road-routing.md).
+Bản đường biển không cần API key. **Bản thử đường bộ dùng OpenStreetMap / OSRM**, trả km, thời gian và tọa độ theo mạng đường ô tô, không cần key; thời gian chưa xét kẹt xe. Cần backend Node với `ROAD_ROUTING_PROVIDER=osrm-demo`. Có thể bật **TomTom Traffic** để xem màu giao thông thật và hành trình xe–tàu–xe bằng `ROAD_ROUTING_PROVIDER=tomtom` cùng key máy chủ; xem [hướng dẫn TomTom](docs/tomtom-traffic.md). Google Routes vẫn là tùy chọn khi có key/billing. Xem [hướng dẫn đường bộ](docs/road-routing.md).
 
 Cần Internet cho: gợi ý địa chỉ Photon (không có mạng vẫn dùng được ~300 thành phố có sẵn), font, và
 dữ liệu cảng 3D (vector tiles OpenStreetMap qua OpenFreeMap). Bản đồ thế giới (Natural Earth, gói `world-atlas`) nằm sẵn trong app.

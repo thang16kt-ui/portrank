@@ -182,3 +182,30 @@ a { color: var(--color-sky); }
 :root[data-ui="light"] .pr-pass-tip, :root[data-ui="light"] .pr-tag { background: rgba(255,255,255,.96); color: #0f172a; }
 :root[data-ui="light"] .bg-white\/10 { background: rgba(15,23,42,.08); }
 :root[data-ui="light"] .toast-pop { box-shadow: 0 6px 20px rgba(15,23,42,.18); }
+/* Door-to-door playback stays readable over either light OSM tiles or dark map themes. */
+.journey-summary,.journey-controls{position:absolute;z-index:500;color:#172033;background:rgba(255,255,255,.96);border:1px solid #cbd5e1;border-radius:12px;box-shadow:0 4px 20px #0f172a20;padding:12px;font-size:14px;line-height:1.45}
+.journey-summary{left:12px;top:12px;max-width:min(560px,calc(100% - 24px));max-height:42%;overflow:auto}
+.journey-controls{left:12px;right:12px;bottom:25px}
+.journey-summary .btn,.journey-controls .btn,.journey-controls .field{color:#172033;background:#f1f5f9;border-color:#cbd5e1}
+.journey-stage{padding:5px 9px;background:#e2e8f0;border-radius:7px;font-size:12px;text-align:left;max-width:100%}
+.journey-stage-active{background:#dbeafe;box-shadow:inset 0 0 0 2px #2563eb;color:#1e3a8a}
+.journey-vehicle{display:flex;align-items:center;justify-content:center;font-size:32px;filter:drop-shadow(0 2px 3px #0007);background:#fffffff0;border-radius:50%;border:2px solid #fff}
+.leaflet-top.leaflet-right .leaflet-control-zoom{margin-top:52px}
+@media(max-width:899px){.journey-summary{padding:8px;font-size:12px;max-height:35%;max-width:calc(100% - 24px)}.journey-controls{padding:8px;bottom:22px}.journey-stage{font-size:11px;padding:3px 6px}.journey-vehicle{font-size:28px}}
+.journey-truck-3d{background:transparent!important;border:0!important;perspective:400px;pointer-events:none}
+.truck-model{position:relative;width:70px;height:70px;perspective:400px}
+.truck-shadow{position:absolute;left:15px;top:19px;width:40px;height:50px;border-radius:50%;background:#0f172a55;filter:blur(6px)}
+.truck-heading{position:absolute;left:35px;top:35px;transform-style:preserve-3d}
+.truck-solids,.truck-solid{position:absolute;transform-style:preserve-3d}
+.truck-solid{width:var(--w);height:var(--d)}
+.truck-face{position:absolute;display:block;background:var(--paint);backface-visibility:visible;border:1px solid #0002;box-sizing:border-box}
+.truck-top,.truck-bottom{width:var(--w);height:var(--d);transform:translateZ(calc(var(--h)/2))}
+.truck-bottom{transform:translateZ(calc(var(--h)/-2));filter:brightness(.55)}
+.truck-front,.truck-back{width:var(--w);height:var(--h);top:calc((var(--d) - var(--h))/2)}
+.truck-front{transform:rotateX(90deg) translateZ(calc(var(--d)/2));filter:brightness(.85)}
+.truck-back{transform:rotateX(90deg) translateZ(calc(var(--d)/-2));filter:brightness(.65)}
+.truck-left,.truck-right{width:var(--h);height:var(--d);left:calc((var(--w) - var(--h))/2)}
+.truck-left{transform:rotateY(90deg) translateZ(calc(var(--w)/-2));filter:brightness(.7)}
+.truck-right{transform:rotateY(90deg) translateZ(calc(var(--w)/2));filter:brightness(.9)}
+.truck-container .truck-left,.truck-container .truck-right{background:repeating-linear-gradient(0deg,#0002 0 1px,transparent 1px 4px),var(--paint)}
+.truck-wheel .truck-face{border-radius:35%;border:1px solid #475569}

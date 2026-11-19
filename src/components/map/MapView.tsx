@@ -397,7 +397,7 @@ export default function MapView() {
         }),
       });
       // Xe tải (đường bộ) – ghim HTML
-      if (active && L.track!.vehicle === 'truck' && !L.portView) {
+      if (active && L.track!.vehicle === 'truck' && !L.portView && !L.view3d) {
         const at = trackPosition(L.track!, day);
         if (!s.truck) {
           const el = document.createElement('div');

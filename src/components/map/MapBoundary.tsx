@@ -28,8 +28,8 @@ function MapFallback({ reason, onRetry }: { reason: string; onRetry: () => void 
  * Cô lập vùng bản đồ: lỗi WebGL / MapLibre (không tạo được context, mất context…) chỉ thay vùng bản đồ bằng thông báo,
  * không làm trắng toàn bộ app. Form và kết quả nằm ngoài boundary nên không bị unmount.
  */
-export default class MapBoundary extends Component<{ children: ReactNode }, { error: string | null; attempt: number }> {
-  state = { error: webglAvailable() ? null : 'Trình duyệt không tạo được WebGL (tăng tốc đồ hoạ bị tắt hoặc không hỗ trợ).', attempt: 0 };
+export default class MapBoundary extends Component<{ children: ReactNode; webgl?: boolean }, { error: string | null; attempt: number }> {
+  state = { error: this.props.webgl === false || webglAvailable() ? null : 'Trình duyệt không tạo được WebGL (tăng tốc đồ hoạ bị tắt hoặc không hỗ trợ).', attempt: 0 };
 
   static getDerivedStateFromError(e: unknown) {
     return { error: `Lỗi khởi tạo bản đồ: ${(e as Error)?.message ?? String(e)}` };
@@ -40,7 +40,7 @@ export default class MapBoundary extends Component<{ children: ReactNode }, { er
   }
 
   retry = () => {
-    this.setState((s) => ({ error: webglAvailable() ? null : 'Vẫn chưa tạo được WebGL.', attempt: s.attempt + 1 }));
+    this.setState((s) => ({ error: this.props.webgl === false || webglAvailable() ? null : 'Vẫn chưa tạo được WebGL.', attempt: s.attempt + 1 }));
   };
 
   render() {

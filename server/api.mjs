@@ -22,6 +22,7 @@
  */
 
 import { handleRoad, roadConfig } from './road.mjs';
+import { handleTraffic } from './tomtom.mjs';
 
 const HTS_BASE = 'https://hts.usitc.gov/reststop/search';
 const HTS_EXPORT = 'https://hts.usitc.gov/reststop/exportList';
@@ -189,6 +190,7 @@ export async function handleApi(method, rawUrl, env = process.env) {
       return json(200, { server: true, hts: true, road, dcsa: dcsaCarriers(env).map((c) => ({ id: c.id, configured: c.ok })) });
     }
     if (url.pathname === '/api/road/config' || url.pathname === '/api/road/routes') return await handleRoad(url, env);
+    if (url.pathname.startsWith('/api/traffic/')) return await handleTraffic(url, env);
     if (url.pathname === '/api/hts/search') return await handleHts(url);
     if (url.pathname === '/api/hts/exportList') return await handleHtsExport(url);
     if (url.pathname.startsWith('/api/wits/')) return await handleWits(url);
