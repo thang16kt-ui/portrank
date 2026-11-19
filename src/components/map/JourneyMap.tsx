@@ -22,6 +22,7 @@ export default function JourneyMap() {
   const [inland, setInland] = useState<LegState>({ loading: false });
   const [roadLive, setRoadLive] = useState<RoadDirections | null>(null);
   const [trafficOn, setTrafficOn] = useState(true);
+  const [summaryOpen, setSummaryOpen] = useState(false);
   const [trafficReady, setTrafficReady] = useState(false);
   const [trafficError, setTrafficError] = useState('');
   const [trafficAt, setTrafficAt] = useState('');
@@ -145,8 +146,8 @@ export default function JourneyMap() {
 
   useEffect(() => {
     if (!map || map !== liveMap.current || !stageLeg || !animationReady || !followStages || !leaflet.current) return;
-    map.fitBounds(leaflet.current.latLngBounds(latLngs(stageLeg)), { paddingTopLeft: [35, 150], paddingBottomRight: [35, 145], maxZoom: 14, animate: false });
-  }, [map, stageLeg, animationReady, followStages]);
+    map.fitBounds(leaflet.current.latLngBounds(latLngs(stageLeg)), { paddingTopLeft: [35, summaryOpen ? 150 : 55], paddingBottomRight: [35, 145], maxZoom: 14, animate: false });
+  }, [map, stageLeg, animationReady, followStages, summaryOpen]);
 
   useEffect(() => {
     if (!map || map !== liveMap.current || !leaflet.current) return;
@@ -207,6 +208,8 @@ export default function JourneyMap() {
   return <div className="relative isolate h-full w-full bg-well">
     <div ref={holder} className="h-full w-full" aria-label="Bản đồ hành trình xe tải và tàu biển" />
     <section className="journey-summary" aria-label="Thông tin hành trình">
+      <button className="btn !text-xs" aria-expanded={summaryOpen} aria-controls="journey-summary-details" onClick={() => setSummaryOpen((open) => !open)}>{summaryOpen ? '✕ Ẩn thông tin' : 'ⓘ Thông tin hành trình'}</button>
+      <div id="journey-summary-details" hidden={!summaryOpen}>
       <div className="flex items-center justify-between gap-2"><strong>{road ? '🚚 Hành trình đường bộ' : '🚚 Thành phố · 🚢 Cảng · 🚚 Thành phố'}</strong>
         {trafficReady && <button className="btn !text-xs" aria-pressed={trafficOn} onClick={() => setTrafficOn((on) => !on)}>{trafficOn ? 'Ẩn giao thông' : 'Hiện giao thông'}</button>}</div>
       {road && route && <p className="mt-1 font-semibold">{fmtDrivingDistance(route.distanceMeters)} · {fmtDuration(route.durationSeconds)} · {source}</p>}
@@ -220,6 +223,7 @@ export default function JourneyMap() {
       <p className="mt-1 text-xs opacity-75">{trafficReady ? 'Giao thông TomTom hiện tại · cập nhật mỗi 2 phút khi mở trang.' : 'Chưa bật dữ liệu giao thông trên máy chủ.'} {fetchedAt && `Tuyến lấy lúc ${new Date(fetchedAt).toLocaleTimeString('vi-VN')}.`}</p>
       {trafficOn && trafficReady && !trafficError && <p className="text-xs opacity-75">Phóng to mức thành phố để xem màu giao thông.{trafficAt && ` Lớp màu tải lúc ${new Date(trafficAt).toLocaleTimeString('vi-VN')}.`}</p>}
       {legs.some((l) => l.forecast) && <p className="text-xs font-semibold">ETA theo giờ tương lai là dự báo. Lớp màu nền thể hiện giao thông hiện tại.</p>}
+      </div>
     </section>
     {!!legs.length && <section className="journey-controls" aria-label="Điều khiển mô phỏng hành trình">
       <div className="mb-2 flex flex-wrap gap-2">{legs.map((leg, index) => <button key={leg.id} className={`journey-stage ${stage?.index === index ? 'journey-stage-active' : ''}`}
