@@ -12,7 +12,7 @@ import { getTrack } from '../../lib/actions';
 import { ServerRoadProvider, type RoadDirections } from '../../providers/RoadProvider';
 import { PLAYBACK_SPEEDS, useAppStore, usePlayback, type Speed } from '../../store/useAppStore';
 import type { Place, Port } from '../../types';
-import { truckModelMarkup } from './truckModel';
+import { SHIP_MODEL_SIZE, TRUCK_MODEL_SIZE, shipModelMarkup, truckModelMarkup } from './truckModel';
 
 type LegState = { origin?: RoadDirections; destination?: RoadDirections; departureTime?: string; error?: string; loading: boolean };
 const REFRESH_MS = 120000;
@@ -100,7 +100,8 @@ export default function JourneyMap() {
 
   useEffect(() => {
     let alive = true;
-    if (!plan || !option || road || !trafficReady) { setInland({ loading: false }); return; }
+    // tuyến xe hai đầu cảng lấy từ nguồn đường bộ của máy chủ (TomTom/OSRM) – không phụ thuộc lớp màu giao thông
+    if (!plan || !option || road) { setInland({ loading: false }); return; }
     const { seller, buyer } = plan;
     const pol = option.pol, pod = option.pod;
     if (!pol || !pod) return;
@@ -110,7 +111,7 @@ export default function JourneyMap() {
       .then((result) => { if (alive) setInland({ ...result, loading: false }); })
       .catch((error: Error) => { if (alive) setInland({ loading: false, error: error.message }); });
     return () => { alive = false; };
-  }, [plan, option, road, trafficReady, sea, calculatedAt]);
+  }, [plan, option, road, sea, calculatedAt]);
 
   const legs = useMemo<JourneyLeg[]>(() => {
     if (!plan || !option) return [];
@@ -203,10 +204,13 @@ export default function JourneyMap() {
     if (!marker.current || lastVehicle.current !== stage.leg.vehicle) {
       marker.current?.remove();
       marker.current = L.marker([at.coord[1], at.coord[0]], { interactive: false, zIndexOffset: 1000,
-        icon: L.divIcon({ className: stage.leg.vehicle === 'truck' ? 'journey-truck-3d' : 'journey-vehicle', html: stage.leg.vehicle === 'truck' ? truckModelMarkup() : '<span aria-hidden="true">🚢</span>', iconSize: [70, 70], iconAnchor: [35, 35] }) }).addTo(map);
+        icon: (() => {
+          const truck = stage.leg.vehicle === 'truck', size = truck ? TRUCK_MODEL_SIZE : SHIP_MODEL_SIZE;
+          return L.divIcon({ className: 'journey-model-3d', html: truck ? truckModelMarkup() : shipModelMarkup(), iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
+        })() }).addTo(map);
       lastVehicle.current = stage.leg.vehicle;
     } else marker.current.setLatLng([at.coord[1], at.coord[0]]);
-    const heading = marker.current.getElement()?.querySelector<HTMLElement>('.truck-heading');
+    const heading = marker.current.getElement()?.querySelector<HTMLElement>('.vehicle-heading');
     if (heading) heading.style.transform = `rotateX(48deg) rotateZ(${at.bearing}deg)`;
   }, [map, stage, animationReady]);
 

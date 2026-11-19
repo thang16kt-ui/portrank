@@ -5,7 +5,7 @@ import { fetchRoadConfig, type RoadConfig } from '../../providers/RoadProvider';
 import { PLAYBACK_SPEEDS, useAppStore, usePlayback, type Speed } from '../../store/useAppStore';
 import { journeyPosition, journeyStatus, TRAFFIC_COLORS, type JourneyLeg } from '../../lib/journey';
 import SimulationReadout from '../SimulationReadout';
-import { truckModelMarkup } from './truckModel';
+import { TRUCK_MODEL_SIZE, truckModelMarkup } from './truckModel';
 
 type LatLng = { lat: number; lng: number };
 type MapInstance = { fitBounds(bounds: unknown, padding: number | { top: number; bottom: number; left: number; right: number }): void };
@@ -56,14 +56,14 @@ function makeTruck(maps: MapsLibrary): TruckOverlay {
     constructor() {
       super();
       this.node.className = 'journey-truck-3d';
-      Object.assign(this.node.style, { position: 'absolute', width: '70px', height: '70px', pointerEvents: 'none', zIndex: '10' });
+      Object.assign(this.node.style, { position: 'absolute', width: `${TRUCK_MODEL_SIZE}px`, height: `${TRUCK_MODEL_SIZE}px`, pointerEvents: 'none', zIndex: '10' });
       this.node.innerHTML = truckModelMarkup();
     }
     onAdd() { this.getPanes()?.overlayLayer.appendChild(this.node); }
     onRemove() { this.node.remove(); }
     draw() {
       const p = this.getProjection()?.fromLatLngToDivPixel(new maps.LatLng(this.position.lat, this.position.lng));
-      if (p) { this.node.style.left = `${p.x - 35}px`; this.node.style.top = `${p.y - 35}px`; }
+      if (p) { this.node.style.left = `${p.x - TRUCK_MODEL_SIZE / 2}px`; this.node.style.top = `${p.y - TRUCK_MODEL_SIZE / 2}px`; }
     }
     update(position: LatLng, heading: number) {
       this.position = position;

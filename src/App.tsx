@@ -7,11 +7,9 @@ import IncotermExplainer from './components/IncotermExplainer';
 import PortCard from './components/PortCard';
 import ResultPanel from './components/ResultPanel';
 import Sidebar from './components/Sidebar';
-import MapView from './components/map/MapView';
 import MapBoundary from './components/map/MapBoundary';
 import RoadMap from './components/map/RoadMap';
 import JourneyMap from './components/map/JourneyMap';
-import { useRoadConfig } from './hooks/useRoadConfig';
 import PortCatalogPage from './pages/PortCatalogPage';
 import RateTablePage from './pages/RateTablePage';
 import SavedPage from './pages/SavedPage';
@@ -26,10 +24,6 @@ function Planner() {
   // Keep an existing Google road result on a Google map while a new sea request is still loading.
   const mode = useAppStore((s) => s.plan?.input.mode === 'road' ? 'road' : s.form.mode);
   const [collapsed, setCollapsed] = useState(false);
-  const [journeyView, setJourneyView] = useState(true);
-  const cityPair = useAppStore((s) => (s.plan?.seller ?? s.form.mine)?.kind === 'address' && (s.plan?.buyer ?? s.form.partner)?.kind === 'address');
-  const { config } = useRoadConfig();
-  const canShowJourney = mode === 'sea' && cityPair && (config?.inlandProvider ?? config?.provider) === 'tomtom' && config?.configured && !portView;
   const hidePanel = collapsed || !!portView;
   return (
     <div className="flex min-h-0 flex-1 max-[899px]:block max-[899px]:overflow-y-auto">
@@ -47,10 +41,8 @@ function Planner() {
       </aside>
       <main className="flex min-w-0 flex-1 flex-col max-[899px]:block">
         <div className="relative min-h-0 flex-1 max-[899px]:h-[52vh]">
-          {mode === 'road' && !portView ? <RoadMap /> : canShowJourney && journeyView ? <MapBoundary key="journey" webgl={false}><JourneyMap /></MapBoundary> : <MapBoundary key="world">
-            <MapView />
-          </MapBoundary>}
-          {canShowJourney && <button className="btn absolute right-3 top-3 z-[600] bg-panel shadow-lg" onClick={() => setJourneyView((v) => !v)}>{journeyView ? 'Xem bản đồ 3D' : 'Xem hành trình xe–tàu–xe'}</button>}
+          {/* Một bản đồ duy nhất: hành trình xe – tàu – xe (đường bộ dùng cùng bản đồ, hoặc Google khi nguồn là Google) */}
+          {mode === 'road' ? <RoadMap /> : <MapBoundary key="journey" webgl={false}><JourneyMap /></MapBoundary>}
           <div className="pointer-events-none absolute inset-0">
             <IncotermExplainer />
             <PortCard />
