@@ -1,5 +1,7 @@
 # Đường bộ: quãng đường và thời gian từ Google Maps
 
+> Bản thử hiện bật OSRM không cần key theo lựa chọn người dùng. Xem [đường bộ OSRM](road-routing.md). Hướng dẫn dưới đây chỉ áp dụng khi chuyển `ROAD_ROUTING_PROVIDER=google`.
+
 Nhánh `codex/road-google-maps`, dựa trên `claude/v2-sua-loi` tại `334d04532aede873a76d25fbcab8a7f4172f0e41`.
 
 ## Hành vi

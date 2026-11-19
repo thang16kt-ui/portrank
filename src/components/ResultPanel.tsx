@@ -5,6 +5,7 @@ import { sellerShare } from '../lib/incoterm';
 import type { Plan } from '../lib/plan';
 import { COMPLETENESS_LABEL } from '../lib/completeness';
 import type { RankedOption } from '../lib/ranking';
+import { roadSourceLabel, roadTrafficLabel } from '../providers/RoadProvider';
 import { useAppStore, type DetailTab } from '../store/useAppStore';
 import IncotermCard, { placeNamesOf } from './IncotermCard';
 
@@ -36,9 +37,8 @@ export function quoteText(plan: Plan, r: RankedOption, term: string): string {
     `${o.mode === 'sea' ? 'Đường biển' : 'Đường bộ'}: ${o.title}${o.route ? ` · ${fmtNm(o.route.distanceNm)}` : o.drivingRoute ? ` · ${fmtDrivingDistance(o.drivingRoute.distanceMeters)}` : o.roadKm != null ? ` · ${fmtKm(o.roadKm)}` : ''}`,
     `Hàng: ${cargo}${i.hs ? ` · HS ${i.hs}` : ''}${i.goodsValue ? ` · trị giá ${usd(i.goodsValue)} (${i.valueTerm})` : ''}`,
     `Điều kiện: ${term} – ${INCOTERMS[term as keyof typeof INCOTERMS].nameVi}`,
-    // thời gian luôn theo mô hình (giá cước thật không làm thời gian thành số đã xác nhận)
-    o.drivingRoute ? `Thời gian lái xe: ${fmtDuration(o.drivingRoute.durationSeconds)} · Google Maps (ô tô, có xét giao thông; chưa gồm nghỉ, bốc dỡ và cửa khẩu)` : `Thời gian: ${fmtDays(o.days.total)} (ước tính theo mô hình)`,
-    ...(o.roadDirections ? [`Giờ khởi hành: ${o.roadDirections.departureTime} · lấy dữ liệu: ${o.roadDirections.fetchedAt}`, 'Tuyến ô tô chưa xác nhận hạn chế xe tải/container.'] : []),
+    o.drivingRoute ? `Thời gian lái xe: ${fmtDuration(o.drivingRoute.durationSeconds)} · ${roadSourceLabel(o.roadDirections)} (ô tô, ${roadTrafficLabel(o.roadDirections)}; chưa gồm nghỉ, bốc dỡ và cửa khẩu)` : `Thời gian: ${fmtDays(o.days.total)} (ước tính theo mô hình)`,
+    ...(o.roadDirections ? [`${o.roadDirections.trafficAware ? `Giờ khởi hành: ${o.roadDirections.departureTime} · ` : 'Không dự báo theo giờ đi · '}lấy dữ liệu: ${o.roadDirections.fetchedAt}`, 'Tuyến ô tô chưa xác nhận hạn chế xe tải/container.'] : []),
     `Phạm vi: ${plan.scopeTitle}`,
     `Bạn trả: ${usd(r.youPay)} · Bên kia trả: ${usd(r.otherPays)} · ${o.completeness === 'complete' ? 'Tổng' : 'Đã tính'} 10 khoản: ${usd(o.total)} (khoảng ${usd(o.low)} – ${usd(o.high)})`,
     `Trạng thái tổng: ${COMPLETENESS_LABEL[o.completeness].label.toUpperCase()}${o.missing.length ? ` – chưa gồm: ${o.missing.slice(0, 6).join('; ')}${o.missing.length > 6 ? '…' : ''}` : ''}`,
@@ -95,7 +95,7 @@ function Overview({ plan, r }: { plan: Plan; r: RankedOption }) {
         <Big
           label={o.drivingRoute ? 'Thời gian lái xe (dự kiến)' : 'Thời gian (ước tính)'}
           value={o.drivingRoute ? fmtDuration(o.drivingRoute.durationSeconds) : fmtDays(d.total)}
-          sub={o.drivingRoute ? <>{fmtDrivingDistance(o.drivingRoute.distanceMeters)} · Google Maps · có xét giao thông; chưa gồm nghỉ, bốc dỡ và cửa khẩu</> : <>{d.inlandO + d.inlandD > 0 ? `nội địa ${d.inlandO + d.inlandD} + ` : ''}chờ tàu {d.wait} + biển {d.main.toFixed(1)} + làm hàng {d.handling} · theo mô hình</>}
+          sub={o.drivingRoute ? <>{fmtDrivingDistance(o.drivingRoute.distanceMeters)} · {roadSourceLabel(o.roadDirections)} · {roadTrafficLabel(o.roadDirections)}; chưa gồm nghỉ, bốc dỡ và cửa khẩu</> : <>{d.inlandO + d.inlandD > 0 ? `nội địa ${d.inlandO + d.inlandD} + ` : ''}chờ tàu {d.wait} + biển {d.main.toFixed(1)} + làm hàng {d.handling} · theo mô hình</>}
         />
         <Big
           label={duty.status === 'ok' && duty.completeness !== 'complete' ? 'Thuế và VAT (chưa đủ)' : 'Thuế và VAT'}
@@ -137,7 +137,7 @@ function Overview({ plan, r }: { plan: Plan; r: RankedOption }) {
       )}
       {plan.notes.length > 0 && <ul className="mt-1.5 space-y-0.5 text-[10px] leading-snug text-mute">{plan.notes.map((n, i) => <li key={i}>ℹ️ {n}</li>)}</ul>}
       {o.warnings.length > 0 && <ul className="mt-1.5 text-[10px] text-amber-200">{o.warnings.map((n, i) => <li key={i}>{n}</li>)}</ul>}
-      {o.roadDirections && <p className="mt-1 text-[10px] text-mute">Khởi hành {new Date(o.roadDirections.departureTime).toLocaleString('vi-VN')} · lấy dữ liệu {new Date(o.roadDirections.fetchedAt).toLocaleTimeString('vi-VN')}</p>}
+      {o.roadDirections && <p className="mt-1 text-[10px] text-mute">{o.roadDirections.trafficAware ? `Khởi hành ${new Date(o.roadDirections.departureTime).toLocaleString('vi-VN')} · ` : 'Không dự báo theo giờ đi · '}lấy dữ liệu {new Date(o.roadDirections.fetchedAt).toLocaleString('vi-VN')}{o.roadDirections.cached ? ' · dùng lại dữ liệu trong 5 phút' : ''}</p>}
     </div>
   );
 }

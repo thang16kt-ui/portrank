@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useRoadConfig } from '../hooks/useRoadConfig';
 import { INCOTERMS, termsForMode } from '../config/incoterms';
 import { CARGO_LABEL, CONTAINER_LABEL } from '../config/pricing';
 import { CRITERIA_LABEL, PRIORITY_LABEL, type Weights } from '../config/weights';
@@ -55,6 +56,7 @@ export default function Sidebar() {
   const [more, setMore] = useState(false);
   const [carrierOpen, setCarrierOpen] = useState(false);
   const [suggest, setSuggest] = useState(false);
+  const { config: roadConfig } = useRoadConfig(f.mode === 'road');
 
   const sellerC = f.role === 'seller' ? f.mine?.country : f.partner?.country;
   const buyerC = f.role === 'seller' ? f.partner?.country : f.mine?.country;
@@ -90,9 +92,11 @@ export default function Sidebar() {
         <AddressInput label="Bên đối tác" value={f.partner} onChange={(partner) => setForm({ partner })} color={f.role === 'seller' ? BUYER_C : SELLER_C} placeholder="VD: Munich, Đức – hoặc Đức" />
         {f.mode === 'road' && (
           <div>
+            {roadConfig?.provider === 'google' && <>
             <label className="lbl" htmlFor="road-departure">Giờ khởi hành (để trống = đi ngay)</label>
             <input id="road-departure" className="field" type="datetime-local" value={f.roadDepartureTime ?? ''} onChange={(e) => setForm({ roadDepartureTime: e.target.value })} />
-            <p className="mt-1 text-[10.5px] text-mute">Theo múi giờ thiết bị. Google Maps tính km và giờ lái xe có xét giao thông; cần chọn thành phố/địa chỉ ở hai đầu. Tuyến ô tô chưa xét hạn chế xe tải/container.</p>
+            </>}
+            <p className="mt-1 text-[10.5px] text-mute">{roadConfig?.provider === 'google' ? 'Google Maps có xét giao thông, giờ đi theo múi giờ thiết bị.' : roadConfig?.provider === 'osrm' ? 'OpenStreetMap / OSRM · bản thử. Thời gian chưa xét kẹt xe và không dự báo theo giờ đi.' : 'Đang kiểm tra nguồn đường bộ.'} Chọn thành phố/địa chỉ ở hai đầu. Tuyến ô tô chưa xét hạn chế xe tải/container.</p>
           </div>
         )}
         <div className={f.mode === 'sea' ? '' : 'opacity-40'}>

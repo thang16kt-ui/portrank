@@ -31,7 +31,7 @@ npm install
 npm run dev        # http://localhost:5173
 ```
 
-Bản đường biển không cần API key. **Đường bộ lấy km, thời gian có xét giao thông và tọa độ tuyến từ Google Routes**; cần máy chủ, Google Cloud billing và key riêng. Xem [hướng dẫn bật đường bộ](docs/google-road-routing.md).
+Bản đường biển không cần API key. **Bản thử đường bộ dùng OpenStreetMap / OSRM**, trả km, thời gian và tọa độ theo mạng đường ô tô, không cần key; thời gian chưa xét kẹt xe. Cần backend Node với `ROAD_ROUTING_PROVIDER=osrm-demo`. Có thể chuyển sang Google Routes khi có key/billing. Xem [hướng dẫn đường bộ](docs/road-routing.md).
 
 Cần Internet cho: gợi ý địa chỉ Photon (không có mạng vẫn dùng được ~300 thành phố có sẵn), font, và
 dữ liệu cảng 3D (vector tiles OpenStreetMap qua OpenFreeMap). Bản đồ thế giới (Natural Earth, gói `world-atlas`) nằm sẵn trong app.
@@ -66,11 +66,11 @@ dữ liệu cảng 3D (vector tiles OpenStreetMap qua OpenFreeMap). Bản đồ 
 ## Logic tính toán (`src/lib`)
 
 - `plan.ts` – dựng phương án: cảng ứng viên (`candidates.ts`), tuyến biển thật (`routing.ts`, searoute/marnet + đồ thị dự phòng,
-  xử lý kinh tuyến 180°), đường bộ theo Google Routes (`providers/RoadProvider.ts`, `server/road.mjs`), 10 khoản chi phí, thời gian. `road.ts` chỉ còn là mô hình cửa khẩu tham khảo, không dùng để trả km/giờ trong app.
+  xử lý kinh tuyến 180°), đường bộ theo nguồn máy chủ chọn (`providers/RoadProvider.ts`, `server/road.mjs`, `server/osrm.mjs`), 10 khoản chi phí, thời gian. `road.ts` chỉ còn là mô hình cửa khẩu tham khảo, không dùng để trả km/giờ trong app.
 - **10 khoản** (`config/incoterms.ts`, hệ số trong `config/pricing.ts`): 1 bốc hàng tại kho · 2 nội địa nước xuất (Haversine × 1,3 × đơn giá/km
   theo khu vực) · 3 thông quan xuất · 4 phí cảng đi · 5 cước biển `550 + 0,27 × hải lý` (40′) + phụ phí · 6 bảo hiểm (% × 110% × CIF) ·
   7 phí cảng đến · 8 thông quan nhập + thuế NK + VAT · 9 nội địa nước nhập · 10 dỡ hàng.
-- **Thời gian biển** = nội địa đi + chờ tàu + hải lý/(16 × 24) + làm hàng + nội địa đến. **Đường bộ**: km và giây lái xe lấy cùng một tuyến Google Routes (`DRIVE`, `TRAFFIC_AWARE_OPTIMAL`), hiển thị giờ/phút; chưa gồm nghỉ tài xế, bốc dỡ, chờ cửa khẩu. Bản đồ đường bộ dùng Google Maps riêng; bản đồ biển vẫn dùng MapLibre. Cước xe tính trên km cửa đến cửa, không cộng hai chặng bãi 30 km.
+- **Thời gian biển** = nội địa đi + chờ tàu + hải lý/(16 × 24) + làm hàng + nội địa đến. **Đường bộ**: km, giây lái xe và hình học lấy cùng một tuyến của nguồn; hiển thị giờ/phút, chưa gồm nghỉ tài xế, bốc dỡ, chờ cửa khẩu. OSRM dùng Leaflet + nền OSM, chưa xét kẹt xe/giờ đi. Google dùng Google Maps riêng và xét giao thông. Cước xe tính trên km cửa đến cửa, không cộng hai chặng bãi 30 km.
 - **Giá hàng** báo theo một Incoterm → quy về giá tại xưởng / FOB / CIF (lặp cho hội tụ vì bảo hiểm và thuế phụ thuộc CIF).
 - **Incoterm** (`config/incoterms.ts`, dạng data): ma trận người bán trả, điểm cắt chi phí / rủi ro (% chuỗi – có test khớp ma trận),
   câu “Rủi ro chuyển giao khi nào” tự chèn địa điểm thật và đổi từ theo phương thức, 3 “Điểm cần nhớ” cho từng điều kiện.
@@ -87,7 +87,7 @@ dữ liệu cảng 3D (vector tiles OpenStreetMap qua OpenFreeMap). Bản đồ 
 | Interface | Đang dùng | Ghi chú |
 | --- | --- | --- |
 | `GeocodingProvider` | Photon (OSM, debounce 400 ms) + ~300 thành phố offline (`data/cities.ts`) | – |
-| `RoadProvider` | Google Routes qua máy chủ PortRank, có xét giờ khởi hành/giao thông | Ô tô, chưa xác nhận hạn chế xe tải/container; thiếu key/lỗi nguồn → báo lỗi, không đoán km |
+| `RoadProvider` | OSRM demo qua máy chủ PortRank; tùy chọn Google Routes khi có key | OSRM không xét kẹt xe; ô tô chưa xác nhận hạn chế xe tải/container; lỗi nguồn → báo lỗi, không đoán km |
 | `RateProvider` | Bảng giá của tôi (CSV / Excel / nhập tay) – giá thật còn hiệu lực ghi đè ước tính | Để nối sau: Freightos, Xeneta, API hãng tàu |
 | `TariffProvider` | 1) Biểu thuế bạn nhập → 2) **nguồn chính thức tự động** (`lib/tariffSources.ts`) | Xem mục *Thuế tự động* |
 | `ScheduleProvider` | 1) Lịch tàu bạn nhập → 2) **API hãng tàu chuẩn DCSA** qua máy chủ PortRank | Xem mục *Lịch tàu từ API hãng* |

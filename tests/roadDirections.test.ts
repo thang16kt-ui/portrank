@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { handleApi } from '../server/api.mjs';
 import { roadAvailability } from '../src/data/landBlocks';
-import { GoogleRoadProvider } from '../src/providers/RoadProvider';
+import { ServerRoadProvider } from '../src/providers/RoadProvider';
 import { createTableRateProvider } from '../src/providers/RateProvider';
 import { createUserTariffProvider } from '../src/providers/TariffProvider';
 import { buildPlan, type PlanInput } from '../src/lib/plan';
@@ -146,7 +146,7 @@ describe('road plan and client', () => {
   });
   it('detects HTML from static hosting and does not fall back to the old Haversine model', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response('<html>app</html>', { headers: { 'Content-Type': 'text/html' } })));
-    await expect(GoogleRoadProvider.lookup({ origin, destination })).rejects.toThrow('Bản chạy tĩnh');
+    await expect(ServerRoadProvider.lookup({ origin, destination })).rejects.toThrow('Bản chạy tĩnh');
     await expect(buildPlan(input, deps)).rejects.toThrow('Bản chạy tĩnh');
   });
   it('marks changed departure times as stale and removes old results when a new request fails', async () => {

@@ -6,15 +6,17 @@ export interface DrivingRoute {
   distanceMeters: number;
   durationSeconds: number;
   staticDurationSeconds: number | null;
-  /** Google geometry: display only on a Google Map, never on the MapLibre sea map. */
+  /** Geometry from the route provider. Google geometry must only be shown on Google Maps. */
   path: LngLat[];
   warnings: string[];
 }
 
 export interface RoadDirections {
-  provider: 'google';
+  provider: 'google' | 'osrm';
   profile: 'DRIVE';
-  trafficAware: true;
+  trafficAware: boolean;
+  demo?: boolean;
+  cached?: boolean;
   fetchedAt: string;
   departureTime: string;
   routes: DrivingRoute[];
@@ -26,17 +28,18 @@ export interface RoadProvider {
 
 export interface RoadConfig {
   configured: boolean;
-  provider: 'google';
+  provider: 'google' | 'osrm';
   profile: 'DRIVE';
   trafficAware: boolean;
+  demo?: boolean;
   browserKey: string;
 }
 
-const NOT_CONFIGURED = 'Chưa bật định tuyến Google Maps trên máy chủ. Bản chạy tĩnh cần chuyển sang Web Service và cấu hình Google Routes.';
+const NOT_CONFIGURED = 'Chưa bật dịch vụ đường bộ trên máy chủ. Bản chạy tĩnh cần chuyển sang Web Service để tính tuyến.';
 
 async function request<T>(url: string): Promise<T> {
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 20000);
+  const timer = setTimeout(() => ctrl.abort(), 25000);
   try {
     const response = await fetch(url, { signal: ctrl.signal, cache: 'no-store' });
     // A static host may return index.html with HTTP 200 for an unknown /api path.
@@ -45,7 +48,7 @@ async function request<T>(url: string): Promise<T> {
     if (!response.ok) throw new Error(body.error || NOT_CONFIGURED);
     return body as T;
   } catch (e) {
-    if ((e as Error).name === 'AbortError') throw new Error('Quá thời gian chờ Google Maps. Thử tính lại.');
+    if ((e as Error).name === 'AbortError') throw new Error('Quá thời gian chờ nguồn đường bộ. Thử tính lại.');
     throw e;
   } finally {
     clearTimeout(timer);
@@ -54,7 +57,7 @@ async function request<T>(url: string): Promise<T> {
 
 export const fetchRoadConfig = () => request<RoadConfig>('/api/road/config');
 
-export const GoogleRoadProvider: RoadProvider = {
+export const ServerRoadProvider: RoadProvider = {
   async lookup({ origin, destination, departureTime }) {
     if (origin.kind !== 'address' || destination.kind !== 'address')
       throw new Error('Đường bộ cần thành phố hoặc địa chỉ ở cả hai đầu. Hãy chọn địa điểm cụ thể thay cho tên quốc gia.');
@@ -63,3 +66,8 @@ export const GoogleRoadProvider: RoadProvider = {
     return request<RoadDirections>(`/api/road/routes?${q}`);
   },
 };
+
+export const roadSourceLabel = (directions?: Pick<RoadDirections, 'provider'>) =>
+  directions?.provider === 'google' ? 'Google Maps' : directions?.provider === 'osrm' ? 'OpenStreetMap / OSRM' : 'Nguồn đường bộ';
+export const roadTrafficLabel = (directions?: Pick<RoadDirections, 'trafficAware'>) =>
+  directions?.trafficAware ? 'có xét giao thông' : 'chưa xét kẹt xe';

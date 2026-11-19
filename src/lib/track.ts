@@ -36,13 +36,13 @@ export function seaTrack(route: RouteResult, cargo: CargoType): Track {
   return { coords: route.coords, times, total: times[times.length - 1], vehicle: 'ship', estimated: true, stops: [] };
 }
 
-/** Tuyến đường bộ: quãng đường / 500 km mỗi ngày + 1 ngày tại mỗi cửa khẩu */
+/** Route-provider driving time; legacy fixtures retain the old model when no API route exists. */
 export function roadTrack(o: PlanOption): Track | null {
   if (!o.roadPath || !o.roadKm) return null;
   const path = o.roadPath;
   const cum = cumulativeNm(path);
   const totalNm = cum[cum.length - 1] || 1;
-  const driveDays = o.roadKm / PRICING.road.kmPerDay;
+  const driveDays = o.drivingRoute ? o.drivingRoute.durationSeconds / 86400 : o.roadKm / PRICING.road.kmPerDay;
   const coords: LngLat[] = [], times: number[] = [], stops: TrackStop[] = [];
   // vị trí (chỉ số) của từng cửa khẩu trên path = điểm gần nhất
   const gateIdx = (o.gates ?? []).map((g) => {

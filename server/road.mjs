@@ -1,4 +1,5 @@
-/** Google Routes stays behind the PortRank server. Never send the Routes API key to the browser. */
+/** Road routing providers stay behind the PortRank server. Google keys never reach OSRM. */
+import { handleOsrm } from './osrm.mjs';
 const ENDPOINT = 'https://routes.googleapis.com/directions/v2:computeRoutes';
 const FIELD_MASK = 'routes.distanceMeters,routes.duration,routes.staticDuration,routes.polyline.geoJsonLinestring,routes.description,routes.warnings';
 const requestStarts = [];
@@ -23,6 +24,9 @@ function seconds(value) {
 }
 
 export function roadConfig(env = process.env) {
+  if (env.ROAD_ROUTING_PROVIDER === 'osrm-demo') return {
+    configured: true, provider: 'osrm', profile: 'DRIVE', trafficAware: false, demo: true, browserKey: '',
+  };
   return {
     configured: !!env.GOOGLE_ROUTES_API_KEY?.trim(),
     provider: 'google',
@@ -39,6 +43,7 @@ export async function handleRoad(url, env = process.env) {
   const origin = point(url.searchParams.get('origin'));
   const destination = point(url.searchParams.get('destination'));
   if (!origin || !destination) return json(400, { error: 'Điểm đi và điểm đến phải có tọa độ hợp lệ (kinh độ,vĩ độ).' });
+  if (env.ROAD_ROUTING_PROVIDER === 'osrm-demo') return handleOsrm(origin, destination);
   const departure = url.searchParams.get('departureTime');
   const at = departure ? Date.parse(departure) : Date.now();
   if (departure && (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(departure) || !Number.isFinite(at) || at < Date.now()))

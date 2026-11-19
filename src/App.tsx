@@ -9,7 +9,7 @@ import ResultPanel from './components/ResultPanel';
 import Sidebar from './components/Sidebar';
 import MapView from './components/map/MapView';
 import MapBoundary from './components/map/MapBoundary';
-import GoogleRoadMap from './components/map/GoogleRoadMap';
+import RoadMap from './components/map/RoadMap';
 import PortCatalogPage from './pages/PortCatalogPage';
 import RateTablePage from './pages/RateTablePage';
 import SavedPage from './pages/SavedPage';
@@ -41,7 +41,7 @@ function Planner() {
       </aside>
       <main className="flex min-w-0 flex-1 flex-col max-[899px]:block">
         <div className="relative min-h-0 flex-1 max-[899px]:h-[52vh]">
-          {mode === 'road' && !portView ? <GoogleRoadMap /> : <MapBoundary>
+          {mode === 'road' && !portView ? <RoadMap /> : <MapBoundary>
             <MapView />
           </MapBoundary>}
           <div className="pointer-events-none absolute inset-0">
