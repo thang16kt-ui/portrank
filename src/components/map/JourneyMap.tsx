@@ -244,7 +244,7 @@ export default function JourneyMap() {
       })()}
       {!!legs.length && <SimulationReadout departureTime={departureTime} elapsedSeconds={stage?.elapsedSeconds ?? 0} totalSeconds={animationReady ? stage?.totalSeconds ?? NaN : NaN}
         legLabel={stage?.leg.label ?? '—'} status={status} estimated={!road} forecast={legs.some((l) => l.forecast)} compact children={<>{!road && <p>Giờ đến theo thời lượng các chặng; chưa gồm chờ chuyến và bốc dỡ ở cảng.</p>}{road && <p>{source === 'OSRM' ? 'Thời gian OSRM chưa xét kẹt xe theo giờ đi.' : 'Giờ đến có tính tình hình giao thông.'} Chưa xác nhận hạn chế xe tải/container.</p>}</>} />}
-      {trafficReady && trafficOn && <div className="journey-legend" title="Màu giao thông hiện tại"><span><i className="legend-dot" style={{ background: '#16a34a' }} />Thông thoáng</span><span><i className="legend-dot" style={{ background: '#f97316' }} />Chậm</span><span><i className="legend-dot" style={{ background: '#dc2626' }} />Kẹt xe</span><span><i className="legend-dot" style={{ background: '#1d63d6' }} />Tuyến chọn</span></div>}
+      <div className="journey-legend" title="Màu giao thông hiện tại"><span><i className="legend-dot" style={{ background: '#16a34a' }} />Thông thoáng</span><span><i className="legend-dot" style={{ background: '#f97316' }} />Chậm</span><span><i className="legend-dot" style={{ background: '#dc2626' }} />Kẹt xe</span><span><i className="legend-dot" style={{ background: '#1d63d6' }} />Tuyến chọn</span></div>
       </div>
     </section>
     {!!legs.length && <section ref={controls} className="journey-controls" aria-label="Điều khiển mô phỏng hành trình">
