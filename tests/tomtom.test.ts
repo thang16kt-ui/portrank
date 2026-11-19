@@ -61,6 +61,51 @@ describe('TomTom server integration', () => {
     expect(request.pathname).toContain('10.77,106.7:10.77,106.71:10.77,106.72');
     expect(request.searchParams.get('departAt')).toBe('2027-01-01T00:00:00Z');
   });
+  it('requests border avoidance and keeps only provider-confirmed domestic routes', async () => {
+    const data = fixture();
+    const domestic = { ...data.routes[0], sections: [
+      ...data.routes[0].sections,
+      { sectionType: 'COUNTRY', startPointIndex: 0, endPointIndex: 2, countryCode: 'VNM' },
+    ] };
+    const foreign = { ...domestic, sections: [
+      { sectionType: 'COUNTRY', startPointIndex: 0, endPointIndex: 1, countryCode: 'VNM' },
+      { sectionType: 'COUNTRY', startPointIndex: 1, endPointIndex: 2, countryCode: 'LAO' },
+    ] };
+    const f = mock({ routes: [foreign, domestic] });
+    const result = await call(url + '&domesticCountry=VN');
+    expect(result.status).toBe(200);
+    expect(result.data.routes).toHaveLength(1);
+    expect(result.data.routes[0].countryCodes).toEqual(['VN']);
+    expect(result.data.routes[0].trafficSections).toHaveLength(1);
+    const request = new URL(String(f.mock.calls[0][0]));
+    expect(request.searchParams.getAll('avoid')).toEqual(['ferries', 'borderCrossings']);
+    expect(request.searchParams.getAll('sectionType')).toEqual(['traffic', 'country']);
+  });
+  it('does not label incomplete country metadata as proof of a domestic route', async () => {
+    const data = fixture();
+    const partial = { ...data.routes[0], sections: [{ sectionType: 'COUNTRY', startPointIndex: 0, endPointIndex: 1, countryCode: 'VNM' }] };
+    mock({ routes: [partial] });
+    expect((await call(url + '&domesticCountry=VN')).data.routes[0].countryCodes).toBeUndefined();
+  });
+  it('separates domestic and unrestricted cache entries without blocking cross-border requests', async () => {
+    const f = mock();
+    await call();
+    await call(url + '&domesticCountry=VN');
+    expect(f).toHaveBeenCalledTimes(2);
+    expect(new URL(String(f.mock.calls[0][0])).searchParams.getAll('avoid')).toEqual(['ferries']);
+    expect(new URL(String(f.mock.calls[1][0])).searchParams.getAll('avoid')).toContain('borderCrossings');
+    await call(url + '&domesticCountry=VN');
+    expect(f).toHaveBeenCalledTimes(2);
+  });
+  it('rejects invalid country filters and never substitutes an explicitly foreign route for a domestic request', async () => {
+    const data = fixture();
+    const f = mock({ routes: [{ ...data.routes[0], sections: [{ sectionType: 'COUNTRY', startPointIndex: 0, endPointIndex: 2, countryCode: 'LAO' }] }] });
+    expect((await call(url + '&domesticCountry=bad')).status).toBe(400);
+    expect(f).not.toHaveBeenCalled();
+    const result = await call(url + '&domesticCountry=VN');
+    expect(result.status).toBe(404);
+    expect(result.data.error).toContain('Không tự thay');
+  });
   it('does not turn missing, malformed or distant routes into a usable road', async () => {
     mock({ routes: [] }); expect((await call()).status).toBe(404);
     const broken = fixture(); broken.routes[0].legs[0].points[0].latitude = NaN;

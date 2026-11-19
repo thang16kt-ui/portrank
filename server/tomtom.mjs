@@ -1,4 +1,5 @@
 /** TomTom credentials stay on the server. Only validated coordinates/tiles reach fixed upstreams. */
+import countries from 'i18n-iso-countries';
 const cache = new Map();
 const pending = new Map();
 const starts = [];
@@ -68,17 +69,34 @@ export function normalizeTomTomRoute(route, index = 0) {
       speedKmh: finite(s.effectiveSpeedInKmh) ? s.effectiveSpeedInKmh : null,
       delaySeconds: finite(s.delayInSeconds) ? s.delayInSeconds : null }];
   });
+  const countrySections = (Array.isArray(route.sections) ? route.sections : []).filter((s) => s.sectionType === 'COUNTRY');
+  const countryCodes = [];
+  let covered = -1;
+  let completeCountries = countrySections.length > 0;
+  for (const s of countrySections) {
+    const code = typeof s.countryCode === 'string' ? countries.alpha3ToAlpha2(s.countryCode) : undefined;
+    if (!code || !Number.isInteger(s.startPointIndex) || !Number.isInteger(s.endPointIndex)
+      || s.startPointIndex < 0 || s.startPointIndex > covered + 1 || s.endPointIndex < s.startPointIndex || s.endPointIndex >= path.length) {
+      completeCountries = false; break;
+    }
+    covered = Math.max(covered, s.endPointIndex);
+    if (!countryCodes.includes(code)) countryCodes.push(code);
+  }
   return { id: `tomtom-road-${index}`, description: index ? `Phương án ${index + 1} · TomTom` : 'Tuyến chính · TomTom',
     distanceMeters: summary.lengthInMeters, durationSeconds: summary.travelTimeInSeconds,
     staticDurationSeconds: finite(summary.noTrafficTravelTimeInSeconds) ? summary.noTrafficTravelTimeInSeconds : null,
     trafficDelaySeconds: finite(summary.trafficDelayInSeconds) ? summary.trafficDelayInSeconds : null,
-    trafficSections, path, warnings: [] };
+    trafficSections, path, warnings: [],
+    ...(completeCountries && covered === path.length - 1 ? { countryCodes } : {}) };
 }
 
 export async function handleTomTomRoad(url, env, origin, destination, via) {
   const key = env.TOMTOM_API_KEY?.trim();
   if (!key) return json(503, { error: 'Chưa cấu hình API key TomTom trên máy chủ.' });
   const departure = url.searchParams.get('departureTime');
+  const domesticCountry = url.searchParams.get('domesticCountry');
+  if (domesticCountry !== null && (!/^[A-Z]{2}$/.test(domesticCountry) || !countries.alpha2ToAlpha3(domesticCountry)))
+    return json(400, { error: 'Quốc gia của tuyến nội địa không hợp lệ.' });
   const timestamp = departure ? Date.parse(departure) : Date.now();
   if (departure && (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(departure) || !Number.isFinite(timestamp) || timestamp < Date.now()))
     return json(400, { error: 'Giờ khởi hành phải ở hiện tại hoặc tương lai, có múi giờ.' });
@@ -88,15 +106,18 @@ export async function handleTomTomRoad(url, env, origin, destination, via) {
   target.search = new URLSearchParams({ key, traffic: 'true', travelMode: 'car', routeType: 'fastest',
     routeRepresentation: 'polyline', computeTravelTimeFor: 'all', sectionType: 'traffic',
     avoid: 'ferries', maxAlternatives: via ? '0' : '2', departAt: departure || 'now' }).toString();
-  return cachedRequest(`route:${locations}:${departure || 'now'}`, key, async () => {
+  target.searchParams.append('sectionType', 'country');
+  if (domesticCountry) target.searchParams.append('avoid', 'borderCrossings');
+  return cachedRequest(`route:${locations}:${departure || 'now'}:${domesticCountry || 'international'}`, key, async () => {
     try {
       const response = await upstream(target);
       if (!response.ok) return upstreamError(response.status);
       const data = await response.json();
       const routes = (Array.isArray(data.routes) ? data.routes : []).slice(0, 3).map(normalizeTomTomRoute).filter(Boolean)
         .filter((r) => distanceMeters(r.path[0], [origin.longitude, origin.latitude]) <= 5000
-          && distanceMeters(r.path.at(-1), [destination.longitude, destination.latitude]) <= 5000);
-      if (!routes.length) return json(404, { error: 'TomTom không trả được tuyến đường bộ hợp lệ cho hai điểm này.' });
+          && distanceMeters(r.path.at(-1), [destination.longitude, destination.latitude]) <= 5000)
+        .filter((r) => !domesticCountry || !r.countryCodes || r.countryCodes.every((c) => c === domesticCountry));
+      if (!routes.length) return json(404, { error: domesticCountry ? 'Chưa tìm được tuyến đường bộ nằm trong quốc gia đã chọn. Không tự thay bằng tuyến quá cảnh nước khác.' : 'TomTom không trả được tuyến đường bộ hợp lệ cho hai điểm này.' });
       return json(200, { provider: 'tomtom', profile: 'DRIVE', trafficAware: true,
         trafficMode: departure ? 'forecast' : 'live', fetchedAt: new Date().toISOString(),
         departureTime: new Date(timestamp).toISOString(), routes });

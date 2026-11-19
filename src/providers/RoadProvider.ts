@@ -19,6 +19,8 @@ export interface DrivingRoute {
   warnings: string[];
   trafficSections?: TrafficSection[];
   trafficDelaySeconds?: number | null;
+  /** Provider country sections covering the entire route, normalized to ISO alpha-2. */
+  countryCodes?: string[];
 }
 
 export interface RoadDirections {
@@ -74,6 +76,7 @@ export const ServerRoadProvider: RoadProvider = {
     if (origin.kind !== 'address' || destination.kind !== 'address')
       throw new Error('Đường bộ cần thành phố hoặc địa chỉ ở cả hai đầu. Hãy chọn địa điểm cụ thể thay cho tên quốc gia.');
     const q = new URLSearchParams({ origin: origin.coord.join(','), destination: destination.coord.join(',') });
+    if (origin.country === destination.country && (!via || via.country === origin.country)) q.set('domesticCountry', origin.country);
     if (departureTime) q.set('departureTime', departureTime);
     if (context) q.set('context', context);
     if (via) {

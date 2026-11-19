@@ -13,7 +13,7 @@ import type { Place } from '../src/types';
 // Synthetic protocol fixture; these numbers are not advertised as a real journey or benchmark.
 const origin: Place = { kind: 'address', label: 'Hồ Chí Minh', country: 'VN', countryName: 'Việt Nam', coord: [106.7, 10.77] };
 const destination: Place = { ...origin, label: 'Hà Nội', coord: [105.84, 21.03] };
-const path = [origin.coord, [107, 12], [106, 17], destination.coord];
+const path = [origin.coord, [107, 12], [108.2, 16.05], destination.coord];
 const route = { distanceMeters: 1500123, duration: '73234s', staticDuration: '70000s', polyline: { geoJsonLinestring: { type: 'LineString', coordinates: path } }, description: 'Đường kiểm thử', warnings: [] };
 const url = `/api/road/routes?origin=${origin.coord.join(',')}&destination=${destination.coord.join(',')}`;
 const env = { GOOGLE_ROUTES_API_KEY: 'server-test-secret', GOOGLE_MAPS_BROWSER_KEY: 'public-browser-test' };

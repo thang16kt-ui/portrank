@@ -10,7 +10,7 @@ import type { RoadDirections } from '../src/providers/RoadProvider';
 import type { Place } from '../src/types';
 
 // Synthetic protocol fixtures, never presented as measurements of a real trip.
-const path = [[106.7, 10.77], [107, 12], [106, 17], [105.84, 21.03]];
+const path = [[106.7, 10.77], [107, 12], [108.2, 16.05], [105.84, 21.03]];
 const route = (mode = 'driving', distance = 1500123, duration = 73234) => ({
   distance, duration, geometry: { type: 'LineString', coordinates: path },
   legs: [{ summary: 'Test route', steps: [{ mode }] }],
