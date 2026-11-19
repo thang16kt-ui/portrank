@@ -222,7 +222,8 @@ export default function JourneyMap() {
       {!summaryOpen && <button className="journey-pill" aria-expanded={false} aria-controls="journey-summary-details" onClick={() => setSummaryOpen(true)}><Icon name="info" size={14} />Thông tin hành trình</button>}
       <div id="journey-summary-details" hidden={!summaryOpen}>
       <div className="journey-head">
-        <strong className="journey-title">{road ? <><Icon name="truck" size={15} /> Đường bộ</> : <><Icon name="truck" size={15} /><span aria-hidden="true">·</span><Icon name="ship" size={15} /><span aria-hidden="true">·</span><Icon name="truck" size={15} /> Xe – Tàu – Xe</>}</strong>
+        <strong className="journey-title">{road ? <><Icon name="truck" size={15} /> Đường bộ</> : <><Icon name="truck" size={15} /><span aria-hidden="true">·</span><Icon name="ship" size={15} /><span aria-hidden="true">·</span><Icon name="truck" size={15} /></>}</strong>
+        {!!legs.length && <span className="journey-status" title={status}>{status.replace(' · chưa xác nhận dự báo từng đoạn', '')}</span>}
         <div className="flex shrink-0 items-center gap-1">
           {trafficReady && <button className="journey-mini" aria-pressed={trafficOn} onClick={() => setTrafficOn((on) => !on)}>{trafficOn ? 'Ẩn giao thông' : 'Giao thông'}</button>}
           <button className="journey-close" aria-expanded={true} aria-controls="journey-summary-details" aria-label="Thu gọn thông tin hành trình" title="Thu gọn" onClick={() => setSummaryOpen(false)}><Icon name="x" size={15} /></button>
@@ -239,11 +240,11 @@ export default function JourneyMap() {
           missingLeg && !inland.loading ? 'Chưa đủ tuyến đường bộ để phát trọn hành trình.' : '',
           !road && plan && option && ((option.pol && option.pol.country !== plan.seller.country) || (option.pod && option.pod.country !== plan.buyer.country)) ? 'Có chặng xe qua biên giới – cần xác nhận cửa khẩu và phí.' : '',
         ].filter(Boolean);
-        return warns.length ? <div className="journey-warn" role="status"><Icon name="alert" size={14} /><ul>{warns.map((w, i) => <li key={i}>{w}</li>)}</ul></div> : null;
+        return warns.length ? <div className="journey-warn" role="status" title={warns.join('\n')}><Icon name="alert" size={13} /><span>{warns[0]}{warns.length > 1 && <b> +{warns.length - 1}</b>}</span></div> : null;
       })()}
       {!!legs.length && <SimulationReadout departureTime={departureTime} elapsedSeconds={stage?.elapsedSeconds ?? 0} totalSeconds={animationReady ? stage?.totalSeconds ?? NaN : NaN}
-        legLabel={stage?.leg.label ?? '—'} status={status} estimated={!road} forecast={legs.some((l) => l.forecast)} children={<>{!road && <p>Giờ đến theo thời lượng các chặng; chưa gồm chờ chuyến và bốc dỡ ở cảng.</p>}{road && <p>{source === 'OSRM' ? 'Thời gian OSRM chưa xét kẹt xe theo giờ đi.' : 'Giờ đến có tính tình hình giao thông.'} Chưa xác nhận hạn chế xe tải/container.</p>}</>} />}
-      <div className="journey-legend" title="Màu giao thông hiện tại"><span><i className="legend-dot" style={{ background: '#16a34a' }} />Thông thoáng</span><span><i className="legend-dot" style={{ background: '#f97316' }} />Chậm</span><span><i className="legend-dot" style={{ background: '#dc2626' }} />Kẹt xe</span><span><i className="legend-dot" style={{ background: '#1d63d6' }} />Tuyến chọn</span></div>
+        legLabel={stage?.leg.label ?? '—'} status={status} estimated={!road} forecast={legs.some((l) => l.forecast)} compact children={<>{!road && <p>Giờ đến theo thời lượng các chặng; chưa gồm chờ chuyến và bốc dỡ ở cảng.</p>}{road && <p>{source === 'OSRM' ? 'Thời gian OSRM chưa xét kẹt xe theo giờ đi.' : 'Giờ đến có tính tình hình giao thông.'} Chưa xác nhận hạn chế xe tải/container.</p>}</>} />}
+      {trafficReady && trafficOn && <div className="journey-legend" title="Màu giao thông hiện tại"><span><i className="legend-dot" style={{ background: '#16a34a' }} />Thông thoáng</span><span><i className="legend-dot" style={{ background: '#f97316' }} />Chậm</span><span><i className="legend-dot" style={{ background: '#dc2626' }} />Kẹt xe</span><span><i className="legend-dot" style={{ background: '#1d63d6' }} />Tuyến chọn</span></div>}
       </div>
     </section>
     {!!legs.length && <section ref={controls} className="journey-controls" aria-label="Điều khiển mô phỏng hành trình">

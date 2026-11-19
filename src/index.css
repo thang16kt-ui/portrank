@@ -226,20 +226,23 @@ a { color: var(--color-sky); }
 :root[data-ui="light"] .toast-pop { box-shadow: 0 6px 20px rgba(15,23,42,.18); }
 /* Door-to-door playback stays readable over either light OSM tiles or dark map themes. */
 .journey-summary,.journey-controls{position:absolute;z-index:500;color:#172033;background:rgba(255,255,255,.97);border:1px solid #dfe5ee;border-radius:14px;box-shadow:0 1px 2px #0f172a10,0 8px 28px #0f172a1f;padding:12px 14px;font-size:13.5px;line-height:1.5;backdrop-filter:blur(6px)}
-.journey-summary{left:12px;top:12px;max-width:min(340px,calc(100% - 24px));max-height:calc(100% - 130px);overflow:auto;padding:10px 12px;font-size:12.5px;line-height:1.45}
+.journey-summary{left:10px;top:10px;max-width:min(260px,calc(100% - 20px));max-height:calc(100% - 130px);overflow:auto;padding:7px 9px 8px;font-size:12px;line-height:1.4;border-radius:12px}
 .journey-summary[data-expanded="false"]{padding:0;border-radius:999px;background:transparent;border:0;box-shadow:none;overflow:visible}
-.journey-summary[data-expanded="true"]{width:min(340px,calc(100% - 24px))}
+.journey-summary[data-expanded="true"]{width:min(260px,calc(100% - 20px))}
 .journey-pill{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:6px 12px;border-radius:999px;background:#fff;border:1px solid #dfe5ee;box-shadow:0 2px 10px #0f172a1f;color:#172033;font-size:12.5px;font-weight:600}
 .journey-pill:hover{background:#f2f5f9}
-.journey-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:-2px -4px 6px 0}
+.journey-head{display:flex;align-items:center;justify-content:space-between;gap:6px;margin:-2px -4px 4px 0}
+.journey-title svg{width:14px;height:14px}
+.journey-title span{color:#94a3b8}
 .journey-title{font-size:13px!important}
-.journey-close{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;color:#526075}
+.journey-close{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;color:#526075}
 .journey-close:hover{background:#eef2f7;color:#0f172a}
 .journey-mini{min-height:26px;padding:2px 8px;border-radius:7px;border:1px solid #c5cfdc;background:#fff;font-size:11.5px;font-weight:500;color:#253247}
 .journey-mini:hover{background:#f2f5f9}
 .journey-strong{font-weight:650;font-size:13px}
 .journey-note{color:#526075;font-size:12px}
-.journey-warn{display:flex;gap:6px;align-items:flex-start;margin-top:4px;padding:6px 8px;border-radius:8px;background:#fff7e6;border:1px solid #fbdfa6;color:#8a4b05;font-size:11.5px;line-height:1.4}
+.journey-warn{display:flex;gap:5px;align-items:center;margin-top:2px;padding:3px 7px;border-radius:7px;background:#fff7e6;border:1px solid #fbdfa6;color:#8a4b05;font-size:11px;line-height:1.35;cursor:help}
+.journey-warn>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .journey-warn svg{margin-top:1px}
 .journey-warn ul{margin:0;padding:0;list-style:none;display:grid;gap:2px}
 .journey-controls{left:14px;right:14px;bottom:26px;max-height:calc(100% - 80px);overflow:auto;padding:10px 12px}
@@ -265,7 +268,7 @@ a { color: var(--color-sky); }
 .journey-title{display:inline-flex;align-items:center;gap:6px;font-weight:650;font-size:14px}
 .journey-title svg{color:#1d63d6}
 .legend-dot{display:inline-block;width:9px;height:9px;border-radius:999px;margin-right:5px;vertical-align:1px}
-.journey-legend{display:flex;flex-wrap:wrap;gap:2px 10px;margin-top:8px;padding-top:6px;border-top:1px solid #e3e8ef;color:#334155;font-size:11px}
+.journey-legend{display:flex;flex-wrap:wrap;gap:2px 8px;margin-top:6px;padding-top:5px;border-top:1px solid #e3e8ef;color:#334155;font-size:11px}
 .journey-legend .legend-dot{width:8px;height:8px;margin-right:4px}
 @media(max-width:599px){.simulation-readout{gap:8px 12px}.journey-playback{gap:6px}.journey-playback .btn{padding:6px 8px}}
 .legacy-simulation{max-height:calc(52vh - 70px);overflow:auto}
@@ -293,3 +296,15 @@ a { color: var(--color-sky); }
 .vm-wake{position:absolute;left:-20px;top:-56px;width:40px;height:124px;border-radius:50% 50% 40% 40%;
   background:radial-gradient(ellipse 30% 22% at 50% 4%,#ffffffd0,transparent 70%),radial-gradient(ellipse 48% 30% at 50% 84%,#ffffffb0,transparent 72%),
   linear-gradient(to bottom,transparent 8%,#ffffff55 30%,#ffffff40 70%,transparent);filter:blur(1.5px);opacity:.9}
+
+/* Khung hành trình dạng gọn: 2 dòng số liệu */
+.sim-compact{margin-top:6px;padding-top:6px;border-top:1px solid #e3e8ef;display:grid;gap:3px;font-size:12px;line-height:1.35}
+.sim-times{display:flex;justify-content:space-between;gap:8px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sim-times em{font-style:normal;color:#526075;font-size:11px}
+.sim-times strong{font-weight:650}
+.sim-now{color:#1d63d6}
+.sim-fc{margin-left:4px;padding:0 4px;border-radius:4px;background:#dbeafe;color:#1e40af;font-size:10px}
+.sim-leg{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#526075}
+.sim-leg strong{color:#172033;font-weight:600}
+.sim-stale{padding:2px 6px;border-radius:5px;background:#fef3c7;color:#92400e;font-size:11px}
+.journey-status{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;font-weight:600;color:#334155;text-align:right}
