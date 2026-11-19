@@ -352,12 +352,7 @@ async function roadOptions(input: PlanInput, seller: Place, buyer: Place, deps: 
   const transitChecks = await Promise.all(routes.map((rt) => rt.countryCodes?.length
     ? rt.countryCodes.filter((c) => c !== seller.country && c !== buyer.country)
     : roadTransitCountries(rt.path, [seller.country, buyer.country])));
-  // A domestic shipment must not silently become an international transit route.
-  // An explicitly chosen foreign waypoint is an intentional exception.
-  const domesticOnly = domestic && (!input.roadVia || input.roadVia.country === seller.country);
-  const selectedRoutes = routes.map((route, index) => ({ route, transitCountries: transitChecks[index] }))
-    .filter(({ transitCountries }) => !domesticOnly || !transitCountries.length);
-  if (!selectedRoutes.length) throw new Error('Chưa tìm được tuyến đường bộ nội địa cho hai điểm này. Không tự thay bằng tuyến quá cảnh nước khác. Hãy thử điểm đi qua trong nước hoặc đổi địa chỉ ghim.');
+  const selectedRoutes = routes.map((route, index) => ({ route, transitCountries: transitChecks[index] }));
   const sourceLabel = roadSourceLabel(directions);
   notes.push(directions.provider === 'google'
     ? 'Quãng đường và thời gian lái xe: Google Maps, có xét giao thông tại giờ khởi hành. Kết quả có thể khác ứng dụng Google Maps do giờ đi, điểm ghim và lựa chọn tuyến.'
@@ -366,7 +361,10 @@ async function roadOptions(input: PlanInput, seller: Place, buyer: Place, deps: 
   notes.push('Đây là tuyến ô tô (DRIVE), chưa xác nhận hạn chế chiều cao, tải trọng hay đường cấm xe tải/container.');
   notes.push('Thời gian lái xe chưa gồm nghỉ tài xế, bốc dỡ và làm thủ tục. Giá vận chuyển vẫn là ước tính theo đơn giá/km.');
   if (!domestic) notes.push('Tuyến xuyên biên giới: cửa khẩu, quyền quá cảnh, giờ mở cửa và thời gian chờ cần xác minh trước khi vận chuyển.');
-  if (domesticOnly) notes.push('Chỉ đề xuất tuyến đường bộ nội địa; đã loại các phương án phát hiện đi qua nước khác.');
+  if (directions.routingNotice) notes.push(directions.routingNotice);
+  if (domestic) notes.push(selectedRoutes.some((r) => !r.transitCountries.length)
+    ? 'Hiển thị cả phương án nội địa và phương án quá cảnh tìm được để so sánh; mỗi tuyến giữ riêng quãng đường, thời gian và chi phí.'
+    : 'Nguồn dữ liệu chưa trả được phương án nội địa. Các phương án quá cảnh vẫn được giữ để so sánh.');
   if (input.roadVia) notes.push(`Đi qua: ${input.roadVia.label}. Tuyến tính qua điểm đã chọn; không có nghĩa là đã giới hạn tuyến trong một quốc gia.`);
   const perKm = (R.perKm40[regionOf(seller.country)] + R.perKm40[regionOf(buyer.country)]) / 2;
   const cargoF = { dry: 1, reefer: 1.25, dg: 1.3, oog: 1.6 }[sh.cargo];
@@ -399,7 +397,7 @@ async function roadOptions(input: PlanInput, seller: Place, buyer: Place, deps: 
     const key = `road:${rt.id}`;
     const history = simulatePriceHistory(key, `${seller.country}${buyer.country}`, items[4].amount ?? 0);
     const description = rt.description || `Đường bộ · ${sourceLabel}`;
-    const title = domestic && !transitCountries.length ? `Nội địa · ${description}` : description;
+    const title = domestic ? `${transitCountries.length ? `Quá cảnh ${transitNames}` : 'Nội địa'} · ${description}` : description;
     return {
       key, mode: 'road' as const, title, gates: [], roadKm: km, roadStraight: false,
       drivingRoute: rt, roadDirections, roadTransitCountries: transitCountries,

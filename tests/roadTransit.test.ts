@@ -29,7 +29,7 @@ describe('OSRM transit screening', () => {
     expect(await roadTransitCountries([[105, 12], [106, 16]], ['KH', 'LA'])).toEqual([]);
   });
   it('marks transit fees as unknown and the total incomplete instead of charging zero domestic clearance', async () => {
-    const input = planInputOf({ ...DEFAULT_FORM, role: 'seller', mode: 'road', mine: a, partner: b, roadVia: { ...via, country: 'LA' } }) as PlanInput;
+    const input = planInputOf({ ...DEFAULT_FORM, role: 'seller', mode: 'road', mine: a, partner: b }) as PlanInput;
     const directions: RoadDirections = { provider: 'osrm', profile: 'DRIVE', trafficAware: false, fetchedAt: '2026-11-19T01:00:00Z', departureTime: '2026-11-19T01:00:00Z', routes: [{ id: 'transit-test', description: 'Synthetic transit route', distanceMeters: 1500000, durationSeconds: 70000, staticDurationSeconds: 70000, path: transitPath, warnings: [] }] };
     const plan = await buildPlan(input, { road: { lookup: async () => directions }, rates: createTableRateProvider([]), tariffs: createUserTariffProvider([]) });
     const o = plan.options[0];
@@ -51,33 +51,53 @@ describe('OSRM transit screening', () => {
     await expect(buildPlan(planInputOf({ ...form, roadVia: via })!, { road: { lookup }, rates: createTableRateProvider([]), tariffs: createUserTariffProvider([]) })).rejects.toThrow('test-stop');
     expect(lookup.mock.calls[0][0]).toMatchObject({ via });
   });
-  it('keeps a longer domestic route and its own distance/time rather than cheaper transit alternatives', async () => {
-    const input = planInputOf({ ...DEFAULT_FORM, role: 'seller', mode: 'road', mine: a, partner: b })!;
+  it.each(['VN', 'TH', 'AU'])('keeps both domestic and transit alternatives with their own distance/time for %s', async (country) => {
+    const input = planInputOf({ ...DEFAULT_FORM, role: 'seller', mode: 'road', mine: { ...a, country }, partner: { ...b, country } })!;
     const base = { description: 'Synthetic', staticDurationSeconds: 70000, warnings: [] };
     const directions: RoadDirections = { provider: 'tomtom', profile: 'DRIVE', trafficAware: true, fetchedAt: '', departureTime: '', routes: [
-      { ...base, id: 'foreign', distanceMeters: 1300000, durationSeconds: 60000, path: transitPath, countryCodes: ['VN', 'LA', 'KH'] },
-      { ...base, id: 'domestic', distanceMeters: 1650000, durationSeconds: 85000, path: [a.coord, b.coord], countryCodes: ['VN'] },
+      { ...base, id: 'foreign', distanceMeters: 1300000, durationSeconds: 60000, path: transitPath, countryCodes: [country, 'LA', 'KH'] },
+      { ...base, id: 'domestic', distanceMeters: 1650000, durationSeconds: 85000, path: [a.coord, b.coord], countryCodes: [country] },
     ] };
     const plan = await buildPlan(input, { road: { lookup: async () => directions }, rates: createTableRateProvider([]), tariffs: createUserTariffProvider([]) });
-    expect(plan.options).toHaveLength(1);
-    expect(plan.options[0].key).toBe('road:domestic');
-    expect(plan.options[0].title).toContain('Nội địa');
-    expect(plan.options[0].roadKm).toBe(1650);
-    expect(plan.options[0].days.total * 86400).toBeCloseTo(85000);
-    expect(plan.options[0].roadTransitCountries).toEqual([]);
+    expect(plan.options).toHaveLength(2);
+    const local = plan.options.find((o) => o.key === 'road:domestic')!;
+    const foreign = plan.options.find((o) => o.key === 'road:foreign')!;
+    expect(local.title).toContain('Nội địa');
+    expect(local.roadKm).toBe(1650);
+    expect(local.days.total * 86400).toBeCloseTo(85000);
+    expect(local.roadTransitCountries).toEqual([]);
+    expect(foreign.title).toContain('Quá cảnh');
+    expect(foreign.roadKm).toBe(1300);
+    expect(foreign.days.total * 86400).toBeCloseTo(60000);
+    expect(foreign.completeness).toBe('partial');
+    expect(rankOptions(plan.options, 'FCA', 'seller', WEIGHT_PRESETS.balanced)[0].option.key).toBe(local.key);
   });
-  it.each(['tomtom', 'osrm', 'google'] as const)('does not silently fall back to transit when %s returns no domestic route', async (provider) => {
+  it.each(['tomtom', 'osrm', 'google'] as const)('preserves transit alternatives with a notice when %s returns no domestic route', async (provider) => {
     const input = planInputOf({ ...DEFAULT_FORM, mode: 'road', mine: a, partner: b })!;
     const directions: RoadDirections = { provider, profile: 'DRIVE', trafficAware: false, fetchedAt: '', departureTime: '', routes: [
       { id: 'foreign', description: '', distanceMeters: 1300000, durationSeconds: 60000, staticDurationSeconds: null, path: transitPath, warnings: [] },
     ] };
-    await expect(buildPlan(input, { road: { lookup: async () => directions }, rates: createTableRateProvider([]), tariffs: createUserTariffProvider([]) })).rejects.toThrow('Không tự thay bằng tuyến quá cảnh');
+    const plan = await buildPlan(input, { road: { lookup: async () => directions }, rates: createTableRateProvider([]), tariffs: createUserTariffProvider([]) });
+    expect(plan.options).toHaveLength(1);
+    expect(plan.options[0].title).toContain('Quá cảnh');
+    expect(plan.notes.join(' ')).toContain('chưa trả được phương án nội địa');
   });
   it('requests border avoidance for domestic endpoints and domestic waypoints, including inland legs', async () => {
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { headers: { 'Content-Type': 'application/json' } }));
     try {
       await ServerRoadProvider.lookup({ origin: a, destination: b, via, context: 'inland' });
-      expect(new URL(String(fetchMock.mock.calls[0][0]), 'https://test.invalid').searchParams.get('domesticCountry')).toBe('VN');
+      const query = new URL(String(fetchMock.mock.calls[0][0]), 'https://test.invalid').searchParams;
+      expect(query.get('domesticCountry')).toBe('VN');
+      expect(query.has('includeTransit')).toBe(false);
+    } finally { fetchMock.mockRestore(); }
+  });
+  it.each(['VN', 'TH', 'AU'])('supplements the normal alternatives with domestic routing for every same-country pair (%s)', async (country) => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { headers: { 'Content-Type': 'application/json' } }));
+    try {
+      await ServerRoadProvider.lookup({ origin: { ...a, country }, destination: { ...b, country } });
+      const query = new URL(String(fetchMock.mock.calls[0][0]), 'https://test.invalid').searchParams;
+      expect(query.get('domesticCountry')).toBe(country);
+      expect(query.get('includeTransit')).toBe('true');
     } finally { fetchMock.mockRestore(); }
   });
   it('does not impose domestic routing on international endpoints or an explicitly foreign waypoint', async () => {

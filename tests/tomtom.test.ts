@@ -87,6 +87,34 @@ describe('TomTom server integration', () => {
     mock({ routes: [partial] });
     expect((await call(url + '&domesticCountry=VN')).data.routes[0].countryCodes).toBeUndefined();
   });
+  it('supplements domestic routes with the original transit alternatives and deduplicates shared geometry', async () => {
+    const local = { ...fixture().routes[0], sections: [{ sectionType: 'COUNTRY', startPointIndex: 0, endPointIndex: 2, countryCode: 'VNM' }] };
+    const foreign = { ...local, summary: { ...local.summary, lengthInMeters: 1800, travelTimeInSeconds: 500 },
+      legs: [{ points: [{ longitude: 106.7, latitude: 10.77 }, { longitude: 106.71, latitude: 10.78 }, { longitude: 106.72, latitude: 10.77 }] }],
+      sections: [{ sectionType: 'COUNTRY', startPointIndex: 0, endPointIndex: 1, countryCode: 'VNM' }, { sectionType: 'COUNTRY', startPointIndex: 1, endPointIndex: 2, countryCode: 'LAO' }] };
+    const f = vi.fn(async (input: string | URL) => new Response(JSON.stringify({ routes: new URL(input).searchParams.getAll('avoid').includes('borderCrossings') ? [local] : [foreign, local] }), { headers: { 'content-type': 'application/json' } }));
+    vi.stubGlobal('fetch', f);
+    const result = await call(url + '&domesticCountry=VN&includeTransit=true');
+    expect(result.status).toBe(200);
+    expect(result.data.routes).toHaveLength(2);
+    expect(result.data.routes[0]).toMatchObject({ id: 'domestic:tomtom-road-0', countryCodes: ['VN'], distanceMeters: 2200, durationSeconds: 600 });
+    expect(result.data.routes[1]).toMatchObject({ id: 'tomtom-road-0', countryCodes: ['VN', 'LA'], distanceMeters: 1800, durationSeconds: 500 });
+    expect(new Set(result.data.routes.map((r: { id: string }) => r.id)).size).toBe(2);
+    expect(f).toHaveBeenCalledTimes(2);
+    await call(url + '&domesticCountry=VN&includeTransit=true');
+    expect(f).toHaveBeenCalledTimes(2);
+  });
+  it.each([true, false])('keeps usable comparison routes when one supplementary search fails (domestic fails: %s)', async (domesticFails) => {
+    const f = vi.fn(async (input: string | URL) => {
+      const local = new URL(input).searchParams.getAll('avoid').includes('borderCrossings');
+      return new Response(JSON.stringify(local === domesticFails ? { error: 'fixture' } : fixture()), { status: local === domesticFails ? 502 : 200, headers: { 'content-type': 'application/json' } });
+    });
+    vi.stubGlobal('fetch', f);
+    const result = await call(url + '&domesticCountry=VN&includeTransit=true');
+    expect(result.status).toBe(200);
+    expect(result.data.routes).toHaveLength(1);
+    expect(result.data.routingNotice).toContain('Chưa lấy được');
+  });
   it('separates domestic and unrestricted cache entries without blocking cross-border requests', async () => {
     const f = mock();
     await call();

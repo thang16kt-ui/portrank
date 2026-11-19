@@ -100,6 +100,33 @@ export async function handleTomTomRoad(url, env, origin, destination, via) {
   const timestamp = departure ? Date.parse(departure) : Date.now();
   if (departure && (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(departure) || !Number.isFinite(timestamp) || timestamp < Date.now()))
     return json(400, { error: 'Giờ khởi hành phải ở hiện tại hoặc tương lai, có múi giờ.' });
+  if (domesticCountry && url.searchParams.get('includeTransit') === 'true') {
+    // Supplement the original alternatives with a border-avoiding search, rather than replacing them.
+    // Each search uses the same validated points, waypoint, departure and scoped cache/rate limits.
+    const domesticUrl = new URL(url); domesticUrl.searchParams.delete('includeTransit');
+    const unrestrictedUrl = new URL(domesticUrl); unrestrictedUrl.searchParams.delete('domesticCountry');
+    const [local, original] = await Promise.all([
+      handleTomTomRoad(domesticUrl, env, origin, destination, via),
+      handleTomTomRoad(unrestrictedUrl, env, origin, destination, via),
+    ]);
+    if (local.status !== 200 && original.status !== 200) return original;
+    const localData = local.status === 200 ? JSON.parse(local.body) : null;
+    const originalData = original.status === 200 ? JSON.parse(original.body) : null;
+    const seen = new Set();
+    const routes = [
+      ...(localData?.routes ?? []).map((r) => ({ ...r, id: `domestic:${r.id}` })),
+      ...(originalData?.routes ?? []),
+    ].filter((r) => {
+      const key = JSON.stringify(r.path);
+      if (seen.has(key)) return false;
+      seen.add(key); return true;
+    });
+    const routingNotice = !localData ? 'Chưa lấy được phương án nội địa bổ sung. Vẫn giữ các tuyến đã tìm được để so sánh.'
+      : !originalData ? 'Chưa lấy được các phương án thông thường bổ sung. Vẫn giữ tuyến nội địa đã tìm được.' : undefined;
+    const base = localData ?? originalData;
+    const fetchedAt = new Date(Math.min(...[localData, originalData].filter(Boolean).map((d) => Date.parse(d.fetchedAt)))).toISOString();
+    return json(200, { ...base, fetchedAt, routes, ...(routingNotice ? { routingNotice } : {}) });
+  }
   const points = [origin, ...(via ? [via] : []), destination];
   const locations = points.map((p) => `${p.latitude},${p.longitude}`).join(':');
   const target = new URL(`https://api.tomtom.com/routing/1/calculateRoute/${locations}/json`);

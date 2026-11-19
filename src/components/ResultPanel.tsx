@@ -176,7 +176,7 @@ function Ranking({ ranked }: { ranked: RankedOption[] }) {
             >
               <div className="flex items-center gap-1.5">
                 <span className={`flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-bold ${rankCls(r.rank)}`}>{r.rank}</span>
-                <span className="min-w-0 flex-1 truncate text-[12px] font-medium text-fg">{o.title}</span>
+                <span className="min-w-0 flex-1 truncate text-[12px] font-medium text-fg" title={o.title}>{o.title}</span>
                 <span className="text-[12px] font-semibold text-amber-200">{usd(basis === 'mine' ? r.youPay : o.total)}</span>
               </div>
               <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 pl-6 text-[10.5px] text-mute">

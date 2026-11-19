@@ -33,6 +33,7 @@ export interface RoadDirections {
   fetchedAt: string;
   departureTime: string;
   routes: DrivingRoute[];
+  routingNotice?: string;
 }
 
 export interface RoadProvider {
@@ -76,7 +77,10 @@ export const ServerRoadProvider: RoadProvider = {
     if (origin.kind !== 'address' || destination.kind !== 'address')
       throw new Error('Đường bộ cần thành phố hoặc địa chỉ ở cả hai đầu. Hãy chọn địa điểm cụ thể thay cho tên quốc gia.');
     const q = new URLSearchParams({ origin: origin.coord.join(','), destination: destination.coord.join(',') });
-    if (origin.country === destination.country && (!via || via.country === origin.country)) q.set('domesticCountry', origin.country);
+    if (origin.country === destination.country && (!via || via.country === origin.country)) {
+      q.set('domesticCountry', origin.country);
+      if (context !== 'inland') q.set('includeTransit', 'true');
+    }
     if (departureTime) q.set('departureTime', departureTime);
     if (context) q.set('context', context);
     if (via) {
